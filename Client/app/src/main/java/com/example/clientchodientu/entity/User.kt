@@ -1,4 +1,4 @@
-package com.example.chodientuapplication.entity
+package com.example.clientchodientu.entity
 
 import java.time.LocalDateTime
 

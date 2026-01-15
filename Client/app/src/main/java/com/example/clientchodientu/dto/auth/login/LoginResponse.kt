@@ -1,6 +1,6 @@
-package com.example.chodientuapplication.dto.auth.login
+package com.example.clientchodientu.dto.auth.login
 
-import com.example.chodientuapplication.entity.User
+import com.example.clientchodientu.entity.User
 
 data class LoginResponse(
     val success : Boolean,

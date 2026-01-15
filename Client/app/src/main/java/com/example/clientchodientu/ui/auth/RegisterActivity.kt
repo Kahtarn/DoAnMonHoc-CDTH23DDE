@@ -1,7 +1,5 @@
 package com.example.clientchodientu.ui.auth
 
-import android.R
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -17,9 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.entity.Province
-import com.example.chodientuapplication.entity.Ward
+import com.example.clientchodientu.entity.Province
+import com.example.clientchodientu.entity.Ward
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,12 +26,10 @@ import android.view.View // FIX: Thêm import này
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Button
-import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.dto.auth.register.OtpRequest
-import com.example.chodientuapplication.dto.auth.register.OtpResponse
-import com.example.chodientuapplication.dto.auth.register.RegisterRequest
-import com.example.chodientuapplication.dto.auth.register.RegisterResponse
-import kotlinx.coroutines.launch
+import com.example.clientchodientu.dto.auth.register.OtpRequest
+import com.example.clientchodientu.dto.auth.register.OtpResponse
+import com.example.clientchodientu.dto.auth.register.RegisterRequest
+import com.example.clientchodientu.dto.auth.register.RegisterResponse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -45,6 +40,8 @@ import kotlin.stackTraceToString
 import kotlin.text.isEmpty
 import kotlin.text.trim
 import kotlin.toString
+import com.example.clientchodientu.R
+
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var edtUsername: EditText
@@ -371,10 +368,10 @@ class RegisterActivity : AppCompatActivity() {
                             // Bind dữ liệu vào Spinner luôn
                             val adapter = ArrayAdapter(
                                 this@RegisterActivity,
-                                R.layout.simple_spinner_item,
+                                android.R.layout.simple_spinner_item,
                                 data
                             )
-                            adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                             sTinh.adapter = adapter
 
                             sTinh.onItemSelectedListener =
@@ -432,10 +429,10 @@ class RegisterActivity : AppCompatActivity() {
                             // Bind dữ liệu vào Spinner luôn
                             val adapter = ArrayAdapter(
                                 this@RegisterActivity,
-                                R.layout.simple_spinner_item,
+                                android.R.layout.simple_spinner_item,
                                 listWard
                             )
-                            adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                             sHuyen.adapter = adapter
                             sHuyen.onItemSelectedListener =
                                 object : AdapterView.OnItemSelectedListener {

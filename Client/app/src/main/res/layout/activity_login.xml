@@ -45,7 +45,7 @@
         android:layout_width="184dp"
         android:layout_height="49dp"
         android:layout_marginTop="76dp"
-        android:text="Đăng kí"
+        android:text="Đăng nhập"
 
         android:textAllCaps="false"
         android:textColor="@color/white"

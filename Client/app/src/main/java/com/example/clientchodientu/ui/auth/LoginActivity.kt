@@ -11,10 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.dto.auth.login.LoginRequest
-import com.example.chodientuapplication.dto.auth.login.LoginResponse
-import com.example.chodientuapplication.ui.home.HomeActivity
+import com.example.clientchodientu.R
+import com.example.clientchodientu.dto.auth.login.LoginRequest
+import com.example.clientchodientu.dto.auth.login.LoginResponse
+import com.example.clientchodientu.ui.home.HomeActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

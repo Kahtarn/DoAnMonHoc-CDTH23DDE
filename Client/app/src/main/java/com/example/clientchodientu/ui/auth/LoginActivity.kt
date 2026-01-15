@@ -11,10 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.dto.auth.login.LoginRequest
-import com.example.chodientuapplication.dto.auth.login.LoginResponse
-import com.example.chodientuapplication.ui.home.HomeActivity
+import com.example.clientchodientu.R
+import com.example.clientchodientu.dto.auth.login.LoginRequest
+import com.example.clientchodientu.dto.auth.login.LoginResponse
+import com.example.clientchodientu.ui.home.HomeActivity
+import com.example.clientchodientu.untils.TokenManager
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
     private val urlLogin = "http://10.0.2.2:8080/api/auth/login"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        TokenManager.init(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
@@ -97,12 +99,7 @@ class LoginActivity : AppCompatActivity() {
                 val data = gson.fromJson(responseString, LoginResponse::class.java)
                 if (response.isSuccessful) {
                     if (data.success) {
-                        val prefs = getSharedPreferences("TokenValues", MODE_PRIVATE)
-                        with(prefs.edit()) {
-                            putString("accessToken", data.data.accessToken)
-                            putString("tokenType", data.data.refreshToken)
-                            apply()
-                        }
+                        TokenManager.saveTokens(data.data.accessToken, data.data.refreshToken)
                         withContext(Dispatchers.Main) {
                             Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
                                 .show()

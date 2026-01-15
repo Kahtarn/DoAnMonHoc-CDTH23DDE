@@ -1,4 +1,4 @@
-package com.example.chodientuapplication.dto.auth.login
+package com.example.clientchodientu.dto.auth.login
 
 data class LoginRequest(
     val emailOrUsername : String,

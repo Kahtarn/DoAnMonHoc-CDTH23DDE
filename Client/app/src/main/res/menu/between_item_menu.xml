@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/Show"
+        android:title="Đang hiển thị"
+        />
+    <item
+        android:id="@+id/expired"
+        android:title="Hết hạn"
+        />
+    <item
+        android:id="@+id/rejected"
+        android:title="Từ chối"
+        />
+    <item
+        android:id="@+id/draft"
+        android:title="Tin nháp"
+        />
+    <item
+        android:id="@+id/pendingapproval"
+        android:title="Chờ duyệt"
+        />
+    <item
+        android:id="@+id/hidden"
+        android:title="Đã ẩn"
+        />
+</menu>

@@ -15,10 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRequest
-import com.example.chodientuapplication.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRespond
-import com.example.chodientuapplication.dto.auth.forgotpassword.ForgotPasswordRequest
+import com.example.clientchodientu.R
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRequest
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRespond
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,13 +27,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.core.content.edit
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 import kotlin.collections.forEachIndexed
 import kotlin.jvm.java
-import kotlin.math.log
 import kotlin.text.isEmpty
 import kotlin.text.isNotEmpty
 import kotlin.text.last
@@ -147,6 +141,7 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
+                    Log.d("error message", e.message.toString())
                     Toast.makeText(
                         this@ForgotPasswordOTPVerificationActivity,
                         e.message,

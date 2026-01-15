@@ -1,4 +1,4 @@
-package com.example.chodientuapplication.dto.auth.register
+package com.example.clientchodientu.dto.auth.register
 
 data class OtpResponse(
     val success : Boolean,

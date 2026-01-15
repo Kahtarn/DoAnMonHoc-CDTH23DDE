@@ -1,9 +1,7 @@
 package com.example.clientchodientu.ui.auth
 
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -29,11 +27,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.core.content.edit
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.toRequestBody
 import kotlin.jvm.java
 import kotlin.text.isEmpty
 import kotlin.text.trim
@@ -139,10 +133,10 @@ class ForgotPasswordActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Snackbar.make(
-                    findViewById(R.id.content),
+                Toast.makeText(
+                    this@ForgotPasswordActivity,
                     e.message.toString(),
-                    Snackbar.LENGTH_LONG
+                    Toast.LENGTH_LONG
                 ).show()
             }
         }

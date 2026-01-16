@@ -2,6 +2,7 @@ package com.example.clientchodientu.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -37,7 +38,6 @@ class LoginActivity : AppCompatActivity() {
     private val urlLogin = "http://10.0.2.2:8080/api/auth/login"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        TokenManager.init(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
@@ -54,6 +54,7 @@ class LoginActivity : AppCompatActivity() {
         edtUsernameOrEmail = findViewById<EditText>(R.id.edtUsernameOrEmail)
         edtPassword = findViewById<EditText>(R.id.edtPassword)
 
+        TokenManager.init(this)
         btnRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
@@ -101,11 +102,14 @@ class LoginActivity : AppCompatActivity() {
                     if (data.success) {
                         TokenManager.saveTokens(data.data.accessToken, data.data.refreshToken)
                         withContext(Dispatchers.Main) {
+                            Log.d("token", data.data.accessToken)
                             Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
                                 .show()
                             val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
-                            finish()
+//                            finish()
                             Result.success(data)
                         }
                     } else {
@@ -131,6 +135,14 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    val dialog = AlertDialog.Builder(this@LoginActivity)
+                        .setTitle("Lỗi")
+                        .setMessage("Đã xảy ra lỗi: ${e.localizedMessage}")
+                        .setPositiveButton("OK", null)
+                        .create()
+                    dialog.show()
+                }
                 Result.failure(e)
             }
         }

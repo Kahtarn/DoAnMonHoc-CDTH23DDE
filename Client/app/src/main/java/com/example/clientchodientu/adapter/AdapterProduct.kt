@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 
-class AdapterProduct(private val ListProduct: List<Product>) : RecyclerView.Adapter<AdapterProduct.ProductViewHolder>() {
+class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adapter<AdapterProduct.ProductViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.activity_item_product, parent, false)
@@ -37,6 +37,10 @@ class AdapterProduct(private val ListProduct: List<Product>) : RecyclerView.Adap
             .placeholder(R.drawable.ic_launcher_background)
             .error(R.drawable.ic_launcher_foreground)
             .into(holder.img)
+    }
+    fun updateData(newList: List<Product>) {
+        this.ListProduct = newList
+        notifyDataSetChanged()
     }
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString == null) return "Lỗi: Không có thời gian"

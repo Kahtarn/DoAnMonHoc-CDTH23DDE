@@ -1,5 +1,6 @@
-package com.example.serverchodientu.entity;
+package com.example.serverchodientu.repository;
 
+import com.example.serverchodientu.entity.ProductImage;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

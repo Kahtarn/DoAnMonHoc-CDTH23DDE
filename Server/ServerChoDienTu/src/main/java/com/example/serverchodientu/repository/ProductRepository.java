@@ -1,5 +1,6 @@
-package com.example.serverchodientu.entity;
+package com.example.serverchodientu.repository;
 
+import com.example.serverchodientu.entity.Product;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

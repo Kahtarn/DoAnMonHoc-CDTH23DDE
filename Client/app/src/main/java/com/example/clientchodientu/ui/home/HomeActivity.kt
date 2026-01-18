@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
-import android.widget.SearchView
+import androidx.appcompat.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -85,7 +85,7 @@ class HomeActivity : AppCompatActivity() {
         val finalurl = if (categoryId == null) {
             urlProduct
         } else {
-            "http://10.0.2.2:8080/api/product/getByCategory?categoryId=$categoryId/"
+            "http://10.0.2.2:8080/api/product/getByCategory?categoryId=$categoryId"
         }
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
@@ -263,7 +263,7 @@ class HomeActivity : AppCompatActivity() {
                     .build()
 
                 // 3. Thực thi
-                val response = client.newCall(request).execute()
+                val response = ApiClient.getClient(this@HomeActivity).newCall(request).execute()
 
                 // 4. Xử lý kết quả trả về
                 if (response.isSuccessful) {

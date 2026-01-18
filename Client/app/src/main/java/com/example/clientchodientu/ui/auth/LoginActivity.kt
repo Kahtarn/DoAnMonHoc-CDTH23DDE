@@ -17,6 +17,7 @@ import com.example.clientchodientu.dto.auth.login.LoginRequest
 import com.example.clientchodientu.dto.auth.login.LoginResponse
 import com.example.clientchodientu.ui.home.HomeActivity
 import com.example.clientchodientu.untils.TokenManager
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,6 +37,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnRegister: Button
     private var client = OkHttpClient()
     private val urlLogin = "http://10.0.2.2:8080/api/auth/login"
+
+    private val urlSetFCMToken = "http://10.0.2.2:8080/api/chat/set-fcm-token"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +103,23 @@ class LoginActivity : AppCompatActivity() {
                 val data = gson.fromJson(responseString, LoginResponse::class.java)
                 if (response.isSuccessful) {
                     if (data.success) {
-                        TokenManager.saveTokens(data.data.accessToken, data.data.refreshToken)
+                        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                            if (!task.isSuccessful) {
+                                Log.w("FCM", "Lấy token thất bại", task.exception)
+                                return@addOnCompleteListener
+                            }
+
+                            // 3. Gửi Token lên Server
+                            val token = task.result
+                            Log.d("FCM", "Token hiện tại: $token")
+                            TokenManager.updateFCMToken(1, token)
+
+                            TokenManager.saveTokens(
+                                data.data.accessToken,
+                                data.data.refreshToken,
+                                token
+                            )
+                        }
                         withContext(Dispatchers.Main) {
                             Log.d("token", data.data.accessToken)
                             Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)

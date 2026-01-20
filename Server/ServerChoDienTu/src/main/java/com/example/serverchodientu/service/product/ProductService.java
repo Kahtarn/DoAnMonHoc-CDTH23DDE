@@ -1,7 +1,10 @@
 package com.example.serverchodientu.service.product;
 
+import com.example.serverchodientu.dto.ApiResponse;
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
+import com.example.serverchodientu.dto.product.SellingProductRequest;
+import com.example.serverchodientu.dto.product.SoldProductRequest;
 import com.example.serverchodientu.entity.Categories;
 import com.example.serverchodientu.entity.Product;
 import com.example.serverchodientu.entity.ProductImage;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,6 +101,16 @@ public class ProductService {
         }
         productImageRepo.deleteByProductId(id);
         productRepo.deleteById(id);
+    }
+
+    public ApiResponse<List<Product>> getSellingProductByOwner(SellingProductRequest request) {
+        var productList = productRepo.findBySellerIdAndStatus(request.getUserId(), 1);
+        return ApiResponse.ok(productList);
+    }
+
+    public ApiResponse<List<Product>> getSoldProductByOwner(SoldProductRequest request) {
+        var productList = productRepo.findBySellerIdAndStatus(request.getUserId(), 0);
+        return ApiResponse.ok(productList);
     }
 
 }

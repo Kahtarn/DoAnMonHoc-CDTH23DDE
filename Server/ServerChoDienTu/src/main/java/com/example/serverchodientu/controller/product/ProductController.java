@@ -3,6 +3,8 @@ package com.example.serverchodientu.controller.product;
 import com.example.serverchodientu.dto.ApiResponse;
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
+import com.example.serverchodientu.dto.product.SellingProductRequest;
+import com.example.serverchodientu.dto.product.SoldProductRequest;
 import com.example.serverchodientu.entity.Product;
 import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/product/")
+@RequestMapping("/api/product")
 public class ProductController {
     private final ProductService productService;
 
@@ -26,6 +28,24 @@ public class ProductController {
     public ResponseEntity<ApiResponse<List<Product>>> getAll() {
         List<Product> data = productService.getAll();
         return ResponseEntity.ok(ApiResponse.ok(data));
+    }
+
+    @PostMapping("/selling-product")
+    ApiResponse<List<Product>> getSellingProductByOwner(@RequestBody SellingProductRequest sellingProductRequest) {
+        try {
+            return productService.getSellingProductByOwner(sellingProductRequest);
+        } catch (Exception e) {
+            return ApiResponse.error("Loi lay san pham dang ban" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/sold-product")
+    ApiResponse<List<Product>> getSoldProductByOwner(@RequestBody SoldProductRequest soldProductRequest) {
+        try {
+            return productService.getSoldProductByOwner(soldProductRequest);
+        } catch (Exception e) {
+            return ApiResponse.error("Loi lay san pham da ban" + e.getMessage());
+        }
     }
 
     @GetMapping("/filter")

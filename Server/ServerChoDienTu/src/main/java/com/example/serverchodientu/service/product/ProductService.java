@@ -32,13 +32,10 @@ public class ProductService {
         this.userRepo = userRepo;
         this.categoriesRepo = categoriesRepo;
     }
-
-    //Lay danh sach san pham
     public List<Product> getAll() {
         return productRepo.findAllByOrderByCreateAtDesc(0);
     }
 
-    //loc tim kiem theo gia, thoi gian
     public List<Product> searchProducts(String name, String sortType) {
         Sort sort;
         if ("price_asc".equalsIgnoreCase(sortType)) {
@@ -52,6 +49,41 @@ public class ProductService {
         return productRepo.findByTitleContainingIgnoreCaseAndStatus(name, 0, sort);
     }
 
+    @Transactional
+    public Product updateProduct(Integer productId, String currentEmail, PostProductRequest request) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+        if (!product.getSeller().getEmail().equals(currentEmail)) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa sản phẩm này!");
+        }
+
+        if (request.getCategoryId() != null) {
+            Categories category = categoriesRepo.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+            product.setCategory(category);
+        }
+
+        product.setTitle(request.getTitle());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+
+        return productRepo.save(product);
+    }
+    public List<Product> getMySellingProducts(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + email));
+
+        return productRepo.findBySellerIdAndStatusOrderByCreateAtDesc(user.getId(), 0);
+    }
+
+    public List<Product> getMySoldProducts(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + email));
+
+        return productRepo.findBySellerIdAndStatusOrderByCreateAtDesc(user.getId(), 1);
+    }
+
     public ProductDetailsResponse getProductDetail(Integer id) {
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
@@ -63,9 +95,8 @@ public class ProductService {
     public Product createProduct(PostProductRequest request) {
         User seller = userRepo.findById(request.getSellerId()).orElseThrow();
         Categories cate = categoriesRepo.findById(request.getCategoryId()).orElseThrow();
-        // 1. Lưu thông tin sản phẩm vào bảng product
         Product product = new Product();
-        product.setSeller(seller); // Nhớ map đúng object User nếu cần
+        product.setSeller(seller);
         product.setCategory(cate);
         product.setTitle(request.getTitle());
         product.setDescription(request.getDescription());
@@ -97,6 +128,19 @@ public class ProductService {
         }
         productImageRepo.deleteByProductId(id);
         productRepo.deleteById(id);
+    }
+
+    @Transactional
+    public void markAsSold(Integer productId, Integer currentUserId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+        if (!product.getSeller().getId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền thực hiện thao tác này!");
+        }
+
+        product.setStatus(1);
+        productRepo.save(product);
     }
 
 }

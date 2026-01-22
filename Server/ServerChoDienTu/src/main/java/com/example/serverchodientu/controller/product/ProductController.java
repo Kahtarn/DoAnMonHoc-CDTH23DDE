@@ -8,6 +8,8 @@ import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,4 +59,39 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/my-selling")
+    public ResponseEntity<ApiResponse<List<Product>>> getMySellingProducts() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        List<Product> myProduct = productService.getMySellingProducts(currentEmail);
+        return ResponseEntity.ok(ApiResponse.ok(myProduct));
+    }
+
+    @GetMapping("/my-sold")
+    public ResponseEntity<ApiResponse<List<Product>>> getMySoldProducts() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        List<Product> myProduct = productService.getMySoldProducts((currentEmail));
+        return ResponseEntity.ok(ApiResponse.ok(myProduct));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse<Product>> updateProduct(
+            @PathVariable Integer id,
+            @RequestBody PostProductRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentEmail = authentication.getName();
+
+            Product updatedProduct = productService.updateProduct(id, currentEmail, request);
+
+            return ResponseEntity.ok(ApiResponse.ok(updatedProduct));
+        } catch (RuntimeException e) {
+            HttpStatus status = e.getMessage().contains("quyền") ? HttpStatus.FORBIDDEN : HttpStatus.NOT_FOUND;
+            return ResponseEntity.status(status)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }

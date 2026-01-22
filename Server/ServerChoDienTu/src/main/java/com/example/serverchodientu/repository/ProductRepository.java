@@ -11,5 +11,5 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findAllByOrderByCreateAtDesc(Integer status);
     List<Product> findByTitleContainingIgnoreCaseAndStatus(String title, Integer status, Sort sort);
-    List<Product> findBySellerIdAndStatus(Integer sellerId, Integer status);
+    List<Product> findBySellerIdAndStatusOrderByCreateAtDesc(Integer sellerId, Integer status);
 }

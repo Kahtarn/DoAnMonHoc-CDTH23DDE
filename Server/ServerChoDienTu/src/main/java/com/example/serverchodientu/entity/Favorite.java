@@ -2,7 +2,7 @@ package com.example.serverchodientu.entity;
 
 import jakarta.persistence.*;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 @Entity
 @Table(

@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.AdapterSellingProduct
+import com.example.clientchodientu.dto.product.DeleteProduct
 import com.example.clientchodientu.dto.product.PostManagerResponse
+import com.example.clientchodientu.entity.Product
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.TokenManager
 import com.google.gson.GsonBuilder
@@ -87,8 +89,8 @@ class PostManagerActivity : AppCompatActivity() {
                         val success = sellingProduct.success
 
                         if(success) {
-                            val adapter = AdapterSellingProduct(listSelling)
-                            rcv.adapter = adapter
+                            setupAdapter(listSelling)
+
                             println("Dữ liệu về: ${listSelling.size} sản phẩm")
                             if (listSelling.isEmpty()) {
                                 Toast.makeText(this@PostManagerActivity, "Không có tin đăng nào", Toast.LENGTH_SHORT).show()
@@ -123,8 +125,7 @@ class PostManagerActivity : AppCompatActivity() {
 
                     withContext(Dispatchers.Main) {
                         if(success) {
-                            val adapter = AdapterSellingProduct(soldProduct.data)
-                            rcv.adapter = adapter
+                            setupAdapter(listSold)
 
                             if (listSold.isEmpty()) {
                                 Toast.makeText(this@PostManagerActivity, "Không có tin đăng nào", Toast.LENGTH_SHORT).show()
@@ -136,6 +137,66 @@ class PostManagerActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+    }
+
+    private fun showDeleteDialog(productId: Int) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Xác nhận xóa")
+            .setMessage("Bạn có chắc chắn muốn xóa bài viết này không?")
+            .setPositiveButton("Xóa") { _, _ ->
+                lifecycleScope.launch {
+                    deleteProductApi(productId)
+                }
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
+    }
+
+    private fun setupAdapter(list: List<Product>) {
+        val adapter = AdapterSellingProduct(list)
+        rcv.adapter = adapter
+
+        adapter.onDeleteClick = { product ->
+            showDeleteDialog(product.id)
+        }
+
+        adapter.onEditClick = { product ->
+
+        }
+    }
+
+    private suspend fun deleteProductApi(productId: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                val deleteUrl = "http://10.0.2.2:8080/api/product/delete/$productId"
+
+                val request = Request.Builder()
+                    .url(deleteUrl)
+                    .delete()
+                    .build()
+
+                val response = ApiClient.getClient(this@PostManagerActivity).newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                val apiResponse = gson.fromJson(responseBody, DeleteProduct::class.java)
+                val success = apiResponse.success
+                val message = apiResponse.message
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && success) {
+                        Toast.makeText(this@PostManagerActivity, message, Toast.LENGTH_SHORT).show()
+                        loadSellingProduct()
+                    } else {
+                        val errorMsg = apiResponse?.message ?: "Xóa thất bại"
+                        Toast.makeText(this@PostManagerActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@PostManagerActivity, "Lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

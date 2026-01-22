@@ -16,6 +16,8 @@ import java.util.TimeZone
 class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerView.Adapter<AdapterSellingProduct.SellingViewHolder> () {
 
     var onItemClick: ((Product) -> Unit)? = null
+    var onEditClick: ((Product) -> Unit)? = null
+    var onDeleteClick: ((Product) -> Unit)? = null
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -41,6 +43,26 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
 
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(p)
+        }
+
+        holder.more.setOnClickListener { view ->
+            val popup = androidx.appcompat.widget.PopupMenu(view.context, view)
+            popup.menuInflater.inflate(R.menu.more_management_menu, popup.menu) // Thay bằng tên file menu của bạn
+
+            popup.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.menu_edit -> {
+                        onEditClick?.invoke(p)
+                        true
+                    }
+                    R.id.menu_delete -> {
+                        onDeleteClick?.invoke(p)
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
         }
     }
 

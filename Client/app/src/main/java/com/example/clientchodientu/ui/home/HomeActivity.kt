@@ -156,7 +156,6 @@ class HomeActivity : AppCompatActivity() {
                 if (response.isSuccessful && responseBody != null) {
                     val productResponse = gson.fromJson(responseBody, ProductResponse::class.java)
                     withContext(Dispatchers.Main) {
-                        val listProduct = productResponse.data
                         val tvEmpty = findViewById<TextView>(R.id.tvEmptyState)
                         if (productResponse.data != null && productResponse.data.isNotEmpty()) {
                             recyclerViewProduct.visibility = android.view.View.VISIBLE

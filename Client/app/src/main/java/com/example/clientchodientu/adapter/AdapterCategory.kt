@@ -10,19 +10,16 @@ import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
 import com.example.clientchodientu.entity.Category
 
-class AdapterCategory(private var ListCategory: List<Category>,
-                      private val onItemClick:(Category)-> Unit
-): RecyclerView.Adapter<AdapterCategory.CategoryViewHolder>() {
+class AdapterCategory(private var ListCategory: List<Category>): RecyclerView.Adapter<AdapterCategory.CategoryViewHolder>() {
+    var onItemClick: ((Category)-> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.activity_item_category,parent,false)
         return CategoryViewHolder(view)
     }
-    fun updateData(newList: List<Category>) {
-        this.ListCategory = newList
-        notifyDataSetChanged()
-    }
+
     override fun onBindViewHolder(
-        holder: AdapterCategory.CategoryViewHolder,
+        holder: CategoryViewHolder,
         position: Int
     ) {
         val category = ListCategory[position]
@@ -33,12 +30,13 @@ class AdapterCategory(private var ListCategory: List<Category>,
             .error(R.drawable.ic_launcher_foreground)
             .into(holder.img)
         holder.itemView.setOnClickListener {
-            onItemClick(category)
+            onItemClick?.invoke(category)
         }
-
     }
 
-    override fun getItemCount(): Int=ListCategory.size
+    override fun getItemCount(): Int {
+        return ListCategory.size
+    }
     inner class CategoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val name: TextView=itemView.findViewById(R.id.tvCategoryName)
         val img: ImageView=itemView.findViewById(R.id.imgCategory)

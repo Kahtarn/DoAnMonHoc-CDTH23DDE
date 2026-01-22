@@ -37,8 +37,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.toString
 import com.example.clientchodientu.ui.product.ProductDetailActivity
+import com.example.clientchodientu.ui.user.PostManagerActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeActivity : AppCompatActivity() {
+    private lateinit var bottomNav : BottomNavigationView
     private lateinit var recyclerViewProduct: RecyclerView
     private lateinit var recyclerViewCategory: RecyclerView
     private val client = OkHttpClient()
@@ -103,6 +106,35 @@ class HomeActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         searchView = findViewById(R.id.searchView)
         setupSearchView()
+
+
+        bottomNav = findViewById(R.id.bottomNavigation)
+        bottomNav.setOnItemSelectedListener { item ->
+            when(item.itemId) {
+                R.id.nav_home -> {
+                    // Đang ở Home rồi thì không cần làm gì hoặc cuộn lên đầu
+                    recyclerViewProduct.smoothScrollToPosition(0)
+                    true
+                }
+                R.id.nav_save -> {
+                     startActivity(Intent(this, PostManagerActivity::class.java))
+                    true
+                }
+                R.id.nav_add -> {
+                    // Mở màn hình đăng tin
+                    true
+                }
+                R.id.nav_chat -> {
+                    // Mở màn hình Chat
+                    true
+                }
+                R.id.nav_account -> {
+                    // Mở màn hình Profile/Account
+                    true
+                }
+                else -> false
+            }
+        }
 
     }
 

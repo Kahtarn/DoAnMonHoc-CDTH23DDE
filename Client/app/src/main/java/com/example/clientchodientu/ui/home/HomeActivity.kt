@@ -36,7 +36,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.toString
-import com.example.clientchodientu.ui.auth.ProductDetailActivity
+import com.example.clientchodientu.ui.product.ProductDetailActivity
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var recyclerViewProduct: RecyclerView
@@ -59,7 +59,7 @@ class HomeActivity : AppCompatActivity() {
     }
     // --- SỬA ĐOẠN NÀY ---
     // 1. Khai báo IP máy tính của bạn (để dùng chung)
-    private val SERVER_IP = "192.168.1.86"
+    private val SERVER_IP = "10.0.2.2"
     private val PORT = "8080"
 
     // 2. Cập nhật URL dùng biến IP trên

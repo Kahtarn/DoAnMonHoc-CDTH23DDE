@@ -1,32 +1,44 @@
-package com.example.clientchodientu.ui.auth
+package com.example.clientchodientu.ui.product
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.clientchodientu.R
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.ProductImageAdapter
 import com.example.clientchodientu.entity.ProductDetailData
+import com.example.clientchodientu.ui.auth.ImageViewerActivity
+import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.ApiResponse
-
 import com.google.gson.Gson
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
 import java.math.BigDecimal
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
 
 class ProductDetailActivity : AppCompatActivity() {
     // 1. KHAI BÁO BIẾN (VARIABLES)
@@ -110,6 +122,7 @@ class ProductDetailActivity : AppCompatActivity() {
             // Toast.makeText(this, "Đang xem sản phẩm ID: $currentProductId", Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun initViews() {
         rvProductImages = findViewById(R.id.rvProductImages)
         tvImageCounter = findViewById(R.id.tvImageCounter)
@@ -152,7 +165,8 @@ class ProductDetailActivity : AppCompatActivity() {
                 intent.data = Uri.parse("tel:$phoneNumber")
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Không tìm thấy thông tin người bán", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Không tìm thấy thông tin người bán", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -174,22 +188,26 @@ class ProductDetailActivity : AppCompatActivity() {
     // 5. LOGIC NGHIỆP VỤ (BUSINESS LOGIC)
 
     private fun loadProductData() {
-        val ipAddress = "192.168.1.86"
+        val ipAddress = "10.0.2.2"
         val port = "8080"
         val url = "http://$ipAddress:$port/api/product/detail/$currentProductId"
-        val request = okhttp3.Request.Builder()
+        val request = Request.Builder()
             .url(url)
             .build()
 
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+        ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
                 runOnUiThread {
-                    android.widget.Toast.makeText(this@ProductDetailActivity, "Lỗi kết nối: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@ProductDetailActivity,
+                        "Lỗi kết nối: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+            override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
                     val jsonResponse = response.body?.string()
                     if (jsonResponse != null) {
@@ -203,18 +221,27 @@ class ProductDetailActivity : AppCompatActivity() {
                             }
                         } catch (e: Exception) {
                             runOnUiThread {
-                                android.widget.Toast.makeText(this@ProductDetailActivity, "Lỗi đọc dữ liệu: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@ProductDetailActivity,
+                                    "Lỗi đọc dữ liệu: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
                 } else {
                     runOnUiThread {
-                        android.widget.Toast.makeText(this@ProductDetailActivity, "Lỗi Server: ${response.code}", android.widget.Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@ProductDetailActivity,
+                            "Lỗi Server: ${response.code}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         })
     }
+
     private fun updateUI(data: ProductDetailData) {
         val productObj = data.product
         val sellerObj = productObj.seller
@@ -253,7 +280,7 @@ class ProductDetailActivity : AppCompatActivity() {
             tvImageCounter.text = "0 / 0"
             return
         }
-        val adapter = com.example.clientchodientu.adapter.ProductImageAdapter(images) { position ->
+        val adapter = ProductImageAdapter(images) { position ->
             val intent = Intent(this, ImageViewerActivity::class.java)
             intent.putStringArrayListExtra("IMAGES", ArrayList(images)) // Truyền list ảnh
             intent.putExtra("POSITION", position) // Truyền vị trí ảnh đang xem
@@ -279,6 +306,7 @@ class ProductDetailActivity : AppCompatActivity() {
         })
         tvImageCounter.text = "1 / ${images.size}"
     }
+
     fun formatCurrency(price: BigDecimal?): String {
         if (price == null) return "0 đ"
         try {
@@ -288,15 +316,16 @@ class ProductDetailActivity : AppCompatActivity() {
             return "0 đ"
         }
     }
+
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString == null) return "Lỗi: Không có thời gian"
 
-        val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
         try {
             val past = format.parse(timeString) ?: return "Lỗi: Định dạng sai"
-            val now = java.util.Date()
-            format.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            val now = Date()
+            format.timeZone = TimeZone.getTimeZone("UTC")
             if (past.time > now.time) {
                 return "Lỗi dữ liệu (Thời gian ở tương lai)"
             }
@@ -311,7 +340,7 @@ class ProductDetailActivity : AppCompatActivity() {
                 diff < day -> "${diff / hour} giờ trước"
                 diff < 7 * day -> "${diff / day} ngày trước"
                 else -> {
-                    val outputFormat = java.text.SimpleDateFormat("dd/MM/yyyy")
+                    val outputFormat = SimpleDateFormat("dd/MM/yyyy")
                     outputFormat.format(past)
                 }
             }
@@ -322,19 +351,19 @@ class ProductDetailActivity : AppCompatActivity() {
     }
 
     private fun showMoreOptions() {
-        val dialog = android.app.Dialog(this)
-        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         val view = layoutInflater.inflate(R.layout.activity_bottom_sheet_options, null)
         dialog.setContentView(view)
         val window = dialog.window
         if (window != null) {
             window.setLayout(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             val layoutParams = window.attributes
-            layoutParams.gravity = android.view.Gravity.CENTER
+            layoutParams.gravity = Gravity.CENTER
             layoutParams.width = (resources.displayMetrics.widthPixels * 0.90).toInt()
             window.attributes = layoutParams
         }
@@ -345,4 +374,3 @@ class ProductDetailActivity : AppCompatActivity() {
         dialog.show()
     }
 }
-

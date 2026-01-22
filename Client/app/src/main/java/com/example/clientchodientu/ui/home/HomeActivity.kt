@@ -1,5 +1,8 @@
 package com.example.clientchodientu.ui.home
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -9,8 +12,10 @@ import androidx.appcompat.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +36,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.toString
+import com.example.clientchodientu.ui.auth.ProductDetailActivity
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var recyclerViewProduct: RecyclerView
@@ -42,9 +48,26 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var searchView: SearchView
 
     private var searchJob: Job? = null
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("Chat", "Notification permission granted")
+        } else {
+            Log.e("Chat", "Notification permission denied")
+        }
+    }
+    // --- SỬA ĐOẠN NÀY ---
+    // 1. Khai báo IP máy tính của bạn (để dùng chung)
+    private val SERVER_IP = "192.168.1.86"
+    private val PORT = "8080"
 
-    private val urlProduct = "http://10.0.2.2:8080/api/product/getAll"
-    private val urlCategory = "http://10.0.2.2:8080/api/category/getCategories"
+    // 2. Cập nhật URL dùng biến IP trên
+    private val urlProduct = "http://$SERVER_IP:$PORT/api/product/getAll"
+    private val urlCategory = "http://$SERVER_IP:$PORT/api/category/getCategories"
+    // --------------------
+//    private val urlProduct = "http://10.0.2.2:8080/api/product/getAll"
+//    private val urlCategory = "http://10.0.2.2:8080/api/category/getCategories"
 
     private lateinit var token: String
     val gson = GsonBuilder()
@@ -59,6 +82,8 @@ class HomeActivity : AppCompatActivity() {
 //            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
 //            insets
 //        }
+
+        askNotificationPermission();
         TokenManager.init(this)
         token = TokenManager.getToken().toString()
         Log.d("TOKEN_HOME", "Token lấy được: $token")
@@ -85,7 +110,8 @@ class HomeActivity : AppCompatActivity() {
         val finalurl = if (categoryId == null) {
             urlProduct
         } else {
-            "http://10.0.2.2:8080/api/product/getByCategory?categoryId=$categoryId"
+//            "http://10.0.2.2:8080/api/product/getByCategory?categoryId=$categoryId"
+            "http://$SERVER_IP:$PORT/api/product/getByCategory?categoryId=$categoryId"
         }
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
@@ -104,6 +130,13 @@ class HomeActivity : AppCompatActivity() {
                             recyclerViewProduct.visibility = android.view.View.VISIBLE
                             tvEmpty.visibility = android.view.View.GONE
                             val adapter = AdapterProduct(productResponse.data)
+                            // Gán sự kiện click chuyển trang
+                            adapter.onItemClick = { productId ->
+                                val intent =
+                                    Intent(this@HomeActivity, ProductDetailActivity::class.java)
+                                intent.putExtra("PRODUCT_ID", productId)
+                                startActivity(intent)
+                            }
                             recyclerViewProduct.adapter = adapter
                         } else {
                             recyclerViewProduct.visibility = android.view.View.GONE
@@ -249,7 +282,7 @@ class HomeActivity : AppCompatActivity() {
                 // 1. Tạo URL chuẩn (Lưu ý: 10.0.2.2 là localhost của máy ảo)
                 val urlBuilder = HttpUrl.Builder()
                     .scheme("http")
-                    .host("10.0.2.2")
+                    .host(SERVER_IP)
                     .port(8080)
                     .addPathSegments("api/product/filter")
                     .addQueryParameter("name", keyword)
@@ -301,6 +334,20 @@ class HomeActivity : AppCompatActivity() {
                     Toast.makeText(this@HomeActivity, "Lỗi kết nối!", Toast.LENGTH_SHORT).show()
                     progressBar.visibility = View.GONE
                 }
+            }
+        }
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                // Permission granted
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
     }

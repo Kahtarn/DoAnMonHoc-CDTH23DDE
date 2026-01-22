@@ -14,6 +14,7 @@ import java.util.Date
 import java.util.TimeZone
 
 class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adapter<AdapterProduct.ProductViewHolder>() {
+    var onItemClick: ((Int) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.activity_item_product, parent, false)
@@ -37,6 +38,11 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
             .placeholder(R.drawable.ic_launcher_background)
             .error(R.drawable.ic_launcher_foreground)
             .into(holder.img)
+
+        holder.itemView.setOnClickListener {
+            // Khi bấm vào, gửi ID sản phẩm ra ngoài
+            onItemClick?.invoke(product.id)
+        }
     }
     fun updateData(newList: List<Product>) {
         this.ListProduct = newList

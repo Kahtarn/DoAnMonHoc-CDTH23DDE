@@ -16,6 +16,7 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.dto.auth.login.LoginRequest
 import com.example.clientchodientu.dto.auth.login.LoginResponse
 import com.example.clientchodientu.ui.home.HomeActivity
+import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.TokenManager
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
@@ -98,7 +99,7 @@ class LoginActivity : AppCompatActivity() {
                     .url(urlLogin)
                     .post(requestBody)
                     .build()
-                val response = client.newCall(request).execute()
+                val response = ApiClient.getClient(this@LoginActivity).newCall(request).execute()
                 val responseString = response.body?.string()
                 val data = gson.fromJson(responseString, LoginResponse::class.java)
                 if (response.isSuccessful) {
@@ -112,7 +113,7 @@ class LoginActivity : AppCompatActivity() {
                             // 3. Gửi Token lên Server
                             val token = task.result
                             Log.d("FCM", "Token hiện tại: $token")
-                            TokenManager.updateFCMToken(1, token)
+                            TokenManager.updateFCMToken(this@LoginActivity,data.data.userId, token)
 
                             TokenManager.saveTokens(
                                 data.data.accessToken,

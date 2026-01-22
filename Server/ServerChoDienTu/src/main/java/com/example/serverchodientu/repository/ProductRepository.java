@@ -12,4 +12,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findAllByOrderByCreateAtDesc(Integer status);
     List<Product> findByTitleContainingIgnoreCaseAndStatus(String title, Integer status, Sort sort);
     List<Product> findBySellerIdAndStatusOrderByCreateAtDesc(Integer sellerId, Integer status);
+    List<Product> findByCategoryId(Integer categoryId);
 }

@@ -70,6 +70,11 @@ public class ProductService {
 
         return productRepo.save(product);
     }
+
+    public List<Product> getByCategoryId(Integer categoryId) {
+        return productRepo.findByCategoryId(categoryId);
+    }
+
     public List<Product> getMySellingProducts(String email) {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + email));

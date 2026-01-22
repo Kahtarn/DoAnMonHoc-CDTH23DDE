@@ -42,6 +42,12 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(data));
     }
 
+    @GetMapping("/getByCategory")
+    public ResponseEntity<ApiResponse<List<Product>>> getByCategory(@RequestParam("categoryId") Integer categoryId) {
+        List<Product> data = productService.getByCategoryId(categoryId);
+        return ResponseEntity.ok(ApiResponse.ok(data));
+    }
+
     @PostMapping("/post")
     public ResponseEntity<ApiResponse<String>> postProduct(@RequestBody PostProductRequest request) {
         productService.createProduct(request);

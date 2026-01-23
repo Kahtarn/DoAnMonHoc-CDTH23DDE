@@ -136,16 +136,15 @@ public class ProductService {
     }
 
     @Transactional
-    public void markAsSold(Integer productId, Integer currentUserId) {
+    public void markAsSold(Integer productId, String currentEmail) {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
-        if (!product.getSeller().getId().equals(currentUserId)) {
+        if (!product.getSeller().getEmail().equals(currentEmail)) {
             throw new RuntimeException("Bạn không có quyền thực hiện thao tác này!");
         }
 
         product.setStatus(1);
-        productRepo.save(product);
     }
 
 }

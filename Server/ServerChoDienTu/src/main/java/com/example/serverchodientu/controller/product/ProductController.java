@@ -100,4 +100,14 @@ public class ProductController {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    @PatchMapping("/{id}/mark-as-sold")
+    public ResponseEntity<ApiResponse<String>> markAsSold(@PathVariable Integer id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        productService.markAsSold(id, currentEmail);
+
+        return ResponseEntity.ok(ApiResponse.ok("Đã đánh dấu sản phẩm là đã bán!"));
+    }
 }

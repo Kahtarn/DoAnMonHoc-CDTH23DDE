@@ -18,8 +18,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat")
 public class ChatController {
-    private UserRepository userRepository;
 
+    @Autowired // THÊM DÒNG NÀY VÀO ĐÂY
+    private UserRepository userRepository;
     @Autowired
     private ChatService chatService;
 //    request mau

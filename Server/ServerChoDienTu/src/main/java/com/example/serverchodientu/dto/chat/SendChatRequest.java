@@ -8,7 +8,6 @@ public class SendChatRequest {
     private Integer senderId;
     private Integer receiverId;
     private String content;
-    private Integer productId;
     private Timestamp createdAt;
 
 
@@ -17,7 +16,6 @@ public class SendChatRequest {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.content = content;
-        this.productId = productId;
         this.createdAt = createdAt;
     }
 
@@ -55,14 +53,6 @@ public class SendChatRequest {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
     }
 
     public Timestamp getCreatedAt() {

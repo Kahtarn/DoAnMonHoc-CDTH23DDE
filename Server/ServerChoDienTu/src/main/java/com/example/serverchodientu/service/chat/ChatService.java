@@ -61,7 +61,7 @@ public class ChatService {
         Map<String, Object> firestoreData = new HashMap<>();
         firestoreData.put("senderId", message.getSenderId());
         firestoreData.put("receiverId", message.getReceiverId());
-        firestoreData.put("productId", message.getProductId());
+//        firestoreData.put("productId", message.getProductId());
         firestoreData.put("content", message.getContent());
         firestoreData.put("isRevoke", false);
         firestoreData.put("createAt", new Date());
@@ -165,12 +165,12 @@ public class ChatService {
         }
 
         // Save Chat Message to SQL
-        Product p = productRepository.findById(message.getProductId()).orElse(null);
+//        Product p = productRepository.findById(message.getProductId()).orElse(null);
 
         Chat c = new Chat();
         c.setRoomId(room);
         c.setContent(message.getContent());
-        c.setProductId(p);
+//        c.setProductId(p);
         c.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         c.setSender(senderUser);
 

@@ -118,7 +118,7 @@ class LoginActivity : AppCompatActivity() {
                             TokenManager.saveTokens(
                                 data.data.accessToken,
                                 data.data.refreshToken,
-                                token
+                                token,data.data.userId
                             )
                         }
                         withContext(Dispatchers.Main) {

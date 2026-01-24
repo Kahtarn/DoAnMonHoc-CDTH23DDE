@@ -18,21 +18,23 @@ object TokenManager {
     private const val KEY_ACCESS_TOKEN = "accessToken"
     private const val KEY_REFRESH_TOKEN = "refreshToken"
     private const val KEY_FCM_TOKEN = "fcmToken"
+    private const val KEY_USER_ID="userId"
     private lateinit var prefs: SharedPreferences
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    fun saveTokens(accessToken: String, refreshToken: String, fcmToken: String) {
+    fun saveTokens(accessToken: String, refreshToken: String, fcmToken: String,userId: Int) {
         prefs.edit().apply {
             putString(KEY_ACCESS_TOKEN, accessToken)
             putString(KEY_REFRESH_TOKEN, refreshToken)
             putString(KEY_FCM_TOKEN, fcmToken)
+            putInt(KEY_USER_ID,userId)
             apply()
         }
     }
-
+    fun getUserId(): Int = prefs.getInt(KEY_USER_ID, -1)
     fun getToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
     fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
 

@@ -75,4 +75,6 @@ dependencies {
     // implementation("com.google.firebase:firebase-auth-ktx") // Đang comment thì giữ nguyên comment
     // implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-database")
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 }

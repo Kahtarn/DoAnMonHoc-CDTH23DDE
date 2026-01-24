@@ -35,9 +35,9 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
             // A. THÀNH CÔNG: Cấp được chìa khóa mới
             val newAccessToken = newTokenResponse.data.accessToken
             val newRefreshToken = newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
+            val userId=newTokenResponse.data.userId
 
-
-            TokenManager.saveTokens(newAccessToken, newRefreshToken, "")
+            TokenManager.saveTokens(newAccessToken, newRefreshToken, "",userId)
 
             // Trả về request cũ nhưng thay Header bằng token MỚI
             return response.request.newBuilder()

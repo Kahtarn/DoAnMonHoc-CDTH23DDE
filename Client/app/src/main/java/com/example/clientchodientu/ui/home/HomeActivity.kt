@@ -17,6 +17,7 @@ import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.ProductResponse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.entity.Product
+import com.example.clientchodientu.ui.product.AddPost
 import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.TokenManager
 import kotlinx.coroutines.launch
@@ -85,6 +86,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_add -> {
+                    startActivity(Intent(this, AddPost::class.java))
                     true
                 }
 

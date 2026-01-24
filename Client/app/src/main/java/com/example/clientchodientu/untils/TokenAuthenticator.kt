@@ -29,6 +29,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
         //  Thực hiện gọi API xin cấp lại token
         // Lưu ý: Phải tạo client mới để không bị dính Interceptor cũ
         val newTokenResponse = getNewToken(refreshToken)
+        val newFCMToken = TokenManager.getFirebaseToken()
 
         // 4. Xử lý kết quả
         if (newTokenResponse != null && newTokenResponse.success) {
@@ -37,7 +38,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
             val newRefreshToken = newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
 
 
-            TokenManager.saveTokens(newAccessToken, newRefreshToken, "")
+            TokenManager.saveTokens(newAccessToken, newRefreshToken, newFCMToken)
 
             // Trả về request cũ nhưng thay Header bằng token MỚI
             return response.request.newBuilder()

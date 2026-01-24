@@ -1,0 +1,14 @@
+package com.example.clientchodientu.dto.chat
+
+import com.google.firebase.database.IgnoreExtraProperties
+
+@IgnoreExtraProperties
+data class InboxRespond(
+    val partnerId: Int =0,
+    val partnerName: String = "",
+    val avatarUrl: String? = null,
+    val lastMessage: String = "",
+    val time: Any? = "",
+    var roomName: String = "",
+    val isRevoke : Boolean = false
+)

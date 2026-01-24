@@ -100,7 +100,7 @@ public class AuthService {
         return Map.of(
                 "accessToken", accessToken,
                 "refreshToken", refreshTokenStr,
-                "fcmToken", fcmToken,
+                "firebaseToken", fcmToken,
                 "userId", u.getId(),
                 "username", u.getUsername(),
                 "fullName", u.getFullName()

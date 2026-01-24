@@ -18,7 +18,7 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
     var onItemClick: ((Product) -> Unit)? = null
     var onEditClick: ((Product) -> Unit)? = null
     var onDeleteClick: ((Product) -> Unit)? = null
-
+    var onSellingClick:((Product)-> Unit)? = null
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -57,6 +57,10 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
                     }
                     R.id.menu_delete -> {
                         onDeleteClick?.invoke(p)
+                        true
+                    }
+                    R.id.menu_sold ->{
+                        onSellingClick?.invoke(p)
                         true
                     }
                     else -> false

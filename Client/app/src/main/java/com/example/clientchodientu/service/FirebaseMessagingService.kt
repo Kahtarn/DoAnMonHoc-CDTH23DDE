@@ -1,6 +1,6 @@
 package com.example.clientchodientu.service
 
-import android.R
+import com.example.clientchodientu.R
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -42,9 +42,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendRegistrationToServer(token: String) {
-        // TODO: Call your Spring Boot API (e.g., PUT /api/users/fcm-token)
         // to save this token for the current logged-in user.
-        TokenManager.updateFCMToken( this,1, token)
+        TokenManager.updateFCMToken(this, token)
     }
 
     private fun sendNotification(title: String, messageBody: String, roomId: String) {
@@ -59,7 +58,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
         val channelId = "chat_messages"
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_dialog_info)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)

@@ -1,4 +1,4 @@
-package com.example.clientchodientu.entity.chat
+package com.example.clientchodientu.entity
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName

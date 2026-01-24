@@ -18,6 +18,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,7 +30,7 @@ import com.example.clientchodientu.adapter.OnMessageLongClickListener
 import com.example.clientchodientu.dto.chat.RevokeMessageRespond
 import com.example.clientchodientu.dto.chat.RevokeRequest
 import com.example.clientchodientu.dto.chat.SendMessageRequest
-import com.example.clientchodientu.entity.chat.ChatMessage
+import com.example.clientchodientu.entity.ChatMessage
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -57,6 +58,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
     private lateinit var roomName: String
     private var myId by Delegates.notNull<Int>()
     private var receiverId by Delegates.notNull<Int>()
+    private lateinit var receiverName: String
     private var firestoreListener: ListenerRegistration? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -80,6 +82,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
 
         roomName = intent.getStringExtra("ROOM_NAME") ?: "general"
         receiverId = intent.getIntExtra("PARTNER_ID", 0)
+        receiverName = intent.getStringExtra("PARTNER_NAME") ?: "Người dùng"
         myId = intent.getStringExtra("MY_ID")?.toInt() ?: 0
         Log.d("DetailChatActivity", "Room Name: $roomName, Receiver ID: $receiverId")
 
@@ -113,6 +116,9 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
                 }
             }
         }
+        findViewById<AppCompatImageButton>(R.id.btnBackChatDetail).setOnClickListener {
+            finish()
+        }
         // xoa roomMessages  khi nhan vao thong bao
         val roomId = intent.getStringExtra("roomId")
         if (roomId != null) {
@@ -132,7 +138,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         val myLayoutManager = LinearLayoutManager(this)
         myLayoutManager.stackFromEnd = true
         rcvChat.layoutManager = myLayoutManager
-        chatAdapter = AdapterDetailChat(messageList, myId, this)
+        chatAdapter = AdapterDetailChat(messageList, myId, this, receiverName)
         rcvChat.adapter = chatAdapter
     }
 

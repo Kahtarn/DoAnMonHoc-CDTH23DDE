@@ -6,6 +6,20 @@
     android:background="#FFFFFF">
 
 
+    <ImageButton
+
+        android:id="@+id/btnBackChat"
+        android:layout_width="55dp"
+        android:layout_height="58dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:padding="8dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintBottom_toBottomOf="@id/topBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
     <TextView
         android:id="@+id/tvHeaderTitle"
         android:layout_width="wrap_content"

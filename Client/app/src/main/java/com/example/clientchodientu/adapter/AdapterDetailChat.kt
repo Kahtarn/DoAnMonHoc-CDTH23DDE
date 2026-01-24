@@ -6,12 +6,13 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
-import com.example.clientchodientu.entity.chat.ChatMessage
+import com.example.clientchodientu.entity.ChatMessage
 
 class AdapterDetailChat(
     private val messageList: ArrayList<ChatMessage>,
     private val myId: Int,
-    private val listener: OnMessageLongClickListener
+    private val listener: OnMessageLongClickListener,
+    private val receiverName: String
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -55,8 +56,7 @@ class AdapterDetailChat(
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
 
                     // CALL THE NEW FUNCTION
-                    showCustomPopup(view, msg, position)
-
+                    showCustomPopup(view, msg, position, true)
                     true
                 }
             } else {
@@ -64,8 +64,21 @@ class AdapterDetailChat(
                 holder.itemView.setOnLongClickListener(null)
             }
         } else if (holder is ReceivedMessageViewHolder) {
-            holder.txtSender.text = msg.senderId.toString()
+            holder.txtSender.text = receiverName
             holder.bind(msg)
+// is me = false, chi co copy khong co thu hoi
+            if (!msg.isRevoke) {
+                holder.itemView.setOnLongClickListener { view ->
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+
+                    // CALL THE NEW FUNCTION
+                    showCustomPopup(view, msg, position, false)
+                    true
+                }
+            } else {
+                // Nếu đã thu hồi rồi thì không cho nhấn giữ nữa
+                holder.itemView.setOnLongClickListener(null)
+            }
         }
     }
 
@@ -119,53 +132,62 @@ class AdapterDetailChat(
         }
     }
 
-    private fun showCustomPopup(anchorView: View, message: ChatMessage, position: Int) {
-        // 1. Inflate the custom layout
+    private fun showCustomPopup(
+        anchorView: View,
+        message: ChatMessage,
+        position: Int,
+        isMe: Boolean
+    ) {
         val inflater = LayoutInflater.from(anchorView.context)
         val popupView = inflater.inflate(R.layout.popup_message_option, null)
 
-        // 2. Create PopupWindow
-        // Width: wrap_content, Height: wrap_content, Focusable: true (closes when clicking outside)
+        // --- BƯỚC 1: Xử lý Logic Ẩn/Hiện nút TRƯỚC khi đo kích thước ---
+        val btnRevoke = popupView.findViewById<TextView>(R.id.btnRevoke)
+        val btnCopy = popupView.findViewById<TextView>(R.id.btnCopy)
+
+        // Xử lý nút Copy (Luôn hiện)
+        btnCopy.setOnClickListener {
+            listener.onCopyMessage(message)
+            // Lưu ý: Cần khai báo popupWindow ở scope rộng hơn hoặc dùng biến tạm để dismiss
+            // (Xem phần dưới để thấy cách xử lý popupWindow.dismiss())
+        }
+
+        // Xử lý nút Thu hồi (Chỉ hiện khi isMe = true)
+        if (isMe) {
+            btnRevoke.visibility = View.VISIBLE
+            btnRevoke.setOnClickListener {
+                listener.onRevokeMessage(message, position)
+            }
+        } else {
+            // QUAN TRỌNG: Dùng GONE để nó biến mất hoàn toàn và layout co lại
+            btnRevoke.visibility = View.GONE
+        }
+
+        // --- BƯỚC 2: Khởi tạo PopupWindow ---
         val popupWindow = PopupWindow(
             popupView,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         )
-
-        // Add a slight elevation/shadow logic if needed (Android 5.0+)
         popupWindow.elevation = 10f
 
-        // 3. Handle Item Clicks inside the popup
-        val btnCopy = popupView.findViewById<TextView>(R.id.btnCopy)
-        val btnDelete = popupView.findViewById<TextView>(R.id.btnRevoke)
-
-
+        // Gán sự kiện dismiss lại cho các nút sau khi có đối tượng popupWindow
         btnCopy.setOnClickListener {
-            // Handle Copy logic here
             listener.onCopyMessage(message)
             popupWindow.dismiss()
         }
-
-        btnDelete.setOnClickListener {
-            // Trigger the listener we made earlier
-
-
+        if (isMe) {
+            btnRevoke.setOnClickListener {
                 listener.onRevokeMessage(message, position)
                 popupWindow.dismiss()
-
+            }
         }
 
-        // 4. Show the popup
-        // xOff and yOff adjust the position.
-        // 0, 0 means top-left of the popup aligns with bottom-left of the message
-        // We adjust Y to make it overlap slightly or appear next to it
-//        popupWindow.showAsDropDown(anchorView, 0, -anchorView.height / 2)
-// 3. Gọi hàm tính toán vị trí (Đã tách riêng)
-        val isMe = getItemViewType(position) == VIEW_TYPE_SENT
+        // --- BƯỚC 3: Tính toán vị trí
         val offset = calculatePos(anchorView, popupView, isMe)
 
-        // Use showAtLocation with Gravity.NO_GRAVITY to position at exact coordinates
+        // --- BƯỚC 4: Hiển thị ---
         popupWindow.showAtLocation(
             anchorView,
             Gravity.NO_GRAVITY,
@@ -174,61 +196,59 @@ class AdapterDetailChat(
         )
     }
 
-
+    //  dai voai luon
     private fun calculatePos(anchorView: View, popupView: View, isMe: Boolean): Pair<Int, Int> {
         // 1. Lấy kích thước màn hình
         val displayMetrics = anchorView.resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
         val screenWidth = displayMetrics.widthPixels
 
-        // 2. Đo kích thước thật của Popup (Quan trọng: ép chiều rộng không quá màn hình)
-        // Dùng AT_MOST để đo chiều cao chính xác hơn nếu text bị xuống dòng
+        // 2. Đo kích thước thật của Popup
+        // Phải đo sau khi đã set Visibility (GONE/VISIBLE) ở hàm trên
         popupView.measure(
-            View.MeasureSpec.makeMeasureSpec(screenWidth, View.MeasureSpec.AT_MOST),
-            View.MeasureSpec.UNSPECIFIED
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
         val popupWidth = popupView.measuredWidth
         val popupHeight = popupView.measuredHeight
 
-        // 3. Lấy vị trí của tin nhắn
+        // 3. Lấy vị trí của tin nhắn trên màn hình
         val location = IntArray(2)
         anchorView.getLocationOnScreen(location)
         val anchorX = location[0]
         val anchorY = location[1]
 
         // --- TÍNH TOÁN Y (DỌC) ---
+        // Logic: Ưu tiên hiện bên dưới, nếu hết chỗ thì nhảy lên trên
+        val spaceBelow = screenHeight - (anchorY + anchorView.height)
+        // Check xem bên dưới có đủ chỗ chứa popup + 1 khoảng đệm (ví dụ 50px) không
+        val showBelow = spaceBelow > popupHeight + 50
 
-        // Tính khoảng trống bên dưới và bên trên
-        // Trừ đi 50px (navigation bar/padding) cho an toàn
-        val spaceBelow = screenHeight - (anchorY + anchorView.height) - 50
-        val spaceAbove = anchorY - 50 // Khoảng trống từ đỉnh màn hình đến đầu tin nhắn
-
-        var finalY = 0
-
-
-        // Nếu bên dưới đủ chỗ chứa Popup -> Hiện bên dưới
-        // Hoặc: Nếu bên trên KHÔNG đủ chỗ hiện bên dưới (chấp nhận che phím)
-        if (spaceBelow >= popupHeight || spaceAbove < popupHeight) {
-            // Hiện bên dưới (Mặc định)
-            finalY = anchorY + anchorView.height - 10 // -10 để đè nhẹ lên tin nhắn cho đẹp
+        val finalY = if (showBelow) {
+            anchorY + anchorView.height // Hiện ngay dưới tin nhắn
         } else {
-            // Trường hợp duy nhất hiện bên trên:
-            // Bên dưới hết chỗ VÀ Bên trên đủ chỗ
-            finalY = anchorY - popupHeight + 10 // +10 để đè nhẹ lên tin nhắn
+            anchorY - popupHeight // Hiện ngay trên tin nhắn
         }
 
-        // --- TÍNH TOÁN X (NGANG)
-        var finalX = anchorX
+        // --- TÍNH TOÁN X (NGANG) ---
+        var finalX: Int
+
         if (isMe) {
+            // Nếu là mình: Căn Phải (Right Align)
+            // X = (Vị trí X của tin nhắn + Chiều rộng tin nhắn) - Chiều rộng Popup
             finalX = (anchorX + anchorView.width) - popupWidth
+        } else {
+            // Nếu là người khác: Căn Trái (Left Align)
+            // X = Vị trí X của tin nhắn
+            finalX = anchorX
         }
 
-        // Fix tràn lề trái/phải
-        val sideMargin = 16
-        if (finalX < sideMargin) {
-            finalX = sideMargin
-        } else if (finalX + popupWidth > screenWidth - sideMargin) {
-            finalX = screenWidth - popupWidth - sideMargin
+        // --- FIX TRÀN MÀN HÌNH (PADDING) ---
+        val margin = 16 // Khoảng cách tối thiểu với mép màn hình
+        if (finalX < margin) {
+            finalX = margin
+        } else if (finalX + popupWidth > screenWidth - margin) {
+            finalX = screenWidth - popupWidth - margin
         }
 
         return Pair(finalX, finalY)

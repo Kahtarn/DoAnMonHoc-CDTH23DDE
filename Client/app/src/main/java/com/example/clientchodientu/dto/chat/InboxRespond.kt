@@ -1,6 +1,7 @@
 package com.example.clientchodientu.dto.chat
 
 import com.google.firebase.database.IgnoreExtraProperties
+import com.google.firebase.firestore.PropertyName
 
 @IgnoreExtraProperties
 data class InboxRespond(
@@ -10,5 +11,7 @@ data class InboxRespond(
     var lastMessage: String = "",
     val time: Any? = "",
     var roomName: String = "",
-    val isRevoke : Boolean = false
+    @get:PropertyName("isRevoke")
+    @set:PropertyName("isRevoke")
+    var isRevoke : Boolean = false
 )

@@ -6,6 +6,20 @@
     android:fitsSystemWindows="true"
     android:background="#FFFFFF">
 
+    <ImageButton
+
+        android:id="@+id/btnBackChatDetail"
+        android:layout_width="59dp"
+        android:layout_height="59dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:padding="8dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintBottom_toBottomOf="@id/topBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
     <TextView
         android:id="@+id/tvDetailTitle"
         android:layout_width="wrap_content"
@@ -66,7 +80,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Gửi tin nhắn"
             android:src="@drawable/ic_send"
-            app:tint="#2196F3" />
+            app:tint="#FF8C32" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

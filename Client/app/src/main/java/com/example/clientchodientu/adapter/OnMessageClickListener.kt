@@ -1,6 +1,6 @@
 package com.example.clientchodientu.adapter
 
-import com.example.clientchodientu.entity.chat.ChatMessage
+import com.example.clientchodientu.entity.ChatMessage
 
 interface OnMessageLongClickListener {
      fun onRevokeMessage(message: ChatMessage, position: Int)

@@ -37,10 +37,11 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(data));
     }
 
-    @GetMapping("/detail/{id}")
+    @GetMapping("/details/{id}")
     public ResponseEntity<ApiResponse<ProductDetailsResponse>> getProductDetail(@PathVariable Integer id) {
-        ProductDetailsResponse data = productService.getProductDetail(id);
-        return ResponseEntity.ok(ApiResponse.ok(data));
+        ProductDetailsResponse detail = productService.getProductDetail(id);
+
+        return ResponseEntity.ok(ApiResponse.ok(detail));
     }
 
     @GetMapping("/getByCategory")

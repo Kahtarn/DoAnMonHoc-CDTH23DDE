@@ -6,6 +6,7 @@ import com.example.serverchodientu.dto.product.ProductDetailsResponse;
 import com.example.serverchodientu.entity.Product;
 import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -48,10 +49,16 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(data));
     }
 
-    @PostMapping("/post")
-    public ResponseEntity<ApiResponse<String>> postProduct(@RequestBody PostProductRequest request) {
-        productService.createProduct(request);
-        return ResponseEntity.ok(ApiResponse.ok("Đăng bài bán thành công!"));
+    @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<Product>> postProduct(@ModelAttribute PostProductRequest request) {
+        if (request.getThumbnailUrl() == null || request.getThumbnailUrl().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Ảnh đại diện sản phẩm là bắt buộc!"));
+        }
+
+        Product savedProduct = productService.createPostProduct(request);
+
+        return ResponseEntity.ok(ApiResponse.ok(savedProduct));
     }
 
     @DeleteMapping("/delete/{id}")

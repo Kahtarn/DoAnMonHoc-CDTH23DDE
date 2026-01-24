@@ -1,14 +1,13 @@
-package com.example.clientchodientu.ui.auth
+package com.example.clientchodientu.ui.product
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.clientchodientu.R
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.FullScreenImageAdapter
 
 class ImageViewerActivity : AppCompatActivity() {
@@ -17,8 +16,8 @@ class ImageViewerActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_image_viewer)
         window.setFlags(
-            android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
         supportActionBar?.hide()
         val images = intent.getStringArrayListExtra("IMAGES") ?: arrayListOf()

@@ -81,7 +81,7 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
     }
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tvTitle)
-        val img: ImageView = itemView.findViewById(R.id.imgProduct)
+        val img: ImageView = itemView.findViewById(R.id.imgProductM)
         val price: TextView = itemView.findViewById(R.id.tvPrice)
         val position: TextView = itemView.findViewById(R.id.tvLocation)
         val tvSellerName: TextView = itemView.findViewById(R.id.tv_SellerName)

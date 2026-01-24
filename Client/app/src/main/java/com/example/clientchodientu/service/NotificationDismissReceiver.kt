@@ -1,4 +1,4 @@
-package com.example.emailotp.service
+package com.example.clientchodientu.service
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,7 +9,7 @@ class NotificationDismissReceiver : BroadcastReceiver() {
         val roomId = intent.getStringExtra("roomId")
         if (roomId != null) {
             // Clear message history for this room
-            FirebaseMessagingService.roomMessages.remove(roomId)
+            FirebaseMessagingService.Companion.roomMessages.remove(roomId)
         }
     }
 }

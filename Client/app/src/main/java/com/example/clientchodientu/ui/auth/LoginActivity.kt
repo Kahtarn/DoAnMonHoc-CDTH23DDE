@@ -109,7 +109,7 @@ class LoginActivity : AppCompatActivity() {
                         // lay fcm token
                         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                             if (!task.isSuccessful) {
-                                Log.w("FCM", "Lấy token thất bại", task.exception)
+                                Log.w("Firebase", "Lấy token thất bại", task.exception)
                                 return@addOnCompleteListener
                             }
 
@@ -117,7 +117,6 @@ class LoginActivity : AppCompatActivity() {
                             val token = task.result
                             Log.d("FCM", "Token hiện tại: $token")
                             TokenManager.updateFCMToken(this@LoginActivity, token)
-
                             TokenManager.saveTokens(
                                 data.data.accessToken,
                                 data.data.refreshToken,

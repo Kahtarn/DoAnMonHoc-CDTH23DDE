@@ -1,4 +1,4 @@
-package com.example.emailotp.service
+package com.example.clientchodientu.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,6 +13,12 @@ import android.content.Context
 import com.example.clientchodientu.ui.chat.DetailChatActivity
 import android.R.drawable.ic_dialog_info
 import com.example.clientchodientu.untils.TokenManager
+import kotlin.apply
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.set
+import kotlin.jvm.java
+import kotlin.toString
 
 class FirebaseMessagingService : FirebaseMessagingService() {
 
@@ -55,7 +61,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
     private fun isUserOnChat(): Boolean {
         // Kiểm tra xem người dùng có đang mở đúng phòng chat đó không?
-        val prefs = getSharedPreferences("AppStatus", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("AppStatus", MODE_PRIVATE)
         val isOnChat = prefs.getBoolean("IS_ON_CHAT", false)
 
         Log.d("is on chat", isOnChat.toString())
@@ -105,7 +111,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             .setGroup(roomId)
 
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         // Create Channel (Android 8+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

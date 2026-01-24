@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -29,7 +30,6 @@ import com.example.clientchodientu.dto.chat.RevokeMessageRespond
 import com.example.clientchodientu.dto.chat.RevokeRequest
 import com.example.clientchodientu.dto.chat.SendMessageRequest
 import com.example.clientchodientu.entity.chat.ChatMessage
-import com.example.emailotp.service.FirebaseMessagingService
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -37,6 +37,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
+import com.example.clientchodientu.service.FirebaseMessagingService
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,8 +57,6 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
     private lateinit var roomName: String
     private var myId by Delegates.notNull<Int>()
     private var receiverId by Delegates.notNull<Int>()
-    private var myUsername = ""
-    private var otherUsername = ""
     private var firestoreListener: ListenerRegistration? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -72,6 +71,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_chat_detail)
         TokenManager.init(this)
 

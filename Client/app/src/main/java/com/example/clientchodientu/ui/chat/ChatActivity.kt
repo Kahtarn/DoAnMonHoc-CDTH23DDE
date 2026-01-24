@@ -1,4 +1,4 @@
-package com.example.emailotp
+package com.example.clientchodientu.ui.chat
 
 import com.example.clientchodientu.R
 import android.content.Intent
@@ -15,19 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.untils.TokenManager
 import com.example.clientchodientu.adapter.AdapterChat
 import com.example.clientchodientu.dto.chat.InboxRespond
-import com.example.clientchodientu.entity.chat.ApiResponse
-import com.example.clientchodientu.ui.chat.DetailChatActivity
-import com.example.clientchodientu.untils.ApiClient
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 class ChatActivity : AppCompatActivity() {
     private lateinit var rvInbox: RecyclerView

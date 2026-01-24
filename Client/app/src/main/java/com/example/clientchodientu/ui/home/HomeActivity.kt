@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import kotlin.toString
 import com.example.clientchodientu.ui.user.PostManagerActivity
 import com.example.clientchodientu.untils.ApiClient
-import com.example.emailotp.ChatActivity
+import com.example.clientchodientu.ui.chat.ChatActivity
 import com.example.exampletemplate.AdapterCategory
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson

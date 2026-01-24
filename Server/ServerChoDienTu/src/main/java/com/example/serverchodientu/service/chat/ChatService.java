@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 
@@ -138,6 +140,7 @@ public class ChatService {
         map.put("lastMessage", content);
         map.put("time", time); // Trường này cực kỳ quan trọng để orderBy trên Android
         map.put("roomName", roomName);
+        map.put("isRevoke", false);
         return map;
     }
 
@@ -208,6 +211,30 @@ public class ChatService {
                     .document(request.getRoomName())
                     .collection("messages")
                     .document(request.getMessageId()) // <--- ID vẫn y nguyên
+                    .update("isRevoke", true);
+            // lsy user id
+            Pattern p = Pattern.compile("\\d+"); // Tìm các cụm chữ số liên tiếp
+            Matcher m = p.matcher(request.getRoomName());
+
+            List<Integer> ids = new ArrayList<>();
+            while (m.find()) {
+                ids.add(Integer.parseInt(m.group()));
+            }
+
+            String userId1 = ids.get(0).toString(); // 10
+            String userId2 = ids.get(1).toString(); // 105
+            FirestoreClient.getFirestore()
+                    .collection("inboxes")
+                    .document(userId1)
+                    .collection("conversations")
+                    .document(request.getRoomName()) // <--- ID vẫn y nguyên
+                    .update("isRevoke", true);
+
+            FirestoreClient.getFirestore()
+                    .collection("inboxes")
+                    .document(userId2)
+                    .collection("conversations")
+                    .document(request.getRoomName()) // <--- ID vẫn y nguyên
                     .update("isRevoke", true);
         } catch (Exception e) {
             return ApiResponse.error("Thu hoi tin nhan that bai, " + e.getMessage());

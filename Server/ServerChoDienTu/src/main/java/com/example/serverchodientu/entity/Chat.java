@@ -30,7 +30,7 @@ public class Chat {
     @JoinColumn(name = "product_id")
     private Product productId;
 
-    @Column(name = "create_at", nullable = false)
+    @Column(name = "create_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
     public Chat(Integer id, Room roomId, User sender, String content, Product productId, Timestamp createdAt) {
@@ -41,6 +41,7 @@ public class Chat {
         this.productId = productId;
         this.createdAt = createdAt;
     }
+
     public Chat() {
 
     }

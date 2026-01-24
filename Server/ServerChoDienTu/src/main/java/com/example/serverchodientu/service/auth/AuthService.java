@@ -11,6 +11,7 @@ import com.example.serverchodientu.repository.RefreshTokenRepository;
 import com.example.serverchodientu.repository.UserRepository;
 import com.example.serverchodientu.service.JwtService;
 import com.example.serverchodientu.service.MailService;
+import com.example.serverchodientu.service.chat.ChatService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,31 +33,33 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepo;
     private final JwtService jwtService;
     private final MailService mailService;
+    private final ChatService chatService;
 
     public AuthService(UserRepository userRepo,
                        EmailVerificationRepository emailVerificationRepo,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        RefreshTokenRepository refreshTokenRepo,
-                       MailService mailService) {
+                       MailService mailService, ChatService chatService) {
         this.userRepo = userRepo;
         this.emailVerificationRepo = emailVerificationRepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenRepo = refreshTokenRepo;
         this.mailService = mailService;
+        this.chatService = chatService;
     }
 
     @Transactional
     public String register(RegisterRequest request) {
-        if(userRepo.existsByEmail(request.getEmail())) {
+        if (userRepo.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email này đã được sử dụng!");
         }
 
         EmailVerification ev = emailVerificationRepo.findByEmailAndOtpCode(request.getEmail(), request.getOtpCode())
                 .orElseThrow(() -> new RuntimeException("Mã OTP không chính xác!"));
 
-        if(ev.getOtpExpiry().isBefore(LocalDateTime.now())) {
+        if (ev.getOtpExpiry().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Mã OTP đã hết hạn!");
         }
 
@@ -85,18 +88,19 @@ public class AuthService {
         User u = userRepo.findByEmailOrUsername(request.getEmailOrUsername(), request.getEmailOrUsername())
                 .orElseThrow(() -> new RuntimeException("Tên đăng nhập hoặc email không tồn tại!"));
 
-        if(!passwordEncoder.matches(request.getPassword(), u.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), u.getPassword())) {
             throw new RuntimeException("Mật khẩu không chính xác!");
         }
 
         String accessToken = jwtService.generateAccessToken(u);
         String refreshTokenStr = jwtService.generateRefreshToken();
-
+        String fcmToken = chatService.createFirebaseToken(u.getId());
         saveRefreshToken(u, refreshTokenStr);
 
         return Map.of(
                 "accessToken", accessToken,
                 "refreshToken", refreshTokenStr,
+                "fcmToken", fcmToken,
                 "userId", u.getId(),
                 "username", u.getUsername(),
                 "fullName", u.getFullName()

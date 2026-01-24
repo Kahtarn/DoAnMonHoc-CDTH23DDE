@@ -70,17 +70,4 @@ public class ChatController {
         }
     }
 
-
-    @GetMapping("/get-firebase-token")
-    public ApiResponse<String> getFirebaseToken(@RequestParam String access_token) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String currentEmail = authentication.getName();
-            User user = userRepository.findByEmail(currentEmail).orElseThrow(() -> new RuntimeException(("Khong tim thay user.")));
-            String token = chatService.createFirebaseToken(user.getId());
-            return ApiResponse.ok(token);
-        } catch (Exception e) {
-            return ApiResponse.error("Loi: " + e.getMessage());
-        }
-    }
 }

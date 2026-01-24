@@ -78,36 +78,42 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun loadInboxDirectlyFromFirestore() {
-
         val mAuth = FirebaseAuth.getInstance()
-        val user = mAuth.currentUser
-        if (user != null) {
-             myId = user.uid
-            db = FirebaseFirestore.getInstance()
-            // Truy vấn thẳng: Lấy tất cả hội thoại, sắp xếp theo thời gian mới nhất
-            db.collection("inboxes").document(myId)
-                .collection("conversations")
-                .orderBy("time", Query.Direction.DESCENDING) // Tự động đưa tin mới lên đầu
-                .addSnapshotListener { snapshots, e ->
-                    if (e != null) {
-                        Log.w("FIRESTORE", "Listen failed (Có thể đang offline): $e")
+        val user = mAuth.currentUser ?: return // Thoát nếu chưa login
+
+        myId = user.uid
+        db = FirebaseFirestore.getInstance()
+
+        db.collection("inboxes").document(myId)
+            .collection("conversations")
+            .orderBy("time", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                // Kiểm tra lỗi trước
+                if (e != null) {
+                    Log.w("FIRESTORE", "Lỗi Listen: $e")
+                    return@addSnapshotListener
+                }
+
+                // Kiểm tra snapshots null an toàn
+                if (snapshots != null) {
+                    val newList = mutableListOf<InboxRespond>()
+                    for (doc in snapshots) {
+                        try {
+                            val item = doc.toObject(InboxRespond::class.java)
+                            // doc.id thường chính là roomName, ta gán lại cho chắc
+                            item.roomName = doc.id
+                            newList.add(item)
+                        } catch (ex: Exception) {
+                            Log.e("FIRESTORE", "Lỗi map dữ liệu: ${ex.message}")
+                        }
                     }
 
-                    val newList = mutableListOf<InboxRespond>()
-                    for (doc in snapshots!!) {
-                        val item = doc.toObject(InboxRespond::class.java)
-                        item.roomName = doc.id.toString()
-                        newList.add(item)
-                    }
-                    // Cập nhật toàn bộ Adapter
+                    // 3. Cập nhật UI trên Main Thread
                     conversationList.clear()
                     conversationList.addAll(newList)
                     adapter.notifyDataSetChanged()
                 }
-        } else {
-            Toast.makeText(this, "Người dùng chưa đăng nhập Firebase", Toast.LENGTH_SHORT).show()
-            Log.e("FIREBASE_AUTH", "Người dùng chưa đăng nhập Firebase")
-        }
+            }
     }
 
 }

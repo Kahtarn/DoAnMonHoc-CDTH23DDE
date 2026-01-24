@@ -126,8 +126,8 @@ class LoginActivity : AppCompatActivity() {
                         }
                         withContext(Dispatchers.Main) {
                             Log.d("token", data.data.accessToken)
-                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
-                                .show()
+//                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
+//                                .show()
                             val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                             intent.flags =
                                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

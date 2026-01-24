@@ -18,6 +18,7 @@ import com.example.clientchodientu.dto.auth.login.LoginResponse
 import com.example.clientchodientu.ui.home.HomeActivity
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.TokenManager
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,7 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
+        FirebaseApp.initializeApp(this)
         val btnForgotPassword = findViewById<Button>(R.id.btnForgotPassword)
 
         btnLogin = findViewById<Button>(R.id.btnLogin)

@@ -7,7 +7,7 @@ data class InboxRespond(
     val partnerId: Int =0,
     val partnerName: String = "",
     val avatarUrl: String? = null,
-    val lastMessage: String = "",
+    var lastMessage: String = "",
     val time: Any? = "",
     var roomName: String = "",
     val isRevoke : Boolean = false

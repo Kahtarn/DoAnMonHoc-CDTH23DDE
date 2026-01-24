@@ -17,6 +17,7 @@ import com.example.clientchodientu.adapter.AdapterChat
 import com.example.clientchodientu.dto.chat.InboxRespond
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
@@ -97,21 +98,50 @@ class ChatActivity : AppCompatActivity() {
                 // Kiểm tra snapshots null an toàn
                 if (snapshots != null) {
                     val newList = mutableListOf<InboxRespond>()
-                    for (doc in snapshots) {
-                        try {
-                            val item = doc.toObject(InboxRespond::class.java)
-                            // doc.id thường chính là roomName, ta gán lại cho chắc
-                            item.roomName = doc.id
-                            newList.add(item)
-                        } catch (ex: Exception) {
-                            Log.e("FIRESTORE", "Lỗi map dữ liệu: ${ex.message}")
+                    for (doc in snapshots.documentChanges) {
+                        when (doc.type) {
+                            DocumentChange.Type.ADDED -> {
+                                try {
+                                    val item = doc.document.toObject(InboxRespond::class.java)
+                                    item.roomName = doc.document.id
+                                    conversationList.add(0, item) // Thêm vào đầu danh sách
+                                    adapter.notifyItemInserted(0)
+                                } catch (ex: Exception) {
+                                    Log.e("FIRESTORE", " Lỗi: ${ex.message}")
+                                }
+                            }
+
+                            DocumentChange.Type.MODIFIED -> {
+                                try {
+                                    val item = doc.document.toObject(InboxRespond::class.java)
+                                    item.roomName = doc.document.id
+                                    val index =
+                                        conversationList.indexOfFirst { it.roomName == item.roomName }
+                                    if (index != -1) {
+                                        if (item.isRevoke) {
+                                            item.lastMessage = "Tin nhắn đã được thu hồi"
+                                        }
+                                        conversationList[index] = item
+                                        // Chỉ cập nhật đúng dòng đó trên giao diện, không load lại cả list
+                                        adapter.notifyItemChanged(index)
+                                    }
+                                } catch (ex: Exception) {
+                                    Log.e("FIRESTORE", " Lỗi: ${ex.message}")
+                                }
+                            }
+
+                            DocumentChange.Type.REMOVED -> {
+                                val index =
+                                    conversationList.indexOfFirst { it.roomName == doc.document.id }
+                                if (index != -1) {
+                                    conversationList.removeAt(index)
+                                    adapter.notifyItemRemoved(index)
+                                }
+                            } //
+
                         }
                     }
 
-                    // 3. Cập nhật UI trên Main Thread
-                    conversationList.clear()
-                    conversationList.addAll(newList)
-                    adapter.notifyDataSetChanged()
                 }
             }
     }

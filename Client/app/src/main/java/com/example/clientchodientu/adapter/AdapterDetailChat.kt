@@ -7,6 +7,34 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
 import com.example.clientchodientu.entity.ChatMessage
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+object TimeUtil {
+    public fun formatTime(timeObj: Any?): String {
+        if (timeObj == null) return ""
+
+        return try {
+            when (timeObj) {
+                // Trường hợp dữ liệu từ Firestore
+                is Timestamp -> {
+                    val date = timeObj.toDate()
+                    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    sdf.format(date)
+                }
+                // Trường hợp dữ liệu từ API (String)
+                is String -> {
+                    if (timeObj.length >= 16) timeObj.substring(11, 16) else timeObj
+                }
+
+                else -> timeObj.toString()
+            }
+        } catch (e: Exception) {
+            ""
+        }
+    }
+}
 
 class AdapterDetailChat(
     private val messageList: ArrayList<ChatMessage>,
@@ -86,7 +114,7 @@ class AdapterDetailChat(
 
     class SentMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtContent: TextView = view.findViewById(R.id.txtContent)
-
+        val txtTimeSend = view.findViewById<TextView>(R.id.txtTimeSend)
         fun bind(msg: ChatMessage) {
             if (msg.isRevoke) {
                 txtContent.text = "Tin nhắn đã được thu hồi"
@@ -95,12 +123,14 @@ class AdapterDetailChat(
                 txtContent.text = msg.content
                 txtContent.alpha = 1.0f
             }
+            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
         }
     }
 
     class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtSender: TextView = view.findViewById(R.id.txtSender)
         val txtContent: TextView = view.findViewById(R.id.txtContent)
+        val txtTimeReceive = view.findViewById<TextView>(R.id.txtTimeReceive)
 
         fun bind(msg: ChatMessage) {
             if (msg.isRevoke) {
@@ -110,6 +140,7 @@ class AdapterDetailChat(
                 txtContent.text = msg.content
                 txtContent.alpha = 1.0f
             }
+            txtTimeReceive.text = TimeUtil.formatTime(msg.createAt)
         }
     }
 

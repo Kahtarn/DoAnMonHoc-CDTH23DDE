@@ -137,7 +137,7 @@ public class ChatService {
         map.put("avatarUrl", partner.getAvatarUrl());
         map.put("lastMessage", content);
         map.put("time", time); // Trường này cực kỳ quan trọng để orderBy trên Android
-        map.put("roomId", roomName);
+        map.put("roomName", roomName);
         return map;
     }
 

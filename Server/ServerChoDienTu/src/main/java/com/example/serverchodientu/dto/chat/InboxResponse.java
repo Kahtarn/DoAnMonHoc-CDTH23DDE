@@ -9,7 +9,7 @@ public class InboxResponse {
     private String avatarUrl;
     private String lastMessage;
     private Timestamp time;
-    private Integer roomId;
+    private String roomName;
 
     public InboxResponse(Integer partnerId, String partnerName, String avatarUrl, String lastMessage, Timestamp time, Integer roomId) {
         this.partnerId = partnerId;
@@ -17,7 +17,7 @@ public class InboxResponse {
         this.avatarUrl = avatarUrl;
         this.lastMessage = lastMessage;
         this.time = time;
-        this.roomId = roomId;
+        this.roomName = roomName;
     }
 
     public InboxResponse() {
@@ -64,11 +64,11 @@ public class InboxResponse {
         this.time = time;
     }
 
-    public Integer getRoomId() {
-        return roomId;
+    public String getRoomId() {
+        return roomName;
     }
 
-    public void setRoomId(Integer roomId) {
-        this.roomId = roomId;
+    public void setRoomId(String roomId) {
+        this.roomName = roomId;
     }
 }

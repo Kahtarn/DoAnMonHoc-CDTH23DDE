@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -68,6 +69,18 @@ public class ChatController {
             return chatService.revokeMessage(request);
         } catch (Exception e) {
             return ApiResponse.error("Loi thu hoi tin nhan");
+        }
+    }
+
+    @GetMapping("/get-user-id")
+    public ApiResponse<Object> getUserId() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentEmail = authentication.getName();
+            User user = userRepository.findByEmail(currentEmail).orElseThrow(() -> new RuntimeException(("Khong tim thay user.")));
+            return ApiResponse.ok(Map.of("userId", user.getId()));
+        } catch (Exception e) {
+            return ApiResponse.error("Loi: " + e.getMessage());
         }
     }
 

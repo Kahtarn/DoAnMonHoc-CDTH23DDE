@@ -39,7 +39,7 @@ public class ProductService {
         this.categoriesRepo = categoriesRepo;
     }
     public List<Product> getAll() {
-        return productRepo.findAllByOrderByCreateAtDesc(0);
+        return productRepo.findAllByStatusOrderByCreateAtDesc(0);
     }
 
     public List<Product> searchProducts(String name, String sortType) {

@@ -67,7 +67,21 @@ public class ChatService {
         firestoreData.put("content", message.getContent());
         firestoreData.put("isRevoke", false);
         firestoreData.put("createAt", new Date());
+        if (message.getProductId() != null) {
+            firestoreData.put("type", "PRODUCT"); // Đánh dấu loại tin nhắn
 
+            // Lấy thông tin sản phẩm từ Repo để đóng gói Metadata
+            productRepository.findById(message.getProductId().intValue()).ifPresent(p -> {
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("productId", p.getId());
+                metadata.put("productName", p.getTitle());
+                metadata.put("productImage", p.getThumbnailUrl()); // Hoặc tên field ảnh của Boss
+                metadata.put("productPrice", p.getPrice());
+                firestoreData.put("metadata", metadata);
+            });
+        } else {
+            firestoreData.put("type", "TEXT");
+        }
         Firestore db = FirestoreClient.getFirestore();
 
         try {
@@ -85,7 +99,8 @@ public class ChatService {
                 // 4. Save to MySQL
                 saveToSqlDatabase(message, roomName);
 
-                updateFirestoreInbox(sender, receiver, message.getContent(), roomName);
+                String lastMsgContent = (message.getProductId() != null) ? "[Sản phẩm] " + message.getContent() : message.getContent();
+                updateFirestoreInbox(sender, receiver, lastMsgContent, roomName);
 
                 // 5. Send FCM Notification
                 // IMPORTANT: Use data payload instead of notification payload
@@ -156,6 +171,10 @@ public class ChatService {
         User receiverUser = usersRepository.findById(message.getReceiverId())
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
+        Product p = null;
+        if (message.getProductId() != null) {
+            p = productRepository.findById(message.getProductId().intValue()).orElse(null);
+        }
         Room room;
         if (roomOpt.isEmpty()) {
             room = new Room();
@@ -173,7 +192,7 @@ public class ChatService {
         Chat c = new Chat();
         c.setRoomId(room);
         c.setContent(message.getContent());
-//        c.setProductId(p);
+        c.setProductId(p);
         c.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         c.setSender(senderUser);
 
@@ -205,37 +224,23 @@ public class ChatService {
 
     public ApiResponse<String> revokeMessage(ChatRevokeRequest request) {
         // Update trường isRevoke = true tại đúng ID đó
+        Firestore db = FirestoreClient.getFirestore();
         try {
-            FirestoreClient.getFirestore()
-                    .collection("chat_rooms")
+
+            db.collection("chat_rooms")
                     .document(request.getRoomName())
                     .collection("messages")
                     .document(request.getMessageId()) // <--- ID vẫn y nguyên
                     .update("isRevoke", true);
             // lsy user id
-            Pattern p = Pattern.compile("\\d+"); // Tìm các cụm chữ số liên tiếp
-            Matcher m = p.matcher(request.getRoomName());
+            String roomName = request.getRoomName();
+            String[] userIds = roomName.replace("chat_user_", "").split("_user_");
 
-            List<Integer> ids = new ArrayList<>();
-            while (m.find()) {
-                ids.add(Integer.parseInt(m.group()));
+            for (String uid : userIds) {
+                db.collection("inboxes").document(uid)
+                        .collection("conversations").document(roomName)
+                        .update("isRevoke", true);
             }
-
-            String userId1 = ids.get(0).toString(); // 10
-            String userId2 = ids.get(1).toString(); // 105
-            FirestoreClient.getFirestore()
-                    .collection("inboxes")
-                    .document(userId1)
-                    .collection("conversations")
-                    .document(request.getRoomName()) // <--- ID vẫn y nguyên
-                    .update("isRevoke", true);
-
-            FirestoreClient.getFirestore()
-                    .collection("inboxes")
-                    .document(userId2)
-                    .collection("conversations")
-                    .document(request.getRoomName()) // <--- ID vẫn y nguyên
-                    .update("isRevoke", true);
         } catch (Exception e) {
             return ApiResponse.error("Thu hoi tin nhan that bai, " + e.getMessage());
         }

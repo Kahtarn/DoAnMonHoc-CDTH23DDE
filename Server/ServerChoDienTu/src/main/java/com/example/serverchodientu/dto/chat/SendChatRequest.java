@@ -1,5 +1,7 @@
 package com.example.serverchodientu.dto.chat;
 
+import com.example.serverchodientu.entity.Product;
+
 import java.sql.Timestamp;
 
 
@@ -8,14 +10,17 @@ public class SendChatRequest {
     private Integer senderId;
     private Integer receiverId;
     private String content;
+    private String type;
+    private Long productId;
     private Timestamp createdAt;
 
-
-    public SendChatRequest(String id, Integer senderId, Integer receiverId, String content, Integer productId, Timestamp createdAt) {
+    public SendChatRequest(String id, Integer senderId, Integer receiverId, String content, String type, Long productId, Timestamp createdAt) {
         this.id = id;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.content = content;
+        this.type = type;
+        this.productId = productId;
         this.createdAt = createdAt;
     }
 
@@ -53,6 +58,22 @@ public class SendChatRequest {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public Timestamp getCreatedAt() {

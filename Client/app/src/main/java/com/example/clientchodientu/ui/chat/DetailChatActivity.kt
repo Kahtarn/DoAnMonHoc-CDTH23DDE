@@ -23,8 +23,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.TokenManager
 import com.example.clientchodientu.adapter.AdapterDetailChat
 import com.example.clientchodientu.adapter.OnMessageLongClickListener
 import com.example.clientchodientu.dto.chat.RevokeMessageRespond
@@ -53,7 +53,6 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
     private lateinit var db: FirebaseFirestore
     private val messageList = ArrayList<ChatMessage>()
     private lateinit var chatAdapter: AdapterDetailChat
-
     private lateinit var rcvChat: RecyclerView
     private lateinit var roomName: String
     private var myId by Delegates.notNull<Int>()
@@ -71,7 +70,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
             Log.e("notification", "Notification permission denied")
         }
     }
-    private var producId by Delegates.notNull<Int>()
+    private var productId by Delegates.notNull<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,14 +83,16 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         rcvChat = findViewById(R.id.rcvChat)
         askNotificationPermission()
 
-        producId = intent.getIntExtra("PRODUCT_ID", -1)
+        productId = intent.getIntExtra("PRODUCT_ID", -1)
         roomName = intent.getStringExtra("ROOM_NAME") ?: "general"
         receiverId = intent.getIntExtra("PARTNER_ID", 0)
         receiverName = intent.getStringExtra("PARTNER_NAME") ?: "Người dùng"
+        // already perfect dont try to change pls
         myId = intent.getStringExtra("MY_ID")?.toInt() ?: 0
         isFirstTimeChat = intent.getBooleanExtra("IS_FIRST_TIME_CHAT", false)
         Log.d("DetailChatActivity", "Room Name: $roomName, Receiver ID: $receiverId")
-
+        Log.d("DetailChat_MyId", myId.toString())
+        Log.d("DetailChat_ProductId_FromIntent", productId.toString())
         db = FirebaseFirestore.getInstance()
 // gan vao tieu de ten nguoi dang chat voi minh
         findViewById<TextView>(R.id.txtName).text = receiverName
@@ -116,19 +117,20 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         // Sự kiện nút Gửi Tin Nhắn Chat
         findViewById<ImageButton>(R.id.btnSendChat).setOnClickListener {
             val edtMessage = findViewById<EditText>(R.id.edtMessage)
-            val content = edtMessage.text.toString()
+            val content = edtMessage.text.toString().trim() // Thêm trim() để xóa khoảng trắng thừa
+
             if (content.isNotEmpty()) {
-                if (isFirstTimeChat && producId != -1) {
-                    lifecycleScope.launch {
-                        sendMessage(content, producId)
-                        isFirstTimeChat = false
+                lifecycleScope.launch {
+                    if (isFirstTimeChat && productId != -1) {
+                        // Lần đầu nhắn từ màn hình SP: Gửi kèm productId
+                        sendMessage(content, productId)
+                        isFirstTimeChat = false // Tắt cờ ngay lập tức
+                    } else {
+                        // Các lần tiếp theo hoặc vào từ danh sách chat: Gửi text thuần
+                        sendMessage(content, null)
                     }
-                } else {
-                    lifecycleScope.launch {
-                        sendMessage(content, -1)
-                    }
+                    edtMessage.setText("")
                 }
-                edtMessage.setText("")
             }
         }
         findViewById<AppCompatImageButton>(R.id.btnBackChatDetail).setOnClickListener {
@@ -158,56 +160,37 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
     }
 
     private fun listenToMessages() {
-        // Truy vấn vào Collection chứa tin nhắn của Room đó
-        // Sắp xếp theo thời gian để tin cũ lên trên, tin mới ở dưới
         val query = db.collection("chat_rooms").document(roomName)
             .collection("messages")
             .orderBy("createAt", Query.Direction.ASCENDING)
 
-        // addSnapshotListener: Hàm này sẽ chạy NGAY LẬP TỨC khi có bất kỳ thay đổi nào trên DB
         firestoreListener = query.addSnapshotListener { snapshots, e ->
-            if (e != null) {
-                Log.e("Chat", "Listen failed.", e)
-                return@addSnapshotListener
-            }
+            if (e != null) return@addSnapshotListener
 
             if (snapshots != null) {
-                // documentChanges: Chỉ chứa những thay đổi (Thêm/Sửa/Xóa)
                 for (dc in snapshots.documentChanges) {
+                    val message = dc.document.toObject(ChatMessage::class.java)
+                    message.id = dc.document.id
+
+                    // Logic xử lý thu hồi trước khi cập nhật Adapter
+                    if (message.isRevoke) {
+                        message.content = "Tin nhắn đã được thu hồi"
+                    }
+
                     when (dc.type) {
-                        // Nếu có tin nhắn MỚI được thêm vào
                         DocumentChange.Type.ADDED -> {
-                            // Convert Document thành Object Message
-                            val newMessage = dc.document.toObject(ChatMessage::class.java)
-                            newMessage.id = dc.document.id
-                            Log.d("fire store new message", newMessage.toString())
-
-                            if (newMessage.isRevoke) {
-                                newMessage.content = "Tin nhắn đã được thu hồi"
-                            }
-                            // Thêm vào Adapter
-                            chatAdapter.addMessage(newMessage)
-
-                            // Tự động cuộn xuống tin nhắn cuối cùng
+                            chatAdapter.addMessage(message)
                             rcvChat.smoothScrollToPosition(messageList.size - 1)
                         }
 
                         DocumentChange.Type.MODIFIED -> {
-                            // Convert Document thành Object Message
-                            val modifiedMessage = dc.document.toObject(ChatMessage::class.java)
-                            modifiedMessage.id = dc.document.id
-                            Log.d("fire store change", modifiedMessage.toString())
+                            // Khi Server đổi isRevoke = true, Firestore bắn sự kiện MODIFIED vào đây
+                            chatAdapter.updateMessage(message)
+                            // Hàm updateMessage trong Adapter phải tìm đúng ID và thay thế object cũ
+                        }
 
-                            if (modifiedMessage.isRevoke) {
-                                modifiedMessage.content = "Tin nhắn đã được thu hồi"
-                            }
-                            // Thêm vào Adapter
-                            chatAdapter.updateMessage(modifiedMessage)
-
-                            // Tự động cuộn xuống tin nhắn cuối cùng
-                            rcvChat.smoothScrollToPosition(messageList.size - 1)
-                        } // Xử lý nếu cần sửa tin
-                        DocumentChange.Type.REMOVED -> {}  // Xử lý nếu cần thu hồi tin
+                        DocumentChange.Type.REMOVED -> { /* Xử lý nếu cần */
+                        }
                     }
                 }
             }
@@ -263,7 +246,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         return super.dispatchTouchEvent(event)
     }
 
-    suspend fun sendMessage(message: String, productId: Int) {
+    suspend fun sendMessage(message: String, productId: Int?) {
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val gson = Gson()
 
@@ -282,7 +265,6 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
 
         Log.d("Chat", "ID do Firestore sinh ra là: $firestoreGeneratedId")
 
-        producId = if (producId > 0) producId else -1
         // cho nay
         val sendMessageRequest =
             SendMessageRequest(
@@ -290,12 +272,13 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
                 receiverId,
                 message,
                 false,
-                producId
+                productId
             )
         val jsonString = gson.toJson(sendMessageRequest)
         val requestBody = jsonString.toRequestBody(mediaType)
 
-        Log.d("ACCESS_TOKEN", TokenManager.getToken().toString())
+        val token = TokenManager.getToken()
+        Log.d("ACCESS_TOKEN", "Token hien tai: $token")
 
         val request = Request.Builder()
             .url(sendMessageUrl)
@@ -303,7 +286,6 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
             .build()
 
         withContext(Dispatchers.IO) {
-            val client = OkHttpClient()
             val respond = ApiClient.getClient(this@DetailChatActivity).newCall(request).execute()
 
             if (respond.isSuccessful) {

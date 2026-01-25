@@ -5,5 +5,5 @@ data class SendMessageRequest(
     var receiverId: Int,
     var content: String,
     var isRevoke: Boolean,
-    var productId: Int
+    var productId: Int?
 )

@@ -4,5 +4,5 @@ data class ProductMetadata(
     val productId: Int = 0,
     val productName: String = "",
     val productImage: String = "",
-    val productPrice: Double = 0.0
+    val productPrice: String = ""
 )

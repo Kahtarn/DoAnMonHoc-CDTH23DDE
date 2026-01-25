@@ -18,11 +18,11 @@ import com.example.clientchodientu.dto.product.ProductResponse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.entity.Product
 import com.example.clientchodientu.ui.product.ProductDetailActivity
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.TokenManager
 import kotlinx.coroutines.launch
 import kotlin.toString
 import com.example.clientchodientu.ui.user.PostManagerActivity
-import com.example.clientchodientu.untils.ApiClient
+import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.ui.chat.ChatActivity
 import com.example.exampletemplate.AdapterCategory
 import com.google.android.material.bottomnavigation.BottomNavigationView

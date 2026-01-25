@@ -1,6 +1,7 @@
 package com.example.clientchodientu.dto.chat
 
-import com.google.firebase.database.PropertyName
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.PropertyName
 
 data class ChatMessage(
     var id: String = "",
@@ -10,6 +11,6 @@ data class ChatMessage(
     @get:PropertyName("isRevoke")
     @set:PropertyName("isRevoke")
     var isRevoke: Boolean = false,
-    val createAt: Long = 0,
+    val createAt: Timestamp = Timestamp.now(),
     val metadata: ProductMetadata? = null // Chứa thông tin sản phẩm
 )

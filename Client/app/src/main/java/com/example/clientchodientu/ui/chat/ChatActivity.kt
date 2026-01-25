@@ -4,8 +4,6 @@ import com.example.clientchodientu.R
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
@@ -14,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.TokenManager
 import com.example.clientchodientu.adapter.AdapterChat
 import com.example.clientchodientu.dto.chat.InboxRespond
 import com.google.firebase.FirebaseApp

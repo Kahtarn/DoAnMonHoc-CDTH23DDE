@@ -9,10 +9,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import android.content.Context
 import com.example.clientchodientu.ui.chat.DetailChatActivity
 import android.R.drawable.ic_dialog_info
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.TokenManager
 import kotlin.apply
 import kotlin.collections.forEach
 import kotlin.collections.isNotEmpty

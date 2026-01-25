@@ -1,42 +1,18 @@
 package com.example.clientchodientu.adapter
 
+import android.graphics.Color
+import android.graphics.Typeface
 import android.util.Log
 import android.view.*
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
 import com.example.clientchodientu.dto.chat.ChatMessage
-import com.google.firebase.Timestamp
-import java.text.SimpleDateFormat
-import java.util.Locale
-
-object TimeUtil {
-    public fun formatTime(timeObj: Any?): String {
-        if (timeObj == null) return ""
-
-        return try {
-            when (timeObj) {
-                // Trường hợp dữ liệu từ Firestore
-                is Timestamp -> {
-                    val date = timeObj.toDate()
-                    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-                    sdf.format(date)
-                }
-                // Trường hợp dữ liệu từ API (String)
-                is String -> {
-                    if (timeObj.length >= 16) timeObj.substring(11, 16) else timeObj
-                }
-
-                else -> timeObj.toString()
-            }
-        } catch (e: Exception) {
-            ""
-        }
-    }
-}
+import com.example.clientchodientu.untils.time.TimeUtil
 
 class AdapterDetailChat(
     private val messageList: ArrayList<ChatMessage>,
@@ -140,7 +116,7 @@ class AdapterDetailChat(
         fun bind(msg: ChatMessage) {
             if (msg.isRevoke) {
                 txtContent.text = "Tin nhắn đã được thu hồi"
-                txtContent.alpha = 0.5f // Làm mờ đi chút cho giống thật
+                txtContent.alpha = 0.5f
             } else {
                 txtContent.text = msg.content
                 txtContent.alpha = 1.0f
@@ -155,20 +131,42 @@ class AdapterDetailChat(
         val txtProductPrice: TextView = view.findViewById(R.id.txtProductPrice)
         val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
         val txtTimeSend: TextView = view.findViewById(R.id.txtTimeSend)
-
+        val divider: View = view.findViewById(R.id.divider_me)
+        val layoutProduct = itemView.findViewById<LinearLayout>(R.id.layoutProductMe)
         fun bind(msg: ChatMessage) {
-            txtContent.text = msg.content
-            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
+            if (msg.isRevoke) {
+                imgProduct.visibility = View.GONE
+                txtProductName.visibility = View.GONE
+                txtProductPrice.visibility = View.GONE
+                if (divider != null) divider.visibility = View.GONE
 
-            // Bốc Metadata từ Map (Firestore trả về Map<String, Any>)
-            val meta = msg.metadata
-            if (meta != null) {
-                txtProductName.text = meta.productName as? String ?: "Sản phẩm"
-                txtProductPrice.text = "${meta.productPrice}đ"
+                txtContent.text = "Tin nhắn đã được thu hồi"
 
-                val imgUrl = meta.productImage as? String
-                Glide.with(itemView.context).load(imgUrl).into(imgProduct)
+                layoutProduct.visibility = View.VISIBLE
+                layoutProduct.alpha = 0.5f
+            } else {
+                imgProduct.visibility = View.VISIBLE
+                txtProductName.visibility = View.VISIBLE
+                txtProductPrice.visibility = View.VISIBLE
+                if (divider != null) divider.visibility = View.VISIBLE
+
+                txtContent.text = msg.content
+                layoutProduct.alpha = 1.0f
+
+                // Bốc Metadata từ Map (Firestore trả về Map<String, Any>)
+                val meta = msg.metadata
+                if (meta != null) {
+                    txtProductName.text = meta.productName as? String ?: "Sản phẩm"
+                    txtProductPrice.text = "${meta.productPrice}đ"
+
+                    val imgUrl = meta.productImage as? String
+                    Glide.with(itemView.context).load(imgUrl)
+                        .placeholder(R.drawable.ic_placeholder_product).into(imgProduct)
+                }
+
+                itemView.alpha = 1.0f
             }
+            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
         }
     }
 
@@ -194,20 +192,39 @@ class AdapterDetailChat(
         val txtProductPrice: TextView = view.findViewById(R.id.txtProductPrice)
         val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
         val txtTimeSend: TextView = view.findViewById(R.id.txtTimeSend)
-
+        val divider: View = view.findViewById(R.id.divider_other)
+        val layoutProduct = itemView.findViewById<LinearLayout>(R.id.layoutChatProductOther)
         fun bind(msg: ChatMessage) {
-            txtContent.text = msg.content
-            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
+            if (msg.isRevoke) {
 
-            // Bốc Metadata từ Map (Firestore trả về Map<String, Any>)
-            val meta = msg.metadata
-            if (meta != null) {
-                txtProductName.text = meta.productName as? String ?: "Sản phẩm"
-                txtProductPrice.text = "${meta.productPrice}đ"
+                imgProduct.visibility = View.GONE
+                txtProductName.visibility = View.GONE
+                txtProductPrice.visibility = View.GONE
+                divider.visibility = View.GONE
 
-                val imgUrl = meta.productImage as? String
-                Glide.with(itemView.context).load(imgUrl).into(imgProduct)
+                txtContent.text = "Tin nhắn đã được thu hồi"
+                layoutProduct.visibility = View.VISIBLE
+                layoutProduct.alpha = 0.5f
+            } else {
+                imgProduct.visibility = View.VISIBLE
+                txtProductName.visibility = View.VISIBLE
+                txtProductPrice.visibility = View.VISIBLE
+                if (divider != null) divider.visibility = View.VISIBLE
+
+                txtContent.text = msg.content
+                // Bốc Metadata từ Map (Firestore trả về Map<String, Any>)
+                val meta = msg.metadata
+                if (meta != null) {
+                    txtProductName.text = meta.productName as? String ?: "Sản phẩm"
+                    txtProductPrice.text = "${meta.productPrice}đ"
+
+                    val imgUrl = meta.productImage as? String
+                    Glide.with(itemView.context).load(imgUrl).into(imgProduct)
+                }
+
+                layoutProduct.alpha = 1.0f
             }
+            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
         }
     }
 

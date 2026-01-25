@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +28,13 @@ import com.example.clientchodientu.adapter.ProductImageAdapter
 import com.example.clientchodientu.entity.ProductDetailData
 import com.example.clientchodientu.ui.auth.ImageViewerActivity
 import com.example.clientchodientu.ui.chat.DetailChatActivity
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.ApiResponse
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.ApiResponse
+import com.example.clientchodientu.untils.token.TokenManager
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -90,7 +95,7 @@ class ProductDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_detail)
-
+        TokenManager.init(this)
         getIntentData()
 
         initViews()
@@ -273,15 +278,21 @@ class ProductDetailActivity : AppCompatActivity() {
         intent.putExtra("IS_FIRST_TIME_CHAT", true)
 
         // Tính toán RoomName ngay tại đây để bên kia có cái dùng luôn
-        val myIdInt =
-            TokenManager.getUserId(
-                this,
-                TokenManager.getToken().toString()
-            ) // Giả sử Boss có hàm lấy ID của mình
-        val ids = listOf(myIdInt.toString(), sellerId.toString()).sorted()
-        val calculatedRoomName = "chat_user_${ids[0]}_user_${ids[1]}"
-        intent.putExtra("ROOM_NAME", calculatedRoomName)
-        startActivity(intent)
+
+        lifecycleScope.launch {
+            val myId =
+                TokenManager.getUserId(
+                    this@ProductDetailActivity
+                ) // Giả sử Boss có hàm lấy ID của mình
+            val ids = listOf(myId.toString(), sellerId.toString()).sorted()
+            val calculatedRoomName = "chat_user_${ids[0]}_user_${ids[1]}"
+            intent.putExtra("MY_ID", myId.toString())
+            intent.putExtra("ROOM_NAME", calculatedRoomName)
+            withContext(Dispatchers.Main) {
+                Log.d("ProductD_MyId", myId.toString())
+                startActivity(intent)
+            }
+        }
     }
 
 

@@ -1,4 +1,4 @@
-package com.example.clientchodientu.untils
+package com.example.clientchodientu.untils.token
 
 import android.content.Context
 import android.content.Intent

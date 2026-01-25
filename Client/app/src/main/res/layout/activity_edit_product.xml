@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA">
@@ -31,6 +33,7 @@
             app:layout_constraintTop_toBottomOf="@id/tvEditHeader">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapSentences" />
@@ -63,6 +66,7 @@
             app:suffixText="đ">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tvPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
@@ -78,11 +82,12 @@
             app:layout_constraintTop_toBottomOf="@id/inputPrice">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
-                android:minLines="5"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:minLines="5" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton

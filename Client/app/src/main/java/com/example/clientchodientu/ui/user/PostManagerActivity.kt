@@ -1,5 +1,6 @@
 package com.example.clientchodientu.ui.user
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.TextView
@@ -16,6 +17,7 @@ import com.example.clientchodientu.adapter.AdapterSellingProduct
 import com.example.clientchodientu.dto.product.DeleteProduct
 import com.example.clientchodientu.dto.product.PostManagerResponse
 import com.example.clientchodientu.entity.Product
+import com.example.clientchodientu.ui.edit.EditProduct
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.TokenManager
 import com.google.gson.GsonBuilder
@@ -201,7 +203,12 @@ class PostManagerActivity : AppCompatActivity() {
         }
 
         adapter.onEditClick = { product ->
-
+            val intent = Intent(this, EditProduct::class.java)
+            intent.putExtra("title",product.title)
+            intent.putExtra("category",product.category?.name)
+            intent.putExtra("price",product.price.toString())
+            intent.putExtra("description",product.description)
+            startActivity(intent)
         }
         adapter.onSellingClick ={ product ->
             lifecycleScope.launch {

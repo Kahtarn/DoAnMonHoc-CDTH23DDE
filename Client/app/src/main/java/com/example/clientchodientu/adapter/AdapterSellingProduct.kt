@@ -47,7 +47,7 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
 
         holder.more.setOnClickListener { view ->
             val popup = androidx.appcompat.widget.PopupMenu(view.context, view)
-            popup.menuInflater.inflate(R.menu.more_management_menu, popup.menu) // Thay bằng tên file menu của bạn
+            popup.menuInflater.inflate(R.menu.more_management_menu, popup.menu)
 
             popup.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {

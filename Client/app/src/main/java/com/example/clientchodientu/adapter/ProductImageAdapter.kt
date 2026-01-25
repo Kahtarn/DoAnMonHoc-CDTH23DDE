@@ -14,7 +14,7 @@ class ProductImageAdapter(
 
     inner class ImageViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.imgProduct)
+        val imageView: ImageView = itemView.findViewById(R.id.imgProductM)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
@@ -24,14 +24,19 @@ class ProductImageAdapter(
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+        val path = imageList[position]
+        val BASE_URL = "http://10.0.2.2:8080"
+        val listIMGUrl = if (path.startsWith("http")) path else BASE_URL + path
+
         Glide.with(holder.imageView.context)
-            .load(imageList[position])
-            .placeholder(R.drawable.ic_launcher_foreground) // optional
+            .load(listIMGUrl)
+            .placeholder(R.drawable.ic_launcher_background)
             .error(R.drawable.ic_launcher_foreground)
-            .fitCenter()// optional
+            .centerCrop()
             .into(holder.imageView)
+
         holder.itemView.setOnClickListener {
-            onItemClick(position) // Truyền vị trí ảnh được click ra ngoài
+            onItemClick(position)
         }
     }
 

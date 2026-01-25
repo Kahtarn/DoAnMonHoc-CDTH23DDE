@@ -92,7 +92,6 @@ class AdapterDetailChat(
                 holder.itemView.setOnLongClickListener(null)
             }
         } else if (holder is ReceivedMessageViewHolder) {
-            holder.txtSender.text = receiverName
             holder.bind(msg)
 // is me = false, chi co copy khong co thu hoi
             if (!msg.isRevoke) {
@@ -128,7 +127,6 @@ class AdapterDetailChat(
     }
 
     class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val txtSender: TextView = view.findViewById(R.id.txtSender)
         val txtContent: TextView = view.findViewById(R.id.txtContent)
         val txtTimeReceive = view.findViewById<TextView>(R.id.txtTimeReceive)
 

@@ -10,15 +10,6 @@
     android:paddingBottom="10dp">
 
     <TextView
-        android:id="@+id/txtSender"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="4dp"
-        android:text="Người gửi"
-        android:textSize="12sp"
-        android:textColor="#757575" />
-
-    <TextView
         android:id="@+id/txtContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,6 +24,6 @@
         android:id="@+id/txtTimeReceive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="20:30" />
 
 </LinearLayout>

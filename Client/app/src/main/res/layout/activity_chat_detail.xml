@@ -21,15 +21,16 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/tvDetailTitle"
+        android:id="@+id/txtName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Phòng Chat"
+        android:text="User 123"
         android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.321"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,7 +40,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="16dp"
         android:background="#F0F0F0"
-        app:layout_constraintTop_toBottomOf="@id/tvDetailTitle" />
+        app:layout_constraintTop_toBottomOf="@id/txtName" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvChat"

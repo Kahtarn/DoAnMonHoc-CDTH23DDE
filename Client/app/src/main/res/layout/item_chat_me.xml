@@ -24,6 +24,6 @@
         android:id="@+id/txtTimeSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="20:30" />
 
 </LinearLayout>

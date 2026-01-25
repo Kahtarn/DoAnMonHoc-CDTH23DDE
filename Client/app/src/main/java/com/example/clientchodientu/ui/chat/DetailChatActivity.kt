@@ -87,6 +87,8 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         Log.d("DetailChatActivity", "Room Name: $roomName, Receiver ID: $receiverId")
 
         db = FirebaseFirestore.getInstance()
+// gan vao tieu de ten nguoi dang chat voi minh
+        findViewById<TextView>(R.id.txtName).text = receiverName
 
         setupRecyclerView()
         listenToMessages()

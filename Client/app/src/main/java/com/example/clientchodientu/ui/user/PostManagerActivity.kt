@@ -1,6 +1,7 @@
 package com.example.clientchodientu.ui.user
 
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +27,7 @@ import okhttp3.Request
 class PostManagerActivity : AppCompatActivity() {
     private lateinit var rcv : RecyclerView
     private lateinit var selling : TextView
+    private lateinit var back : ImageButton
     private val gson = GsonBuilder().create()
     private lateinit var sold : TextView
     private lateinit var token : String
@@ -45,6 +47,10 @@ class PostManagerActivity : AppCompatActivity() {
         rcv = findViewById(R.id.rvPosts)
         selling = findViewById(R.id.btnSelling)
         sold = findViewById(R.id.btnSold)
+        back = findViewById(R.id.btnBack)
+        back.setOnClickListener {
+            finish()
+        }
         TokenManager.init(this)
         token = TokenManager.getToken().toString()
         rcv.layoutManager = LinearLayoutManager(this)
@@ -140,6 +146,38 @@ class PostManagerActivity : AppCompatActivity() {
             }
         }
     }
+    private suspend fun markasSold(productId: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                val url = "http://10.0.2.2:8080/api/product/$productId/mark-as-sold"
+                val body = okhttp3.RequestBody.create(null, "")
+                val request = Request.Builder()
+                    .url(url)
+                    .patch(body)
+                    .build()
+
+                val response = ApiClient.getClient(this@PostManagerActivity).newCall(request).execute()
+                val responseBody = response.body?.string()
+                val apiResponse = gson.fromJson(responseBody, DeleteProduct::class.java)
+                val success = apiResponse.success
+                val message = apiResponse.message
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && success) {
+                        Toast.makeText(this@PostManagerActivity, message, Toast.LENGTH_SHORT).show()
+                        loadSellingProduct()
+                    } else {
+                        val errorMsg = apiResponse?.message ?: "Bán thất bại"
+                        Toast.makeText(this@PostManagerActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@PostManagerActivity, "Lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     private fun showDeleteDialog(productId: Int) {
         androidx.appcompat.app.AlertDialog.Builder(this)
@@ -164,6 +202,11 @@ class PostManagerActivity : AppCompatActivity() {
 
         adapter.onEditClick = { product ->
 
+        }
+        adapter.onSellingClick ={ product ->
+            lifecycleScope.launch {
+                markasSold(product.id)
+            }
         }
     }
 

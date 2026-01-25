@@ -30,7 +30,7 @@ import com.example.clientchodientu.adapter.OnMessageLongClickListener
 import com.example.clientchodientu.dto.chat.RevokeMessageRespond
 import com.example.clientchodientu.dto.chat.RevokeRequest
 import com.example.clientchodientu.dto.chat.SendMessageRequest
-import com.example.clientchodientu.entity.ChatMessage
+import com.example.clientchodientu.dto.chat.ChatMessage
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -59,8 +59,9 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
     private var myId by Delegates.notNull<Int>()
     private var receiverId by Delegates.notNull<Int>()
     private lateinit var receiverName: String
+    private lateinit var sendMessageUrl: String
+    private var isFirstTimeChat by Delegates.notNull<Boolean>()
     private var firestoreListener: ListenerRegistration? = null
-
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -70,20 +71,25 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
             Log.e("notification", "Notification permission denied")
         }
     }
+    private var producId by Delegates.notNull<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_chat_detail)
+        sendMessageUrl = "http://10.0.2.2:8080/api/chat/send-private"
+
         TokenManager.init(this)
 
         rcvChat = findViewById(R.id.rcvChat)
         askNotificationPermission()
 
+        producId = intent.getIntExtra("PRODUCT_ID", -1)
         roomName = intent.getStringExtra("ROOM_NAME") ?: "general"
         receiverId = intent.getIntExtra("PARTNER_ID", 0)
         receiverName = intent.getStringExtra("PARTNER_NAME") ?: "Người dùng"
         myId = intent.getStringExtra("MY_ID")?.toInt() ?: 0
+        isFirstTimeChat = intent.getBooleanExtra("IS_FIRST_TIME_CHAT", false)
         Log.d("DetailChatActivity", "Room Name: $roomName, Receiver ID: $receiverId")
 
         db = FirebaseFirestore.getInstance()
@@ -112,10 +118,17 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
             val edtMessage = findViewById<EditText>(R.id.edtMessage)
             val content = edtMessage.text.toString()
             if (content.isNotEmpty()) {
-                lifecycleScope.launch {
-                    sendMessage(content)
-                    edtMessage.setText("")
+                if (isFirstTimeChat && producId != -1) {
+                    lifecycleScope.launch {
+                        sendMessage(content, producId)
+                        isFirstTimeChat = false
+                    }
+                } else {
+                    lifecycleScope.launch {
+                        sendMessage(content, -1)
+                    }
                 }
+                edtMessage.setText("")
             }
         }
         findViewById<AppCompatImageButton>(R.id.btnBackChatDetail).setOnClickListener {
@@ -250,7 +263,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         return super.dispatchTouchEvent(event)
     }
 
-    suspend fun sendMessage(message: String) {
+    suspend fun sendMessage(message: String, productId: Int) {
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val gson = Gson()
 
@@ -269,17 +282,23 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
 
         Log.d("Chat", "ID do Firestore sinh ra là: $firestoreGeneratedId")
 
-
+        producId = if (producId > 0) producId else -1
         // cho nay
         val sendMessageRequest =
-            SendMessageRequest(firestoreGeneratedId, receiverId, message, false)
+            SendMessageRequest(
+                firestoreGeneratedId,
+                receiverId,
+                message,
+                false,
+                producId
+            )
         val jsonString = gson.toJson(sendMessageRequest)
         val requestBody = jsonString.toRequestBody(mediaType)
 
         Log.d("ACCESS_TOKEN", TokenManager.getToken().toString())
 
         val request = Request.Builder()
-            .url("http://10.0.2.2:8080/api/chat/send-private")
+            .url(sendMessageUrl)
             .post(requestBody)
             .build()
 

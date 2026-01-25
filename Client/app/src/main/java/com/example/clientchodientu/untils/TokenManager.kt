@@ -76,6 +76,35 @@ object TokenManager {
         })
     }
 
+    fun getUserId(context: Context, token: String) {
+        val client = OkHttpClient()
+        val url = "http://10.0.2.2:8080/api/chat/set-fcm-token"
+
+        // Tạo JSON chuẩn
+        val jsonObject = JSONObject()
+        jsonObject.put("token", token)
+
+        val requestBody = jsonObject.toString().toRequestBody("application/json".toMediaType())
+        val request = Request.Builder().url(url).post(requestBody).build()
+
+        // Chạy bất đồng bộ để không treo UI
+        ApiClient.getClient(context).newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: okio.IOException) {
+                Log.e("FCM", "Lỗi mạng khi gửi token", e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    Log.d("FCM", "Đã cập nhật token lên Server thành công!")
+                } else {
+                    Log.e("FCM", "Server trả về lỗi: ${response.code}")
+                }
+                response.close()
+            }
+        })
+    }
+
+
     fun clear() {
         prefs.edit().clear().apply()
     }

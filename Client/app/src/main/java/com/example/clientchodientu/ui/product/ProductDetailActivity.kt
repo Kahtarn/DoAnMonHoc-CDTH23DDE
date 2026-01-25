@@ -25,8 +25,10 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.ProductImageAdapter
 import com.example.clientchodientu.entity.ProductDetailData
 import com.example.clientchodientu.ui.auth.ImageViewerActivity
+import com.example.clientchodientu.ui.chat.DetailChatActivity
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.ApiResponse
+import com.example.clientchodientu.untils.TokenManager
 import com.google.gson.Gson
 import okhttp3.Call
 import okhttp3.Callback
@@ -257,12 +259,31 @@ class ProductDetailActivity : AppCompatActivity() {
 //            .placeholder(R.drawable.ic_launcher_foreground)
 //            .into(ivSellerAvatar)
         setupImageSlider(data.images)
+        // khanh
+        this.sellerId = sellerObj.id
     }
 
 
     private fun handleChatAction() {
-        Toast.makeText(this, "Đang mở chat...", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "Đang mở chat...", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, DetailChatActivity::class.java)
+        intent.putExtra("PRODUCT_ID", currentProductId)
+        intent.putExtra("PARTNER_ID", sellerId)
+        intent.putExtra("PARTNER_NAME", tvSellerName.text.toString())
+        intent.putExtra("IS_FIRST_TIME_CHAT", true)
+
+        // Tính toán RoomName ngay tại đây để bên kia có cái dùng luôn
+        val myIdInt =
+            TokenManager.getUserId(
+                this,
+                TokenManager.getToken().toString()
+            ) // Giả sử Boss có hàm lấy ID của mình
+        val ids = listOf(myIdInt.toString(), sellerId.toString()).sorted()
+        val calculatedRoomName = "chat_user_${ids[0]}_user_${ids[1]}"
+        intent.putExtra("ROOM_NAME", calculatedRoomName)
+        startActivity(intent)
     }
+
 
     private fun toggleFavorite() {
         isFavorited = !isFavorited

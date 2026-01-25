@@ -77,7 +77,6 @@ class ChatActivity : AppCompatActivity() {
             intent.putExtra("MY_ID", myId)
             intent.putExtra("PARTNER_NAME", conversation.partnerName)
             startActivity(intent)
-
         }
         rvInbox.layoutManager = LinearLayoutManager(this)
         rvInbox.adapter = adapter

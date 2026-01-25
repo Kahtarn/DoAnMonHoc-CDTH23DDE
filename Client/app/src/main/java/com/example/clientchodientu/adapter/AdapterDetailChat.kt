@@ -2,11 +2,13 @@ package com.example.clientchodientu.adapter
 
 import android.util.Log
 import android.view.*
+import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
-import com.example.clientchodientu.entity.ChatMessage
+import com.example.clientchodientu.dto.chat.ChatMessage
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -45,8 +47,10 @@ class AdapterDetailChat(
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        const val VIEW_TYPE_SENT = 1
-        const val VIEW_TYPE_RECEIVED = 2
+        const val VIEW_TYPE_SENT_TEXT = 1
+        const val VIEW_TYPE_RECEIVED_TEXT = 2
+        const val VIEW_TYPE_SENT_PRODUCT = 3
+        const val VIEW_TYPE_RECEIVED_PRODUCT = 4
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -55,56 +59,75 @@ class AdapterDetailChat(
             "ChatDebug",
             "MsgContent: ${message.content} | Sender: ${message.senderId} | MyId: $myId"
         )
-        return if (message.senderId == myId) {
-            VIEW_TYPE_SENT // Là tin của mình -> trả về 1
+        val isMe = message.senderId == myId
+
+        return if (message.type == "PRODUCT") {
+            if (isMe) VIEW_TYPE_SENT_PRODUCT else VIEW_TYPE_RECEIVED_PRODUCT
         } else {
-            VIEW_TYPE_RECEIVED // Là tin người khác -> trả về 2
+            if (isMe) VIEW_TYPE_SENT_TEXT else VIEW_TYPE_RECEIVED_TEXT
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == VIEW_TYPE_SENT) {
-            val view =
-                LayoutInflater.from(parent.context).inflate(R.layout.item_chat_me, parent, false)
-            SentMessageViewHolder(view)
-        } else {
-            val view =
-                LayoutInflater.from(parent.context).inflate(R.layout.item_chat_other, parent, false)
-            ReceivedMessageViewHolder(view)
+        val inflater = LayoutInflater.from(parent.context)
+        return when (viewType) {
+            VIEW_TYPE_SENT_TEXT -> SentMessageViewHolder(
+                inflater.inflate(
+                    R.layout.item_chat_me,
+                    parent,
+                    false
+                )
+            )
+
+            VIEW_TYPE_RECEIVED_TEXT -> ReceiveMessageViewHolder(
+                inflater.inflate(
+                    R.layout.item_chat_other,
+                    parent,
+                    false
+                )
+            )
+
+            VIEW_TYPE_SENT_PRODUCT -> SentProductViewHolder(
+                inflater.inflate(
+                    R.layout.item_chat_product_me,
+                    parent,
+                    false
+                )
+            )
+
+            VIEW_TYPE_RECEIVED_PRODUCT -> ReceivedProductViewHolder(
+                inflater.inflate(
+                    R.layout.item_chat_product_other,
+                    parent,
+                    false
+                )
+            )
+
+            else -> throw IllegalArgumentException("Wrong view type")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val msg = messageList[position]
-        if (holder is SentMessageViewHolder) {
-            holder.bind(msg)
+        val isMe = msg.senderId == myId
 
-            if (!msg.isRevoke) {
-                holder.itemView.setOnLongClickListener { view ->
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-
-                    // CALL THE NEW FUNCTION
-                    showCustomPopup(view, msg, position, true)
-                    true
-                }
-            } else {
-                // Nếu đã thu hồi rồi thì không cho nhấn giữ nữa
-                holder.itemView.setOnLongClickListener(null)
+        when (holder) {
+            is SentMessageViewHolder -> holder.bind(msg)
+            is ReceiveMessageViewHolder -> holder.bind(msg)
+            is SentProductViewHolder -> holder.bind(msg)
+            is ReceivedProductViewHolder -> {
+                holder.bind(msg)
+                // Có thể thêm tên người gửi cho giống Telegram
             }
-        } else if (holder is ReceivedMessageViewHolder) {
-            holder.bind(msg)
-// is me = false, chi co copy khong co thu hoi
-            if (!msg.isRevoke) {
-                holder.itemView.setOnLongClickListener { view ->
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        }
 
-                    // CALL THE NEW FUNCTION
-                    showCustomPopup(view, msg, position, false)
-                    true
-                }
-            } else {
-                // Nếu đã thu hồi rồi thì không cho nhấn giữ nữa
-                holder.itemView.setOnLongClickListener(null)
+        // Xử lý Popup Menu cho tất cả (trừ khi đã thu hồi)
+        if (!msg.isRevoke) {
+            holder.itemView.setOnLongClickListener { view ->
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                showCustomPopup(view, msg, position, isMe)
+                true
             }
         }
     }
@@ -126,7 +149,30 @@ class AdapterDetailChat(
         }
     }
 
-    class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class SentProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val txtContent: TextView = view.findViewById(R.id.txtContent)
+        val txtProductName: TextView = view.findViewById(R.id.txtProductName)
+        val txtProductPrice: TextView = view.findViewById(R.id.txtProductPrice)
+        val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
+        val txtTimeSend: TextView = view.findViewById(R.id.txtTimeSend)
+
+        fun bind(msg: ChatMessage) {
+            txtContent.text = msg.content
+            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
+
+            // Bốc Metadata từ Map (Firestore trả về Map<String, Any>)
+            val meta = msg.metadata
+            if (meta != null) {
+                txtProductName.text = meta.productName as? String ?: "Sản phẩm"
+                txtProductPrice.text = "${meta.productPrice}đ"
+
+                val imgUrl = meta.productImage as? String
+                Glide.with(itemView.context).load(imgUrl).into(imgProduct)
+            }
+        }
+    }
+
+    class ReceiveMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtContent: TextView = view.findViewById(R.id.txtContent)
         val txtTimeReceive = view.findViewById<TextView>(R.id.txtTimeReceive)
 
@@ -139,6 +185,29 @@ class AdapterDetailChat(
                 txtContent.alpha = 1.0f
             }
             txtTimeReceive.text = TimeUtil.formatTime(msg.createAt)
+        }
+    }
+
+    class ReceivedProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val txtContent: TextView = view.findViewById(R.id.txtContent)
+        val txtProductName: TextView = view.findViewById(R.id.txtProductName)
+        val txtProductPrice: TextView = view.findViewById(R.id.txtProductPrice)
+        val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
+        val txtTimeSend: TextView = view.findViewById(R.id.txtTimeSend)
+
+        fun bind(msg: ChatMessage) {
+            txtContent.text = msg.content
+            txtTimeSend.text = TimeUtil.formatTime(msg.createAt)
+
+            // Bốc Metadata từ Map (Firestore trả về Map<String, Any>)
+            val meta = msg.metadata
+            if (meta != null) {
+                txtProductName.text = meta.productName as? String ?: "Sản phẩm"
+                txtProductPrice.text = "${meta.productPrice}đ"
+
+                val imgUrl = meta.productImage as? String
+                Glide.with(itemView.context).load(imgUrl).into(imgProduct)
+            }
         }
     }
 

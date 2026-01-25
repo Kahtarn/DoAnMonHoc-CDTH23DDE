@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
-import com.example.clientchodientu.adapter.AdapterSellingProduct
+import com.example.clientchodientu.adapter.AdapterPostProductManage
 import com.example.clientchodientu.dto.product.DeleteProduct
 import com.example.clientchodientu.dto.product.PostManagerResponse
 import com.example.clientchodientu.entity.Product
@@ -193,7 +193,7 @@ class PostManagerActivity : AppCompatActivity() {
     }
 
     private fun setupAdapter(list: List<Product>) {
-        val adapter = AdapterSellingProduct(list)
+        val adapter = AdapterPostProductManage(list)
         rcv.adapter = adapter
 
         adapter.onDeleteClick = { product ->

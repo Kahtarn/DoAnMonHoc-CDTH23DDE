@@ -16,7 +16,7 @@
         android:theme="@style/Theme.ChoDienTuApplication"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".ui.auth.ImageViewerActivity"
+            android:name=".ui.product.ImageViewerActivity"
             android:exported="false" />
         <activity
             android:name=".ui.product.ProductDetailActivity"

@@ -2,7 +2,7 @@ package com.example.serverchodientu.dto.user.publicUser;
 
 import java.sql.Timestamp;
 
-public class DetailsUser {
+public class DetailsUserResponse {
     private String fullName;
     private String provinceName;
     private String wardName;
@@ -10,8 +10,9 @@ public class DetailsUser {
     private String email;
     private boolean gender;
     private Timestamp createAt;
+    private String avatarUrl;
 
-    public DetailsUser(String fullName, String provinceName, String wardName, String phone, String email, boolean gender, Timestamp createAt) {
+    public DetailsUserResponse(String fullName, String provinceName, String wardName, String phone, String email, boolean gender, Timestamp createAt, String avatarUrl) {
         this.fullName = fullName;
         this.provinceName = provinceName;
         this.wardName = wardName;
@@ -19,9 +20,10 @@ public class DetailsUser {
         this.email = email;
         this.gender = gender;
         this.createAt = createAt;
+        this.avatarUrl = avatarUrl;
     }
 
-    public DetailsUser() {
+    public DetailsUserResponse() {
     }
 
     public String getFullName() {
@@ -78,5 +80,13 @@ public class DetailsUser {
 
     public void setCreateAt(Timestamp createAt) {
         this.createAt = createAt;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

@@ -1,7 +1,7 @@
 package com.example.serverchodientu.service.user;
 
-import com.example.serverchodientu.dto.ApiResponse;
-import com.example.serverchodientu.dto.user.publicUser.DetailsUser;
+import com.example.serverchodientu.dto.user.privateUser.ProfileUserResponse;
+import com.example.serverchodientu.dto.user.publicUser.DetailsUserResponse;
 import com.example.serverchodientu.entity.User;
 import com.example.serverchodientu.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -14,9 +14,9 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public DetailsUser getDetailsUser(Integer id) {
-        User u = userRepo.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng!"));
-        DetailsUser detailsUser = new DetailsUser();
+    public DetailsUserResponse getDetailsUser(Integer id) {
+        User u = userRepo.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        DetailsUserResponse detailsUser = new DetailsUserResponse();
         detailsUser.setFullName(u.getFullName());
         detailsUser.setEmail(u.getEmail());
         detailsUser.setPhone(u.getPhone());
@@ -24,7 +24,24 @@ public class UserService {
         detailsUser.setProvinceName(u.getProvinceName());
         detailsUser.setWardName(u.getWardName());
         detailsUser.setCreateAt(u.getCreateAt());
+        detailsUser.setAvatarUrl(u.getAvatarUrl());
 
         return detailsUser;
+    }
+
+    public ProfileUserResponse getProfileUser(String email) {
+        User u = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy dữ liệu người dùng!"));
+        ProfileUserResponse profile = new ProfileUserResponse();
+        profile.setFullName(u.getFullName());
+        profile.setEmail(u.getEmail());
+        profile.setPhone(u.getPhone());
+        profile.setGender(u.isGender());
+        profile.setProvinceName(u.getProvinceName());
+        profile.setWardName(u.getWardName());
+        profile.setAvatarUrl(u.getAvatarUrl());
+        profile.setCreateAt(u.getCreateAt());
+
+        return  profile;
     }
 }

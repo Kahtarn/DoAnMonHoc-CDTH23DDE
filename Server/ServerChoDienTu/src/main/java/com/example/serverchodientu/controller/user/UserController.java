@@ -1,13 +1,13 @@
 package com.example.serverchodientu.controller.user;
 
 import com.example.serverchodientu.dto.ApiResponse;
-import com.example.serverchodientu.dto.user.publicUser.DetailsUser;
+import com.example.serverchodientu.dto.user.privateUser.ProfileUserResponse;
+import com.example.serverchodientu.dto.user.publicUser.DetailsUserResponse;
 import com.example.serverchodientu.service.user.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -18,10 +18,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/detailsUser/{id}")
-    public ResponseEntity<ApiResponse<DetailsUser>> getDetailsUser(@PathVariable Integer id) {
-        DetailsUser detailsUser = userService.getDetailsUser(id);
-
+    @GetMapping("/details-user/{id}")
+    public ResponseEntity<ApiResponse<DetailsUserResponse>> getDetailsUser(@PathVariable Integer id) {
+        DetailsUserResponse detailsUser = userService.getDetailsUser(id);
         return ResponseEntity.ok(ApiResponse.ok(detailsUser));
+    }
+
+    @GetMapping("/my-profile")
+    public ResponseEntity<ApiResponse<ProfileUserResponse>> getMyProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        ProfileUserResponse profile = userService.getProfileUser(currentEmail);
+        return ResponseEntity.ok(ApiResponse.ok(profile));
     }
 }

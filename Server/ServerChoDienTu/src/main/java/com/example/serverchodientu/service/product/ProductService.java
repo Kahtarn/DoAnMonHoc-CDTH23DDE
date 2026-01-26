@@ -74,6 +74,7 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
 
+
         return productRepo.save(product);
     }
 
@@ -103,8 +104,8 @@ public class ProductService {
     }
 
     @Transactional
-    public Product createPostProduct(PostProductRequest request) {
-        User seller = userRepo.findById(request.getSellerId()).orElseThrow();
+    public Product createPostProduct(PostProductRequest request, String email) {
+        User seller = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
         Categories cate = categoriesRepo.findById(request.getCategoryId()).orElseThrow();
         Product product = new Product();
         product.setSeller(seller);

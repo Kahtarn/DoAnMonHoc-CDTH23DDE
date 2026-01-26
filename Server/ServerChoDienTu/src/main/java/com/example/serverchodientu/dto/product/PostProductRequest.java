@@ -24,6 +24,9 @@ public class PostProductRequest {
         this.imageUrl = imageUrl;
     }
 
+    public PostProductRequest() {
+    }
+
     public Integer getSellerId() {
         return sellerId;
     }

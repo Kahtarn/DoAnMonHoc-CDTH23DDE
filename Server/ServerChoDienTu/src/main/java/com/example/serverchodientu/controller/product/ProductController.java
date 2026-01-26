@@ -54,8 +54,10 @@ public class ProductController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Ảnh đại diện sản phẩm là bắt buộc!"));
         }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
 
-        Product savedProduct = productService.createPostProduct(request);
+        Product savedProduct = productService.createPostProduct(request, currentEmail);
 
         return ResponseEntity.ok(ApiResponse.ok(savedProduct));
     }

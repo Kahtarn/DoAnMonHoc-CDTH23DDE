@@ -84,12 +84,16 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         askNotificationPermission()
 
         productId = intent.getIntExtra("PRODUCT_ID", -1)
+
         roomName = intent.getStringExtra("ROOM_NAME") ?: "general"
+
         receiverId = intent.getIntExtra("PARTNER_ID", 0)
         receiverName = intent.getStringExtra("PARTNER_NAME") ?: "Người dùng"
         // already perfect dont try to change pls
-        myId = intent.getStringExtra("MY_ID")?.toInt() ?: 0
+        myId = intent.getIntExtra("MY_ID", 0)
+
         isFirstTimeChat = intent.getBooleanExtra("IS_FIRST_TIME_CHAT", false)
+
         Log.d("DetailChatActivity", "Room Name: $roomName, Receiver ID: $receiverId")
         Log.d("DetailChat_MyId", myId.toString())
         Log.d("DetailChat_ProductId_FromIntent", productId.toString())

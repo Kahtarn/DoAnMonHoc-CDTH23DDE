@@ -286,7 +286,7 @@ class ProductDetailActivity : AppCompatActivity() {
                 ) // Giả sử Boss có hàm lấy ID của mình
             val ids = listOf(myId.toString(), sellerId.toString()).sorted()
             val calculatedRoomName = "chat_user_${ids[0]}_user_${ids[1]}"
-            intent.putExtra("MY_ID", myId.toString())
+            intent.putExtra("MY_ID", myId)
             intent.putExtra("ROOM_NAME", calculatedRoomName)
             withContext(Dispatchers.Main) {
                 Log.d("ProductD_MyId", myId.toString())

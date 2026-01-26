@@ -46,8 +46,20 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             val title = remoteMessage.data["title"] ?: "New Message"
             val body = remoteMessage.data["body"] ?: "You have a new message"
             val roomId = remoteMessage.data["roomId"] ?: "general"
-
-            sendNotification(title, body, roomId)
+            val partnerId = remoteMessage.data["senderId"]?.toIntOrNull() ?: 0
+            val partnerName = remoteMessage.data["partnerName"] ?: ""
+            val myId = remoteMessage.data["myId"]?.toIntOrNull() ?: 0
+            val productId = remoteMessage.data["productId"]?.toIntOrNull() ?: 0
+            Log.d("FCM", "Message data payload: ${remoteMessage.data}")
+            sendNotification(
+                title,
+                body,
+                roomId,
+                partnerId,
+                partnerName,
+                productId,
+                myId
+            )
         }
     }
 
@@ -55,7 +67,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         // IMPORTANT: This token identifies THIS phone.
         // You must send this token to your Spring Boot server and save it in the 'users' table.
         Log.d("FCM", "firebase token: $token")
-        TokenManager.updateFCMToken(this,token)
+        TokenManager.updateFCMToken(this, token)
     }
 
     private fun isUserOnChat(): Boolean {
@@ -68,9 +80,17 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         return isOnChat
     }
 
-    private fun sendNotification(title: String, messageBody: String, roomId: String) {
+    private fun sendNotification(
+        title: String,
+        messageBody: String,
+        roomId: String,
+        partnerId: Int,
+        partnerName: String,
+        productId: Int,
+        myId: Int
+    ) {
 
-        val pendingIntent = createChatPendingIntent(roomId)
+        val pendingIntent = createChatPendingIntent(roomId, partnerId, partnerName, productId, myId)
         val deletePendingIntent = createDeletePendingIntent(roomId)
 
 
@@ -126,10 +146,30 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         notificationManager.notify(roomId.hashCode(), notificationBuilder.build())
     }
 
-    private fun createChatPendingIntent(roomId: String): PendingIntent {
+    private fun createChatPendingIntent(
+        roomId: String,
+        partnerId: Int,
+        partnerName: String,
+        productId: Int,
+        myId: Int
+    ): PendingIntent {
         val intent = Intent(this, DetailChatActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("roomId", roomId)
+            putExtra("ROOM_NAME", roomId)
+            // Lưu ý: Boss cần lấy partnerId/Name từ data payload của FCM (Server gửi về)
+            // Nếu Server chưa gửi, Boss nên bổ sung vào data payload phía Backend
+            putExtra("PARTNER_ID", partnerId)
+            putExtra("PARTNER_NAME", partnerName)
+
+            putExtra("MY_ID", myId)
+
+            putExtra("PRODUCT_ID", productId)
+
+            Log.d(
+                "createChatPendingIntent",
+                "roomId: $roomId, partnerId: $partnerId, partnerName: $partnerName, productId: $productId, myId: $myId"
+            )
         }
         return PendingIntent.getActivity(
             this,

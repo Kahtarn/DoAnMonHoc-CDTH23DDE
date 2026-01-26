@@ -19,6 +19,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 
@@ -27,8 +28,8 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var adapter: AdapterChat
     private val conversationList = mutableListOf<InboxRespond>()
     private lateinit var db: FirebaseFirestore
-    private var myId: String = ""
-
+    private var myId: Int = 0
+    private var firestoreListener: ListenerRegistration? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -71,8 +72,8 @@ class ChatActivity : AppCompatActivity() {
             // Khi click vào 1 người, chuyển sang màn hình chat chi tiết
             val intent = Intent(this, DetailChatActivity::class.java)
             intent.putExtra("ROOM_NAME", conversation.roomName)
-            intent.putExtra("PARTNER_ID", conversation.partnerId)
             intent.putExtra("MY_ID", myId)
+            intent.putExtra("PARTNER_ID", conversation.partnerId)
             intent.putExtra("PARTNER_NAME", conversation.partnerName)
             startActivity(intent)
         }
@@ -84,68 +85,89 @@ class ChatActivity : AppCompatActivity() {
         val mAuth = FirebaseAuth.getInstance()
         val user = mAuth.currentUser ?: return // Thoát nếu chưa login
 
-        myId = user.uid
+        myId = user.uid.toInt()
         db = FirebaseFirestore.getInstance()
 
-        db.collection("inboxes").document(myId)
+        val query = db.collection("inboxes").document(myId.toString())
             .collection("conversations")
             .orderBy("time", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshots, e ->
-                // Kiểm tra lỗi trước
-                if (e != null) {
-                    Log.w("FIRESTORE", "Lỗi Listen: $e")
-                    return@addSnapshotListener
-                }
-
-                // Kiểm tra snapshots null an toàn
-                if (snapshots != null) {
-                    val newList = mutableListOf<InboxRespond>()
-                    for (doc in snapshots.documentChanges) {
-                        when (doc.type) {
-                            DocumentChange.Type.ADDED -> {
-                                try {
-                                    val item = doc.document.toObject(InboxRespond::class.java)
-                                    item.roomName = doc.document.id
-                                    conversationList.add(0, item) // Thêm vào đầu danh sách
-                                    adapter.notifyItemInserted(0)
-                                } catch (ex: Exception) {
-                                    Log.e("FIRESTORE", " Lỗi: ${ex.message}")
-                                }
-                            }
-
-                            DocumentChange.Type.MODIFIED -> {
-                                try {
-                                    val item = doc.document.toObject(InboxRespond::class.java)
-                                    item.roomName = doc.document.id
-                                    val index =
-                                        conversationList.indexOfFirst { it.roomName == item.roomName }
-                                    if (index != -1) {
-                                        if (item.isRevoke) {
-                                            item.lastMessage = "Tin nhắn đã được thu hồi"
-                                        }
-                                        conversationList[index] = item
-                                        // Chỉ cập nhật đúng dòng đó trên giao diện, không load lại cả list
-                                        adapter.notifyItemChanged(index)
-                                    }
-                                } catch (ex: Exception) {
-                                    Log.e("FIRESTORE", " Lỗi: ${ex.message}")
-                                }
-                            }
-
-                            DocumentChange.Type.REMOVED -> {
-                                val index =
-                                    conversationList.indexOfFirst { it.roomName == doc.document.id }
-                                if (index != -1) {
-                                    conversationList.removeAt(index)
-                                    adapter.notifyItemRemoved(index)
-                                }
-                            } //
-
-                        }
-                    }
-
-                }
+        firestoreListener = query.addSnapshotListener { snapshots, e ->
+            // Kiểm tra lỗi trước
+            if (e != null) {
+                Log.w("FIRESTORE", "Lỗi Listen: $e")
+                return@addSnapshotListener
             }
+
+            // Kiểm tra snapshots null an toàn
+            if (snapshots != null) {
+                val newList = mutableListOf<InboxRespond>()
+                for (doc in snapshots.documentChanges) {
+                    when (doc.type) {
+                        DocumentChange.Type.ADDED -> {
+                            try {
+                                val item = doc.document.toObject(InboxRespond::class.java)
+                                item.roomName = doc.document.id
+                                conversationList.add(0, item) // Thêm vào đầu danh sách
+                                adapter.notifyItemInserted(0)
+                            } catch (ex: Exception) {
+                                Log.e("FIRESTORE", " Lỗi: ${ex.message}")
+                            }
+                        }
+
+                        DocumentChange.Type.MODIFIED -> {
+                            try {
+                                val item = doc.document.toObject(InboxRespond::class.java)
+                                item.roomName = doc.document.id
+                                val index =
+                                    conversationList.indexOfFirst { it.roomName == item.roomName }
+                                if (index != -1) {
+                                    if (item.isRevoke) {
+                                        item.lastMessage = "Tin nhắn đã được thu hồi"
+                                    }
+                                    conversationList[index] = item
+                                    // Chỉ cập nhật đúng dòng đó trên giao diện, không load lại cả list
+                                    adapter.notifyItemChanged(index)
+                                }
+                            } catch (ex: Exception) {
+                                Log.e("FIRESTORE", " Lỗi: ${ex.message}")
+                            }
+                        }
+
+                        DocumentChange.Type.REMOVED -> {
+                            val index =
+                                conversationList.indexOfFirst { it.roomName == doc.document.id }
+                            if (index != -1) {
+                                conversationList.removeAt(index)
+                                adapter.notifyItemRemoved(index)
+                            }
+                        } //
+
+                    }
+                }
+
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        firestoreListener?.remove()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Lưu lại: Tôi đang ở phòng chat 123
+        val prefs = getSharedPreferences("AppStatus", MODE_PRIVATE)
+        prefs.edit().putBoolean("IS_ON_CHAT", true).apply()
+        Log.d("Activity", "In chat sreen")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Xóa đi: Tôi không còn ở phòng chat nào cả
+        val prefs = getSharedPreferences("AppStatus", MODE_PRIVATE)
+        prefs.edit().remove("IS_ON_CHAT").apply()
+        Log.d("Activity", "Outside chat screen")
     }
 
 }

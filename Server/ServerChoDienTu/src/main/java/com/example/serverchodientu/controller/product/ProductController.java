@@ -4,6 +4,8 @@ import com.example.serverchodientu.dto.ApiResponse;
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
 import com.example.serverchodientu.entity.Product;
+import com.example.serverchodientu.entity.User;
+import com.example.serverchodientu.repository.UserRepository;
 import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +20,11 @@ import java.util.List;
 @RequestMapping("/api/product/")
 public class ProductController {
     private final ProductService productService;
+    private final UserRepository userRepository;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, UserRepository userRepository) {
         this.productService = productService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/getAll")
@@ -50,6 +54,10 @@ public class ProductController {
 
     @PostMapping("/post")
     public ResponseEntity<ApiResponse<String>> postProduct(@RequestBody PostProductRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        User user = userRepository.findByEmail(currentEmail).orElseThrow(() -> new RuntimeException(("Khong tim thay user.")));
+        request.setSellerId(user.getId());
         productService.createProduct(request);
         return ResponseEntity.ok(ApiResponse.ok("Đăng bài bán thành công!"));
     }

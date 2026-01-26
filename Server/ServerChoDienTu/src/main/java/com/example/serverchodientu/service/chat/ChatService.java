@@ -226,7 +226,6 @@ public class ChatService {
         // Update trường isRevoke = true tại đúng ID đó
         Firestore db = FirestoreClient.getFirestore();
         try {
-
             db.collection("chat_rooms")
                     .document(request.getRoomName())
                     .collection("messages")

@@ -1,5 +1,7 @@
 package com.example.serverchodientu.dto.product;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,10 +11,10 @@ public class PostProductRequest {
     private String title;
     private String description;
     private BigDecimal price;
-    private String thumbnailUrl;
-    private List<String> imageUrl;
+    private MultipartFile thumbnailUrl;
+    private List<MultipartFile> imageUrl;
 
-    public PostProductRequest(Integer sellerId, Integer categoryId, String title, String description, BigDecimal price, String thumbnailUrl, List<String> imageUrl) {
+    public PostProductRequest(Integer sellerId, Integer categoryId, String title, String description, BigDecimal price, MultipartFile thumbnailUrl, List<MultipartFile> imageUrl) {
         this.sellerId = sellerId;
         this.categoryId = categoryId;
         this.title = title;
@@ -62,19 +64,19 @@ public class PostProductRequest {
         this.price = price;
     }
 
-    public String getThumbnailUrl() {
+    public MultipartFile getThumbnailUrl() {
         return thumbnailUrl;
     }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
+    public void setThumbnailUrl(MultipartFile thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public List<String> getImageUrl() {
+    public List<MultipartFile> getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(List<String> imageUrl) {
+    public void setImageUrl(List<MultipartFile> imageUrl) {
         this.imageUrl = imageUrl;
     }
 }

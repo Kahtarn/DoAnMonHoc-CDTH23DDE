@@ -13,7 +13,13 @@ import com.example.serverchodientu.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +39,7 @@ public class ProductService {
         this.categoriesRepo = categoriesRepo;
     }
     public List<Product> getAll() {
-        return productRepo.findAllByOrderByCreateAtDesc(0);
+        return productRepo.findAllByStatusOrderByCreateAtDesc(0);
     }
 
     public List<Product> searchProducts(String name, String sortType) {
@@ -97,7 +103,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Product createProduct(PostProductRequest request) {
+    public Product createPostProduct(PostProductRequest request) {
         User seller = userRepo.findById(request.getSellerId()).orElseThrow();
         Categories cate = categoriesRepo.findById(request.getCategoryId()).orElseThrow();
         Product product = new Product();
@@ -106,24 +112,43 @@ public class ProductService {
         product.setTitle(request.getTitle());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
-        product.setThumbnailUrl(request.getThumbnailUrl());
         product.setStatus(0);
         product.setCreateAt(Timestamp.valueOf(LocalDateTime.now()));
 
+
+        if (request.getThumbnailUrl() != null) {
+            String fileName = saveToDisk(request.getThumbnailUrl());
+            product.setThumbnailUrl("/uploads/" + fileName);
+        }
         Product savedProduct = productRepo.save(product);
 
-        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
-            List<ProductImage> images = request.getImageUrl().stream().map(url -> {
+        if (request.getImageUrl() != null) {
+            List<ProductImage> images = request.getImageUrl().stream().map(file -> {
+                String fileName = saveToDisk(file);
                 ProductImage img = new ProductImage();
                 img.setProductId(savedProduct);
-                img.setImageUrl(url);
+                img.setImageUrl("/uploads/" + fileName);
                 return img;
             }).collect(Collectors.toList());
-
             productImageRepo.saveAll(images);
         }
-
         return savedProduct;
+    }
+
+    private String saveToDisk(MultipartFile file) {
+        try {
+            Path root = Paths.get("uploads");
+            if (!Files.exists(root)) {
+                Files.createDirectories(root);
+            }
+
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path path = root.resolve(fileName);
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            return fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi lưu file: " + e.getMessage());
+        }
     }
 
     @Transactional

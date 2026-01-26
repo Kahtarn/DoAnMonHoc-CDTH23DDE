@@ -7,27 +7,17 @@ import java.util.List;
 
 public class ProductDetailsResponse {
     private Product product;
-    private List<String> imageUrl;
+    private List<String> images;
 
-    public Product getProduct() {
-        return product;
-    }
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
 
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public List<String> getImages() {
-        return imageUrl;
-    }
-
-    public void setImages(List<String> imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+    public List<String> getImages() { return images; }
+    public void setImages(List<String> images) { this.images = images; }
 
     public ProductDetailsResponse(Product product, List<ProductImage> productImages) {
         this.product = product;
-        this.imageUrl = productImages.stream()
+        this.images = productImages.stream()
                 .map(ProductImage::getImageUrl)
                 .collect(java.util.stream.Collectors.toList());
     }

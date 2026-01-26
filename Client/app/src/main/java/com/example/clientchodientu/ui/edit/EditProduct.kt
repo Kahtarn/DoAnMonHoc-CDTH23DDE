@@ -161,7 +161,6 @@ class EditProduct : AppCompatActivity() {
                             Toast.makeText(this@EditProduct, apiResponse.message, Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        Toast.makeText(this@EditProduct, "Lỗi Server: ${response.code}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {

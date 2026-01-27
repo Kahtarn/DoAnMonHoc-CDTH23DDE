@@ -37,6 +37,9 @@
             android:name=".ui.auth.ForgotPasswordOTPVerificationActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.product.ImageViewerActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
         <activity

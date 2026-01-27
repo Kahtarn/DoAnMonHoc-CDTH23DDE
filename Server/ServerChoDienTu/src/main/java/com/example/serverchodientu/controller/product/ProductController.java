@@ -139,5 +139,16 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(listProduct));
     }
 
+    @GetMapping("/favorite-status/{productId}")
+    public ResponseEntity<ApiResponse<Boolean>> isFavorite(@PathVariable Integer productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        try {
+            Boolean isfavorite = productService.isFavorite(productId, currentEmail);
+            return ResponseEntity.ok(ApiResponse.ok(isfavorite));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
+        }
+    }
 
 }

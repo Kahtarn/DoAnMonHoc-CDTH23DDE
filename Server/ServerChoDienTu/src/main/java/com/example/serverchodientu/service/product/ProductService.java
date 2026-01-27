@@ -177,4 +177,21 @@ public class ProductService {
         }
     }
 
+    @Transactional
+    public boolean isFavorite(Integer productId, String email) {
+        // ... tìm p và u ...
+        Product p = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Khong tim thay product"));
+        User u = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("Khong tim thay san pham"));
+        Optional<Favorite> fav = favoriteRepo.findFavoriteByUserAndProduct(u, p);
+        if (fav.isPresent()) {
+            favoriteRepo.delete(fav.get());
+            return false; // Trạng thái hiện tại: Đã bỏ thích
+        } else {
+            Favorite newFav = new Favorite();
+            // ... set p, u, createAt ...
+            favoriteRepo.save(newFav);
+            return true; // Trạng thái hiện tại: Đã thích
+        }
+    }
+
 }

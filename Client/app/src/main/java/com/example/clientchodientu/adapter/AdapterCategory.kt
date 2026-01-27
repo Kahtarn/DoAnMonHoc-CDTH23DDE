@@ -24,7 +24,7 @@ class AdapterCategory(private var listCategory: List<Category>) :
         val category = listCategory[position]
         holder.name.text = category.name
 
-        val BASE_URL = "http://192.168.1.111:8080"
+        val BASE_URL = "http://10.0.2.2:8080"
         val listImg = BASE_URL + category.iconUrl
 
         Glide.with(holder.itemView.context)

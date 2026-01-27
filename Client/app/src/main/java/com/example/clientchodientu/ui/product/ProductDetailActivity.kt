@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -21,12 +22,15 @@ import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.ProductImageAdapter
 import com.example.clientchodientu.dto.product.DetailsData
+import com.example.clientchodientu.dto.product.SetFavoriteRespond
 import com.example.clientchodientu.ui.product.ImageViewerActivity
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.ApiResponseData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.math.BigDecimal
 import java.text.DecimalFormat
@@ -35,7 +39,7 @@ import java.util.*
 
 class ProductDetailActivity : AppCompatActivity() {
 
-    private val BASE_URL = "http://192.168.1.111:8080"
+    private val BASE_URL = "http://10.0.2.2:8080"
 
     private lateinit var tvTitle: TextView
     private lateinit var tvPrice: TextView
@@ -98,7 +102,7 @@ class ProductDetailActivity : AppCompatActivity() {
 
     private fun setupEvents() {
         btnBack.setOnClickListener { finish() }
-        btnFavorite.setOnClickListener { toggleFavorite() }
+        btnFavorite.setOnClickListener { updateFavoriteStatus() }
 
         btnCallSeller.setOnClickListener {
             sellerPhoneNumber?.let { phone ->
@@ -152,7 +156,7 @@ class ProductDetailActivity : AppCompatActivity() {
         tvPrice.text = formatCurrency(product.price)
         tvDescription.text = product.description ?: "Không có mô tả"
         tvTimePosted.text = convertTimeAgo(product.createAt)
-
+        setupFavorite()
         if (seller != null) {
             tvSellerName.text = seller.fullName
             tvAddress.text = "${seller.wardName}, ${seller.provinceName}"
@@ -176,7 +180,8 @@ class ProductDetailActivity : AppCompatActivity() {
         }
 
         rvProductImages.adapter = adapter
-        rvProductImages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvProductImages.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvProductImages.onFlingListener = null
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(rvProductImages)
@@ -195,6 +200,96 @@ class ProductDetailActivity : AppCompatActivity() {
             }
         })
         tvImageCounter.text = "1 / ${imageUrls.size}"
+    }
+
+    private fun setupFavorite() {
+        // Giả sử có một API để kiểm tra trạng thái yêu thích
+        val url = "$BASE_URL/api/product/favorite-status/$currentProductId"
+        val request =
+            Request.Builder()
+                .url(url)
+                .get()
+                .build()
+
+        ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { showToast("Lỗi kết nối: ${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    runOnUiThread { showToast("Lỗi Server: ${response.code}") }
+                    return
+                }
+                try {
+                    val json = response.body?.string()
+                    val type = object : TypeToken<ApiResponseData<Boolean>>() {}.type
+                    val apiResponse = gson.fromJson<ApiResponseData<Boolean>>(json, type)
+
+                    if (apiResponse.success) {
+                        isFavorited = apiResponse.data
+                        runOnUiThread {
+                            val icon =
+                                if (isFavorited) R.drawable.favorite_filled else R.drawable.outline_favorite_24
+                            btnFavorite.setImageResource(icon)
+                            Log.d("ProductDetail", "Favorite status:$currentProductId $isFavorited")
+                        }
+                    } else {
+                        runOnUiThread { showToast(apiResponse.message) }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread { showToast("Lỗi xử lý dữ liệu") }
+                }
+
+            }
+        })
+    }
+
+    private fun updateFavoriteStatus() {
+        val url = "$BASE_URL/api/product/set-favorite/$currentProductId"
+        val request = Request.Builder()
+            .url(url)
+            .post("".toRequestBody("application/json".toMediaType()))
+            .build()
+
+        ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { showToast("Lỗi kết nối: ${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    runOnUiThread {
+                        showToast("Lỗi Server: ${response.code}")
+                    }
+                    return
+                }
+                try {
+                    val json = response.body?.string()
+                    val type = object : TypeToken<ApiResponseData<SetFavoriteRespond>>() {}.type
+                    val apiResponse = gson.fromJson<ApiResponseData<SetFavoriteRespond>>(json, type)
+
+                    if (apiResponse.success) {
+                        isFavorited = apiResponse.data.isFavorite
+                        runOnUiThread {
+                            val icon =
+                                if (isFavorited) R.drawable.favorite_filled else R.drawable.outline_favorite_24
+                            btnFavorite.setImageResource(icon)
+                            Log.d("ProductDetail", "Favorite status:$currentProductId $isFavorited")
+                        }
+                    } else {
+                        runOnUiThread {
+                            showToast(apiResponse.message)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread { showToast("Lỗi xử lý dữ liệu") }
+                }
+
+            }
+        })
     }
 
     // --- HELPER FUNCTIONS ---
@@ -234,12 +329,6 @@ class ProductDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggleFavorite() {
-        isFavorited = !isFavorited
-        val icon = if (isFavorited) R.drawable.favorite_filled else R.drawable.outline_favorite_24
-        btnFavorite.setImageResource(icon)
-        showToast(if (isFavorited) "Đã thêm vào yêu thích" else "Đã bỏ yêu thích")
-    }
 
     private fun showMoreOptions() {
         val dialog = Dialog(this)

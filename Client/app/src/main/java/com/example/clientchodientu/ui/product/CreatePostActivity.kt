@@ -35,8 +35,8 @@ import java.math.BigDecimal
 
 class CreatePostActivity : AppCompatActivity() {
     private val gson = Gson()
-    private val urlCate = "http://192.168.1.111:8080/api/category/getCategories"
-    private val urlPost = "http://192.168.1.111:8080/api/product/post"
+    private val urlCate = "http://10.0.2.2:8080/api/category/getCategories"
+    private val urlPost = "http://10.0.2.2:8080/api/product/post"
     private lateinit var imageAdapter: SelectedImageAdapter
     private val selectedUris = mutableListOf<Uri>()
     private lateinit var edtTitle: EditText

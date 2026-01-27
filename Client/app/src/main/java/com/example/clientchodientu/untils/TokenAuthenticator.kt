@@ -58,7 +58,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
         val oldAccessToken = TokenManager.getToken()
 
         val request = Request.Builder()
-            .url("http://192.168.1.111:8080/api/auth/refresh-token")
+            .url("http://10.0.2.2:8080/api/auth/refresh-token")
             .header("Authorization", "Bearer $oldAccessToken")
             .post(body)
             .build()

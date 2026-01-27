@@ -16,6 +16,9 @@
         android:theme="@style/Theme.ChoDienTuApplication"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.edit.EditPostActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.CreatePostActivity"
             android:exported="false" />
         <activity

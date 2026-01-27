@@ -17,7 +17,7 @@ import com.example.clientchodientu.adapter.AdapterPostProductManage
 import com.example.clientchodientu.dto.product.DeleteProduct
 import com.example.clientchodientu.dto.product.PostManagerResponse
 import com.example.clientchodientu.entity.Product
-import com.example.clientchodientu.ui.edit.EditProduct
+import com.example.clientchodientu.ui.edit.EditPostActivity
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.TokenManager
 import com.google.gson.GsonBuilder
@@ -203,7 +203,7 @@ class PostManagerActivity : AppCompatActivity() {
         }
 
         adapter.onEditClick = { product ->
-            val intent = Intent(this, EditProduct::class.java)
+            val intent = Intent(this, EditPostActivity::class.java)
             intent.putExtra("title",product.title)
             intent.putExtra("category",product.category?.name)
             intent.putExtra("price",product.price.toString())

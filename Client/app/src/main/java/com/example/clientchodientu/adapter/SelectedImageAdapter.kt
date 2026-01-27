@@ -17,9 +17,9 @@ class SelectedImageAdapter(
     private val imageList = mutableListOf<Uri>()
 
     companion object {
-        private const val TYPE_ADD = 0    // Loại view: Nút thêm ảnh
-        private const val TYPE_IMAGE = 1  // Loại view: Ảnh đã chọn
-        private const val MAX_IMAGES = 6  // Giới hạn: 1 bìa + 5 ảnh chi tiết
+        private const val TYPE_ADD = 0
+        private const val TYPE_IMAGE = 1
+        private const val MAX_IMAGES = 6
     }
 
     // Cập nhật danh sách ảnh
@@ -49,15 +49,14 @@ class SelectedImageAdapter(
             val uri = imageList[position]
             holder.ivSelected.setImageURI(uri)
 
-            // Xử lý hiển thị Label: Ảnh bìa vs Ảnh chi tiết
             if (position == 0) {
                 holder.tvCover.visibility = View.VISIBLE
                 holder.tvCover.text = "Ảnh bìa"
-                holder.tvCover.setBackgroundColor(0xCCFF9800.toInt()) // Màu cam cho ảnh bìa
+                holder.tvCover.setBackgroundColor(0xCCFF9800.toInt())
             } else {
                 holder.tvCover.visibility = View.VISIBLE
                 holder.tvCover.text = "Ảnh ${position}"
-                holder.tvCover.setBackgroundColor(0x80000000.toInt()) // Màu đen mờ cho ảnh sau
+                holder.tvCover.setBackgroundColor(0x80000000.toInt())
             }
 
             holder.btnRemove.setOnClickListener { onRemoveImageClick(position) }
@@ -68,17 +67,13 @@ class SelectedImageAdapter(
     }
 
     override fun getItemCount(): Int {
-        // Nếu chưa đủ 6 ảnh thì hiện (size + 1 nút thêm), đủ rồi thì chỉ hiện size ảnh
         return if (imageList.size >= MAX_IMAGES) imageList.size else imageList.size + 1
     }
 
-    // ViewHolder cho ảnh đã chọn
     class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val ivSelected: ImageView = view.findViewById(R.id.ivSelectedImage)
         val btnRemove: ImageView = view.findViewById(R.id.btnRemoveImage)
         val tvCover: TextView = view.findViewById(R.id.tvCoverLabel)
     }
-
-    // ViewHolder cho nút thêm ảnh
     class AddViewHolder(view: View) : RecyclerView.ViewHolder(view)
 }

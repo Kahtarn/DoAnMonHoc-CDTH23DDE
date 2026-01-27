@@ -3,6 +3,7 @@ package com.example.serverchodientu.controller.product;
 import com.example.serverchodientu.dto.ApiResponse;
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
+import com.example.serverchodientu.dto.product.SetFavoriteRespond;
 import com.example.serverchodientu.entity.Product;
 import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
@@ -118,4 +119,48 @@ public class ProductController {
 
         return ResponseEntity.ok(ApiResponse.ok("Đã đánh dấu sản phẩm là đã bán!"));
     }
+
+    @PostMapping("/set-favorite/{productId}")
+    public ResponseEntity<ApiResponse<SetFavoriteRespond>> setFavorite(@PathVariable Integer productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String currentEmail = authentication.getName();
+        try {
+            SetFavoriteRespond isFavorite = productService.setFavorite(productId, currentEmail);
+            if (isFavorite.getIsFavorite()) {
+                return ResponseEntity.ok(ApiResponse.ok(isFavorite));
+            }
+            return ResponseEntity.ok(ApiResponse.ok(isFavorite));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/get-favorite")
+    public ResponseEntity<ApiResponse<List<Product>>> getFavorite() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String currentEmail = authentication.getName();
+        try {
+            List<Product> listProduct = productService.getFavorite(currentEmail);
+
+            return ResponseEntity.ok(ApiResponse.ok(listProduct));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/favorite-status/{productId}")
+    public ResponseEntity<ApiResponse<Boolean>> isFavorite(@PathVariable Integer productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String currentEmail = authentication.getName();
+        try {
+            Boolean isfavorite = productService.isFavorite(productId, currentEmail);
+            return ResponseEntity.ok(ApiResponse.ok(isfavorite));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
+        }
+    }
+
 }

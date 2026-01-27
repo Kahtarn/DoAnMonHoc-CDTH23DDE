@@ -113,7 +113,7 @@ class LoginActivity : AppCompatActivity() {
                             // 3. Gửi Token lên Server
                             val token = task.result
                             Log.d("FCM", "Token hiện tại: $token")
-                            TokenManager.updateFCMToken(this@LoginActivity,data.data.userId, token)
+                            TokenManager.updateFCMToken(this@LoginActivity, data.data.userId, token)
 
                             TokenManager.saveTokens(
                                 data.data.accessToken,

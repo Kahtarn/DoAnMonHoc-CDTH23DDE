@@ -79,7 +79,7 @@ public class ProductService {
     }
 
     public List<Product> getByCategoryId(Integer categoryId) {
-        return productRepo.findByCategoryId(categoryId);
+        return productRepo.findByCategoryIdAndStatus(categoryId, 0);
     }
 
     public List<Product> getMySellingProducts(String email) {

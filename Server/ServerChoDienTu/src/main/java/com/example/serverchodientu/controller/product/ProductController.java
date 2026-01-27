@@ -8,7 +8,6 @@ import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,6 @@ public class ProductController {
     }
 
     @GetMapping("/getAll")
-    //Lay danh sach bai ban
     public ResponseEntity<ApiResponse<List<Product>>> getAll() {
         List<Product> data = productService.getAll();
         return ResponseEntity.ok(ApiResponse.ok(data));
@@ -56,8 +54,10 @@ public class ProductController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Ảnh đại diện sản phẩm là bắt buộc!"));
         }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
 
-        Product savedProduct = productService.createPostProduct(request);
+        Product savedProduct = productService.createPostProduct(request, currentEmail);
 
         return ResponseEntity.ok(ApiResponse.ok(savedProduct));
     }

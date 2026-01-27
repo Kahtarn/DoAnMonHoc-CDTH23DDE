@@ -3,6 +3,7 @@ package com.example.clientchodientu.ui.home
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import android.widget.Toast
@@ -17,6 +18,7 @@ import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.ProductResponse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.entity.Product
+import com.example.clientchodientu.ui.favorite.FavoriteActivity
 import com.example.clientchodientu.ui.product.CreatePostActivity
 import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.TokenManager
@@ -44,6 +46,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var recyclerViewProduct: RecyclerView
     private lateinit var recyclerViewCategory: RecyclerView
     private lateinit var progressBar: ProgressBar
+    private lateinit var btnFavorite : ImageButton
+
     private lateinit var token: String
     private fun getSearchUrl(query: String) = "$baseUrl/product/filter?name=$query"
     private var searchJob: Job? = null
@@ -53,6 +57,7 @@ class HomeActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
 
+        btnFavorite = findViewById(R.id.btnFavorite)
         progressBar = findViewById(R.id.progressBar)
         recyclerViewProduct = findViewById(R.id.rvProduct)
         recyclerViewCategory = findViewById(R.id.rvCategory)
@@ -67,6 +72,11 @@ class HomeActivity : AppCompatActivity() {
             setupSearchView()
             loadProduct(urlProductAll)
             loadCategories()
+        }
+
+        btnFavorite.setOnClickListener {
+            val intent = Intent(this, FavoriteActivity::class.java)
+            startActivity(intent)
         }
 
         bottomNav = findViewById(R.id.bottomNavigation)

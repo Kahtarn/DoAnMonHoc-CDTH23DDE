@@ -16,6 +16,9 @@
         android:theme="@style/Theme.ChoDienTuApplication"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.favorite.FavoriteActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.CreatePostActivity"
             android:exported="false" />
         <activity
@@ -50,9 +53,6 @@
             android:exported="false" />
         <activity
             android:name=".ui.user.PostManagerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.product.ImageViewerActivity"
             android:exported="false" />
         <activity
             android:name=".ui.auth.LoginActivity"

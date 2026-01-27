@@ -18,12 +18,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.ProductImageAdapter
 import com.example.clientchodientu.dto.product.DetailsData
 import com.example.clientchodientu.dto.product.SetFavoriteRespond
-import com.example.clientchodientu.ui.product.ImageViewerActivity
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.ApiResponseData
 import com.google.gson.Gson
@@ -230,7 +228,7 @@ class ProductDetailActivity : AppCompatActivity() {
                         isFavorited = apiResponse.data
                         runOnUiThread {
                             val icon =
-                                if (isFavorited) R.drawable.favorite_filled else R.drawable.outline_favorite_24
+                                if (isFavorited) R.drawable.ic_favorite_filled else R.drawable.outline_favorite_24
                             btnFavorite.setImageResource(icon)
                             Log.d("ProductDetail", "Favorite status:$currentProductId $isFavorited")
                         }
@@ -274,7 +272,7 @@ class ProductDetailActivity : AppCompatActivity() {
                         isFavorited = apiResponse.data.isFavorite
                         runOnUiThread {
                             val icon =
-                                if (isFavorited) R.drawable.favorite_filled else R.drawable.outline_favorite_24
+                                if (isFavorited) R.drawable.ic_favorite_filled else R.drawable.outline_favorite_24
                             btnFavorite.setImageResource(icon)
                             Log.d("ProductDetail", "Favorite status:$currentProductId $isFavorited")
                         }

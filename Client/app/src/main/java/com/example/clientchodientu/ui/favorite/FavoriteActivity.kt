@@ -20,7 +20,7 @@ import com.example.clientchodientu.dto.product.DeleteProduct
 import com.example.clientchodientu.dto.product.PostFavoriteResponse
 import com.example.clientchodientu.dto.product.SetFavoriteRespond
 import com.example.clientchodientu.entity.Product
-import com.example.clientchodientu.ui.edit.EditProduct
+import com.example.clientchodientu.ui.edit.EditPostActivity
 import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.ApiClient
 import com.example.clientchodientu.untils.ApiResponseData

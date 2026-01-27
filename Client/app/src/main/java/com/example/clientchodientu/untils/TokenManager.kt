@@ -39,7 +39,7 @@ object TokenManager {
     fun getFCMToken(): String? = prefs.getString(KEY_FCM_TOKEN, null)
 
     fun updateFCMToken(context: Context,userId: Int, token: String) {
-        val url = "http://192.168.1.111:8080/api/chat/set-fcm-token"
+        val url = "http://10.0.2.2:8080/api/chat/set-fcm-token"
         val jsonObject = JSONObject()
         jsonObject.put("userId", userId)
         jsonObject.put("token", token)

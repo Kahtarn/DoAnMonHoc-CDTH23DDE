@@ -118,4 +118,26 @@ public class ProductController {
 
         return ResponseEntity.ok(ApiResponse.ok("Đã đánh dấu sản phẩm là đã bán!"));
     }
+
+    @PostMapping("/set-favorite")
+    public ResponseEntity<ApiResponse<String>> setFavorite(@RequestParam Integer productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        productService.setFavorite(productId, currentEmail);
+
+        return ResponseEntity.ok(ApiResponse.ok("Them/ xoa yeu thich thanh cong!"));
+    }
+
+    @GetMapping("/get-favorite")
+    public ResponseEntity<ApiResponse<List<Product>>> getFavorite() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        List<Product> listProduct = productService.getFavorite(currentEmail);
+
+        return ResponseEntity.ok(ApiResponse.ok(listProduct));
+    }
+
+
 }

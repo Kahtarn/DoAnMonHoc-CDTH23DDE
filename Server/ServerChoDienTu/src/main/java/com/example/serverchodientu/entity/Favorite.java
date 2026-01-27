@@ -25,7 +25,7 @@ public class Favorite {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "create_at", insertable = false, updatable = false)
+    @Column(name = "create_at")
     private Timestamp createAt;
 
     public Favorite(Integer id, User user, Product product, Timestamp createAt) {

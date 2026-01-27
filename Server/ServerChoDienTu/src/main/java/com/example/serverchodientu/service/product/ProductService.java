@@ -1,22 +1,19 @@
 package com.example.serverchodientu.service.product;
 
+
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
-import com.example.serverchodientu.entity.Categories;
-import com.example.serverchodientu.entity.Product;
-import com.example.serverchodientu.entity.ProductImage;
-import com.example.serverchodientu.entity.User;
-import com.example.serverchodientu.repository.CategoriesRepository;
-import com.example.serverchodientu.repository.ProductImageRepository;
-import com.example.serverchodientu.repository.ProductRepository;
-import com.example.serverchodientu.repository.UserRepository;
+import com.example.serverchodientu.entity.*;
+import com.example.serverchodientu.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,13 +22,16 @@ public class ProductService {
     private final ProductRepository productRepo;
     private final ProductImageRepository productImageRepo;
     private final CategoriesRepository categoriesRepo;
+    private final FavoriteRepository favoriteRepo;
 
-    public ProductService(ProductRepository productRepo, ProductImageRepository productImageRepo, UserRepository userRepo, CategoriesRepository categoriesRepo) {
+    public ProductService(ProductRepository productRepo, ProductImageRepository productImageRepo, UserRepository userRepo, CategoriesRepository categoriesRepo, FavoriteRepository favoriteRepo) {
         this.productRepo = productRepo;
         this.productImageRepo = productImageRepo;
         this.userRepo = userRepo;
         this.categoriesRepo = categoriesRepo;
+        this.favoriteRepo = favoriteRepo;
     }
+
     public List<Product> getAll() {
         return productRepo.findAllByOrderByCreateAtDesc(0);
     }
@@ -145,6 +145,36 @@ public class ProductService {
         }
 
         product.setStatus(1);
+    }
+
+    @Transactional
+    public void setFavorite(Integer productId, String email) {
+        Product p = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Khong tim thay product"));
+        User u = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("Khong tim thay san pham"));
+
+        Optional<Favorite> favoriteOpt = favoriteRepo.findFavoriteByUserAndProduct(u, p);
+
+        if (favoriteOpt.isPresent()) {
+            favoriteRepo.delete(favoriteOpt.get());
+        } else {
+            Favorite favorite = new Favorite();
+            favorite.setProduct(p);
+            favorite.setUser(u);
+            favorite.setCreateAt(Timestamp.valueOf(LocalDateTime.now()));
+            favoriteRepo.save(favorite);
+        }
+    }
+
+    public List<Product> getFavorite(String email) {
+        User u = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("Khong tim thay san pham"));
+
+        List<Product> listProduct = favoriteRepo.findFavoriteProductsByUserId(u.getId());
+
+        if (listProduct.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return listProduct;
+        }
     }
 
 }

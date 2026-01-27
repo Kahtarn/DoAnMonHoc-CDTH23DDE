@@ -35,10 +35,8 @@ import java.util.*
 
 class ProductDetailActivity : AppCompatActivity() {
 
-    // --- CONSTANTS ---
     private val BASE_URL = "http://10.0.2.2:8080"
 
-    // --- VIEWS ---
     private lateinit var tvTitle: TextView
     private lateinit var tvPrice: TextView
     private lateinit var tvAddress: TextView
@@ -47,22 +45,16 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var rvProductImages: RecyclerView
     private lateinit var tvImageCounter: TextView
 
-    // Seller Info Views
     private lateinit var layoutSellerInfo: ConstraintLayout
     private lateinit var ivSellerAvatar: ImageView
     private lateinit var tvSellerName: TextView
     private lateinit var tvSellerPhonePreview: TextView
 
-    // Action Views
     private lateinit var btnBack: ImageView
     private lateinit var btnFavorite: ImageView
     private lateinit var btnCallSeller: AppCompatButton
     private lateinit var btnChatWithSeller: LinearLayout
-    private lateinit var btnMoreOptions: ImageView
-    private lateinit var edtCommentInput: EditText
-    private lateinit var btnSendComment: ImageView
 
-    // --- DATA ---
     private val gson = Gson()
     private var currentProductId: Int = -1
     private var isFavorited: Boolean = false
@@ -72,7 +64,6 @@ class ProductDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_detail)
 
-        // 1. Lấy ID sản phẩm
         currentProductId = intent.getIntExtra("PRODUCT_ID", -1)
         if (currentProductId == -1) {
             showToast("Lỗi: Không tìm thấy sản phẩm!")
@@ -80,14 +71,12 @@ class ProductDetailActivity : AppCompatActivity() {
             return
         }
 
-        // 2. Khởi tạo View & Sự kiện & Load Data
         initViews()
         setupEvents()
         loadProductData()
     }
 
     private fun initViews() {
-        // Product Info
         tvTitle = findViewById(R.id.tvProductTitle)
         tvPrice = findViewById(R.id.tvProductPrice)
         tvAddress = findViewById(R.id.tvProductAddress)
@@ -96,26 +85,20 @@ class ProductDetailActivity : AppCompatActivity() {
         rvProductImages = findViewById(R.id.rvProductImages)
         tvImageCounter = findViewById(R.id.tvImageCounter)
 
-        // Seller Info
         layoutSellerInfo = findViewById(R.id.layoutSellerInfo)
         ivSellerAvatar = findViewById(R.id.ivSellerAvatar)
         tvSellerName = findViewById(R.id.tvSellerName)
         tvSellerPhonePreview = findViewById(R.id.tvSellerPhonePreview)
 
-        // Actions
         btnBack = findViewById(R.id.btnBack)
         btnFavorite = findViewById(R.id.btnFavorite)
-        btnMoreOptions = findViewById(R.id.btnMoreOptions)
         btnCallSeller = findViewById(R.id.btnCallSeller)
         btnChatWithSeller = findViewById(R.id.btnChatWithSeller)
-        edtCommentInput = findViewById(R.id.edtCommentInput)
-        btnSendComment = findViewById(R.id.btnSendComment)
     }
 
     private fun setupEvents() {
         btnBack.setOnClickListener { finish() }
         btnFavorite.setOnClickListener { toggleFavorite() }
-        btnMoreOptions.setOnClickListener { showMoreOptions() }
 
         btnCallSeller.setOnClickListener {
             sellerPhoneNumber?.let { phone ->
@@ -125,17 +108,7 @@ class ProductDetailActivity : AppCompatActivity() {
         }
 
         btnChatWithSeller.setOnClickListener { showToast("Tính năng Chat đang phát triển") }
-
-        btnSendComment.setOnClickListener {
-            val content = edtCommentInput.text.toString().trim()
-            if (content.isNotEmpty()) {
-                showToast("Đã gửi: $content")
-                edtCommentInput.setText("")
-            }
-        }
     }
-
-    // --- API & DATA LOGIC ---
 
     private fun loadProductData() {
         val url = "$BASE_URL/api/product/details/$currentProductId"
@@ -154,7 +127,6 @@ class ProductDetailActivity : AppCompatActivity() {
 
                 response.body?.string()?.let { json ->
                     try {
-                        // FIX QUAN TRỌNG: Dùng TypeToken để parse Generic Data
                         val type = object : TypeToken<ApiResponseData<DetailsData>>() {}.type
                         val apiResponse = gson.fromJson<ApiResponseData<DetailsData>>(json, type)
 

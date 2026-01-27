@@ -16,7 +16,6 @@ class FullScreenImageAdapter(private val images: List<String>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        // Tạo file item_image_fullscreen.xml xem hướng dẫn bên dưới *
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_image_fullscreen, parent, false)
         return ViewHolder(view)

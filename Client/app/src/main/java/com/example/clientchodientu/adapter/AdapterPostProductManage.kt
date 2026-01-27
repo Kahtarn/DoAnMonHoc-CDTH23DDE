@@ -15,7 +15,6 @@ import java.util.Date
 import java.util.TimeZone
 
 class AdapterPostProductManage(private var listSelling : List<Product>) : RecyclerView.Adapter<AdapterPostProductManage.SellingViewHolder> () {
-
     var onItemClick: ((Product) -> Unit)? = null
     var onEditClick: ((Product) -> Unit)? = null
     var onDeleteClick: ((Product) -> Unit)? = null

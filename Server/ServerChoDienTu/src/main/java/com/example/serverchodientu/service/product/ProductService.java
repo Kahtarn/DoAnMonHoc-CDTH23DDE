@@ -1,5 +1,6 @@
 package com.example.serverchodientu.service.product;
 
+import com.example.serverchodientu.dto.product.EditPostRequest;
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
 import com.example.serverchodientu.dto.product.SetFavoriteRespond;
@@ -56,7 +57,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Product updateProduct(Integer productId, String currentEmail, PostProductRequest request) {
+    public Product updateProduct(Integer productId, String currentEmail, EditPostRequest request) {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
@@ -64,16 +65,51 @@ public class ProductService {
             throw new RuntimeException("Bạn không có quyền chỉnh sửa sản phẩm này!");
         }
 
+        // 1. Cập nhật thông tin cơ bản
         if (request.getCategoryId() != null) {
             Categories category = categoriesRepo.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
             product.setCategory(category);
         }
-
         product.setTitle(request.getTitle());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
 
+        // 2. Xử lý Thumbnail (Ảnh bìa)
+        // Nếu Android gửi file mới, ta cập nhật lại. Nếu không gửi, giữ nguyên cái cũ.
+        if (request.getThumbnailUrl() != null && !request.getThumbnailUrl().isEmpty()) {
+            String fileName = saveToDisk(request.getThumbnailUrl());
+            product.setThumbnailUrl("/uploads/" + fileName);
+        }
+
+        // 3. Xử lý danh sách ảnh chi tiết (ProductImage)
+        // Lấy danh sách ảnh hiện có trong DB
+        List<ProductImage> currentImages = productImageRepo.findByProductId_Id(productId);
+
+        // Xóa những ảnh cũ KHÔNG nằm trong danh sách existingImages gửi từ Client
+        List<String> existingUrls = request.getExistingImages() != null ? request.getExistingImages() : List.of();
+
+        List<ProductImage> imagesToRemove = currentImages.stream()
+                .filter(img -> !existingUrls.contains(img.getImageUrl()))
+                .collect(Collectors.toList());
+
+        if (!imagesToRemove.isEmpty()) {
+            productImageRepo.deleteAll(imagesToRemove);
+        }
+
+        // Lưu các ảnh mới được upload thêm (nếu có)
+        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+            List<ProductImage> newImages = request.getImageUrl().stream()
+                    .filter(file -> file != null && !file.isEmpty())
+                    .map(file -> {
+                        String fileName = saveToDisk(file);
+                        ProductImage img = new ProductImage();
+                        img.setProductId(product);
+                        img.setImageUrl("/uploads/" + fileName);
+                        return img;
+                    }).collect(Collectors.toList());
+            productImageRepo.saveAll(newImages);
+        }
 
         return productRepo.save(product);
     }

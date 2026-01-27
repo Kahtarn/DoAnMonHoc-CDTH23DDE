@@ -29,7 +29,7 @@ object TokenManager {
             putString(KEY_ACCESS_TOKEN, accessToken)
             putString(KEY_REFRESH_TOKEN, refreshToken)
             putString(KEY_FCM_TOKEN, fcmToken)
-            apply()
+            commit()
         }
     }
 
@@ -39,10 +39,7 @@ object TokenManager {
     fun getFCMToken(): String? = prefs.getString(KEY_FCM_TOKEN, null)
 
     fun updateFCMToken(context: Context,userId: Int, token: String) {
-        val client = OkHttpClient()
         val url = "http://10.0.2.2:8080/api/chat/set-fcm-token"
-
-        // Tạo JSON chuẩn
         val jsonObject = JSONObject()
         jsonObject.put("userId", userId)
         jsonObject.put("token", token)
@@ -50,7 +47,6 @@ object TokenManager {
         val requestBody = jsonObject.toString().toRequestBody("application/json".toMediaType())
         val request = Request.Builder().url(url).post(requestBody).build()
 
-        // Chạy bất đồng bộ để không treo UI
         ApiClient.getClient(context).newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("FCM", "Lỗi mạng khi gửi token", e)

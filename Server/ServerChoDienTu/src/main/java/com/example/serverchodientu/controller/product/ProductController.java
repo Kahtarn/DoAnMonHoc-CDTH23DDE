@@ -1,6 +1,7 @@
 package com.example.serverchodientu.controller.product;
 
 import com.example.serverchodientu.dto.ApiResponse;
+import com.example.serverchodientu.dto.product.EditPostRequest;
 import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
 import com.example.serverchodientu.entity.Product;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -91,22 +93,13 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(myProduct));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse<Product>> updateProduct(
+    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product> update(
             @PathVariable Integer id,
-            @RequestBody PostProductRequest request) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String currentEmail = authentication.getName();
-
-            Product updatedProduct = productService.updateProduct(id, currentEmail, request);
-
-            return ResponseEntity.ok(ApiResponse.ok(updatedProduct));
-        } catch (RuntimeException e) {
-            HttpStatus status = e.getMessage().contains("quyền") ? HttpStatus.FORBIDDEN : HttpStatus.NOT_FOUND;
-            return ResponseEntity.status(status)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+            @ModelAttribute EditPostRequest request,
+            Principal principal
+    ) {
+        return ResponseEntity.ok(productService.updateProduct(id, principal.getName(), request));
     }
 
     @PatchMapping("/{id}/mark-as-sold")

@@ -12,8 +12,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.clientchodientu.R
 import com.example.clientchodientu.dto.product.CategoryResponse
-import com.example.clientchodientu.dto.product.PostRequest
-import com.example.clientchodientu.dto.product.PostResonse
+//import com.example.clientchodientu.dto.product.PostRequest
+//import com.example.clientchodientu.dto.product.PostResonse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.untils.ApiClient
 import com.google.android.material.textfield.TextInputEditText
@@ -68,7 +68,7 @@ class EditProduct : AppCompatActivity() {
         btnSave = findViewById(R.id.btnSave)
         btnSave.setOnClickListener {
             lifecycleScope.launch {
-                UpdatePostProduct()
+//                UpdatePostProduct()
             }
         }
         btnHuy = findViewById(R.id.btnCancel)
@@ -118,57 +118,57 @@ class EditProduct : AppCompatActivity() {
             }
         }
     }
-    suspend fun UpdatePostProduct(){
-        withContext(Dispatchers.IO) {
-            try {
-                val title = Tvtitle.text.toString()
-                val priceStr = Tvprice.text.toString()
-                val description = Tvdescription.text.toString()
-
-                if (selectedCategoryId == -1) {
-                    val currentCategoryName = Actvcategory.text.toString()
-                    selectedCategoryId = listCategoryFull.find { it.name == currentCategoryName }?.id ?: -1
-                }
-
-                val updateData = PostRequest(
-                    title = title,
-                    categoryId = selectedCategoryId,
-                    price = priceStr.toBigDecimalOrNull() ?: BigDecimal.ZERO,
-                    description = description
-                )
-
-                val jsonBody = gson.toJson(updateData)
-                val requestBody = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-
-                val productId = intent.getIntExtra("id", -1)
-                val updateUrl = "http://10.0.2.2:8080/api/product/update/$productId"
-
-                val request = Request.Builder()
-                    .url(updateUrl)
-                    .put(requestBody)
-                    .build()
-
-                val response = ApiClient.getClient(this@EditProduct).newCall(request).execute()
-                val responseBody = response.body?.string()
-
-                withContext(Dispatchers.Main) {
-                    if (response.isSuccessful && responseBody != null) {
-                        val apiResponse = gson.fromJson(responseBody, PostResonse::class.java)
-                        if (apiResponse.success) {
-                            Toast.makeText(this@EditProduct, "Cập nhật thành công!", Toast.LENGTH_SHORT).show()
-                            finish()
-                        } else {
-                            Toast.makeText(this@EditProduct, apiResponse.message, Toast.LENGTH_LONG).show()
-                        }
-                    } else {
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@EditProduct, "Lỗi kết nối: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
+//    suspend fun UpdatePostProduct(){
+//        withContext(Dispatchers.IO) {
+//            try {
+//                val title = Tvtitle.text.toString()
+//                val priceStr = Tvprice.text.toString()
+//                val description = Tvdescription.text.toString()
+//
+//                if (selectedCategoryId == -1) {
+//                    val currentCategoryName = Actvcategory.text.toString()
+//                    selectedCategoryId = listCategoryFull.find { it.name == currentCategoryName }?.id ?: -1
+//                }
+//
+//                val updateData = PostRequest(
+//                    title = title,
+//                    categoryId = selectedCategoryId,
+//                    price = priceStr.toBigDecimalOrNull() ?: BigDecimal.ZERO,
+//                    description = description
+//                )
+//
+//                val jsonBody = gson.toJson(updateData)
+//                val requestBody = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+//
+//                val productId = intent.getIntExtra("id", -1)
+//                val updateUrl = "http://10.0.2.2:8080/api/product/update/$productId"
+//
+//                val request = Request.Builder()
+//                    .url(updateUrl)
+//                    .put(requestBody)
+//                    .build()
+//
+//                val response = ApiClient.getClient(this@EditProduct).newCall(request).execute()
+//                val responseBody = response.body?.string()
+//
+//                withContext(Dispatchers.Main) {
+//                    if (response.isSuccessful && responseBody != null) {
+//                        val apiResponse = gson.fromJson(responseBody, PostResonse::class.java)
+//                        if (apiResponse.success) {
+//                            Toast.makeText(this@EditProduct, "Cập nhật thành công!", Toast.LENGTH_SHORT).show()
+//                            finish()
+//                        } else {
+//                            Toast.makeText(this@EditProduct, apiResponse.message, Toast.LENGTH_LONG).show()
+//                        }
+//                    } else {
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                withContext(Dispatchers.Main) {
+//                    Toast.makeText(this@EditProduct, "Lỗi kết nối: ${e.message}", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
+//    }
 }
 

@@ -85,7 +85,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
             try {
                 val gson = Gson()
                 val client = OkHttpClient()
-                val url = "http://10.0.2.2:8080/api/auth/forgot-password"
+                val url = "http://192.168.1.111:8080/api/auth/forgot-password"
                 val mediaType = "application/json; charset=utf-8".toMediaType()
                 val forgotPasswordRequest = ForgotPasswordRequest(email)
 

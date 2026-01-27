@@ -37,7 +37,7 @@ import kotlin.toString
 
 class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
     private var client = OkHttpClient()
-    private var urlBase = "http://10.0.2.2:8080/api/auth/";
+    private var urlBase = "http://192.168.1.111:8080/api/auth/";
     private var gson = Gson()
     private lateinit var otp1: EditText
     private lateinit var otp2: EditText

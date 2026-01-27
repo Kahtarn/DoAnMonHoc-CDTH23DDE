@@ -25,7 +25,7 @@ class ProductImageAdapter(
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         val path = imageList[position]
-        val BASE_URL = "http://10.0.2.2:8080"
+        val BASE_URL = "http://192.168.1.111:8080"
         val listIMGUrl = if (path.startsWith("http")) path else BASE_URL + path
 
         Glide.with(holder.imageView.context)

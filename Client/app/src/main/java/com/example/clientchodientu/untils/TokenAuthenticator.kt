@@ -12,52 +12,54 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class TokenAuthenticator(private val context: Context) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        //kiem 2 lan neu chua co thi bo qua
         if (responseCount(response) >= 2) {
+            android.util.Log.e("AUTH", "Thử lại quá nhiều lần. Dừng lại.")
             return null
         }
 
-        //  Lấy Refresh Token ra
-        val refreshToken = TokenManager.getRefreshToken()
+        synchronized(this) {
+            val accessTokenInManager = TokenManager.getToken()
 
-        // Nếu không có Refresh TokenVề trang đăng nhập
-        if (refreshToken == null) {
-            logout()
-            return null
-        }
+            if (response.request.header("Authorization") != "Bearer $accessTokenInManager") {
+                return response.request.newBuilder()
+                    .header("Authorization", "Bearer $accessTokenInManager")
+                    .build()
+            }
 
-        //  Thực hiện gọi API xin cấp lại token
-        // Lưu ý: Phải tạo client mới để không bị dính Interceptor cũ
-        val newTokenResponse = getNewToken(refreshToken)
+            val refreshToken = TokenManager.getRefreshToken() ?: run {
+                logout()
+                return null
+            }
 
-        // 4. Xử lý kết quả
-        if (newTokenResponse != null && newTokenResponse.success) {
-            // A. THÀNH CÔNG: Cấp được chìa khóa mới
-            val newAccessToken = newTokenResponse.data.accessToken
-            val newRefreshToken = newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
+            val newTokenResponse = getNewToken(refreshToken)
 
+            if (newTokenResponse != null && newTokenResponse.success) {
+                val newAccess = newTokenResponse.data.accessToken
+                val newRefresh = newTokenResponse.data.refreshToken ?: refreshToken
 
-            TokenManager.saveTokens(newAccessToken, newRefreshToken, "")
+                TokenManager.saveTokens(newAccess, newRefresh, TokenManager.getFCMToken() ?: "")
 
-            // Trả về request cũ nhưng thay Header bằng token MỚI
-            return response.request.newBuilder()
-                .header("Authorization", "Bearer $newAccessToken")
-                .build()
-        } else {
-            // B. THẤT BẠI: Refresh Token cũng hết hạn (sau 7 ngày) -> Về trang đăng nhập
-            logout()
-            return null
+                return response.request.newBuilder()
+                    .header("Authorization", "Bearer $newAccess")
+                    .build()
+            } else {
+                android.util.Log.e("AUTH", "Refresh Token thất bại hoặc hết hạn.")
+                logout()
+                return null
+            }
         }
     }
 
-    // Hàm gọi API Refresh Token
     private fun getNewToken(refreshToken: String): LoginResponse? {
-        val client = OkHttpClient() // Client sạch, không Interceptor
-        val json = "{\"refreshToken\": \"$refreshToken\"}" // Body JSON gửi lên
+        val client = OkHttpClient()
+        val json = "{\"refreshToken\": \"$refreshToken\"}"
         val body = json.toRequestBody("application/json".toMediaType())
 
+        val oldAccessToken = TokenManager.getToken()
+
         val request = Request.Builder()
-            .url("http://10.0.2.2:8080/api/auth/refresh-token") // Đảm bảo API này đúng
+            .url("http://192.168.1.111:8080/api/auth/refresh-token")
+            .header("Authorization", "Bearer $oldAccessToken")
             .post(body)
             .build()
 
@@ -70,20 +72,17 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
                 null
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }
 
-    // Hàm Logout
     private fun logout() {
-        TokenManager.clear() // Xóa sạch token cũ
+        TokenManager.clear()
         val intent = Intent(context, LoginActivity::class.java)
-        // Xóa hết các màn hình cũ, chỉ giữ lại Login
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         context.startActivity(intent)
     }
-
-    // Đếm số lần request đã bị thử lại
     private fun responseCount(response: Response): Int {
         var result = 1
         var prior = response.priorResponse

@@ -17,6 +17,7 @@ import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.ProductResponse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.entity.Product
+import com.example.clientchodientu.ui.product.CreatePostActivity
 import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.TokenManager
 import kotlinx.coroutines.launch
@@ -33,7 +34,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.Request
 
 class HomeActivity : AppCompatActivity() {
-    private val baseUrl = "http://10.0.2.2:8080/api"
+    private val baseUrl = "http://192.168.1.111:8080/api"
     private val urlProductAll = "$baseUrl/product/getAll"
     private val urlCategory = "$baseUrl/category/getCategories"
     private fun getFilterUrl(id: Int) = "$baseUrl/product/getByCategory?categoryId=$id"
@@ -85,6 +86,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_add -> {
+                    startActivity(Intent(this, CreatePostActivity::class.java))
                     true
                 }
 

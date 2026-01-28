@@ -1,6 +1,8 @@
 package com.example.clientchodientu.ui.user
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -11,12 +13,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
-import com.example.clientchodientu.adapter.AdapterSellingProduct
+import com.example.clientchodientu.adapter.AdapterPostProductManage
 import com.example.clientchodientu.dto.product.DeleteProduct
 import com.example.clientchodientu.dto.product.PostManagerResponse
 import com.example.clientchodientu.entity.Product
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.ui.edit.EditPostActivity
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.TokenManager
+
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +30,7 @@ import okhttp3.Request
 class PostManagerActivity : AppCompatActivity() {
     private lateinit var rcv : RecyclerView
     private lateinit var selling : TextView
+    private lateinit var back : ImageButton
     private val gson = GsonBuilder().create()
     private lateinit var sold : TextView
     private lateinit var token : String
@@ -45,6 +50,10 @@ class PostManagerActivity : AppCompatActivity() {
         rcv = findViewById(R.id.rvPosts)
         selling = findViewById(R.id.btnSelling)
         sold = findViewById(R.id.btnSold)
+        back = findViewById(R.id.btnBack)
+        back.setOnClickListener {
+            finish()
+        }
         TokenManager.init(this)
         token = TokenManager.getToken().toString()
         rcv.layoutManager = LinearLayoutManager(this)
@@ -140,6 +149,38 @@ class PostManagerActivity : AppCompatActivity() {
             }
         }
     }
+    private suspend fun markasSold(productId: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                val url = "http://10.0.2.2:8080/api/product/$productId/mark-as-sold"
+                val body = okhttp3.RequestBody.create(null, "")
+                val request = Request.Builder()
+                    .url(url)
+                    .patch(body)
+                    .build()
+
+                val response = ApiClient.getClient(this@PostManagerActivity).newCall(request).execute()
+                val responseBody = response.body?.string()
+                val apiResponse = gson.fromJson(responseBody, DeleteProduct::class.java)
+                val success = apiResponse.success
+                val message = apiResponse.message
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && success) {
+                        Toast.makeText(this@PostManagerActivity, message, Toast.LENGTH_SHORT).show()
+                        loadSellingProduct()
+                    } else {
+                        val errorMsg = apiResponse?.message ?: "Bán thất bại"
+                        Toast.makeText(this@PostManagerActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@PostManagerActivity, "Lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     private fun showDeleteDialog(productId: Int) {
         androidx.appcompat.app.AlertDialog.Builder(this)
@@ -155,7 +196,7 @@ class PostManagerActivity : AppCompatActivity() {
     }
 
     private fun setupAdapter(list: List<Product>) {
-        val adapter = AdapterSellingProduct(list)
+        val adapter = AdapterPostProductManage(list)
         rcv.adapter = adapter
 
         adapter.onDeleteClick = { product ->
@@ -163,7 +204,20 @@ class PostManagerActivity : AppCompatActivity() {
         }
 
         adapter.onEditClick = { product ->
-
+            val intent = Intent(this, EditPostActivity::class.java)
+            intent.putExtra("productId",product.id)
+            intent.putExtra("title",product.title)
+            intent.putExtra("categoryName",product.category?.name)
+            intent.putExtra("categoryId",product.category?.id)
+            intent.putExtra("price",product.price.toString())
+            intent.putExtra("description",product.description)
+            intent.putExtra("thumbnailUrl",product.thumbnailUrl)
+            startActivity(intent)
+        }
+        adapter.onSellingClick ={ product ->
+            lifecycleScope.launch {
+                markasSold(product.id)
+            }
         }
     }
 

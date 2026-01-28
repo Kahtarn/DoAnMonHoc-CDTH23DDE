@@ -1,7 +1,8 @@
-package com.example.clientchodientu.untils
+package com.example.clientchodientu.untils.token
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.example.clientchodientu.dto.auth.login.LoginResponse
 import com.example.clientchodientu.ui.auth.LoginActivity
 import com.google.gson.Gson
@@ -12,8 +13,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class TokenAuthenticator(private val context: Context) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        //kiem 2 lan neu chua co thi bo qua
         if (responseCount(response) >= 2) {
+            Log.e("AUTH", "Thử lại quá nhiều lần. Dừng lại.")
             return null
         }
 
@@ -22,7 +23,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
 
         // Nếu không có Refresh TokenVề trang đăng nhập
         if (refreshToken == null) {
-          TokenManager.logout(context)
+            logout()
             return null
         }
 
@@ -35,9 +36,9 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
             // A. THÀNH CÔNG: Cấp được chìa khóa mới
             val newAccessToken = newTokenResponse.data.accessToken
             val newRefreshToken = newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
-            val userId=newTokenResponse.data.userId
 
-            TokenManager.saveTokens(newAccessToken, newRefreshToken, "",userId)
+
+            TokenManager.saveTokens(newAccessToken, newRefreshToken, "")
 
             // Trả về request cũ nhưng thay Header bằng token MỚI
             return response.request.newBuilder()
@@ -45,7 +46,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
                 .build()
         } else {
             // B. THẤT BẠI: Refresh Token cũng hết hạn (sau 7 ngày) -> Về trang đăng nhập
-           TokenManager.logout(context)
+            logout()
             return null
         }
     }
@@ -75,7 +76,13 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
     }
 
     // Hàm Logout
-
+    private fun logout() {
+        TokenManager.clear() // Xóa sạch token cũ
+        val intent = Intent(context, LoginActivity::class.java)
+        // Xóa hết các màn hình cũ, chỉ giữ lại Login
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
+    }
 
     // Đếm số lần request đã bị thử lại
     private fun responseCount(response: Response): Int {

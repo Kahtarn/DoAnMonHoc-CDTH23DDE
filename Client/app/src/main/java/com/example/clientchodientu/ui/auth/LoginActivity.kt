@@ -16,8 +16,9 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.dto.auth.login.LoginRequest
 import com.example.clientchodientu.dto.auth.login.LoginResponse
 import com.example.clientchodientu.ui.home.HomeActivity
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.TokenManager
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +46,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.ProfileUser)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -113,18 +114,18 @@ class LoginActivity : AppCompatActivity() {
                             // 3. Gửi Token lên Server
                             val token = task.result
                             Log.d("FCM", "Token hiện tại: $token")
-                            TokenManager.updateFCMToken(this@LoginActivity,data.data.userId, token)
-
+                            TokenManager.updateFCMToken(this@LoginActivity, token)
                             TokenManager.saveTokens(
                                 data.data.accessToken,
                                 data.data.refreshToken,
-                                token,data.data.userId
+                                token,
+                                data.data.firebaseToken
                             )
                         }
                         withContext(Dispatchers.Main) {
                             Log.d("token", data.data.accessToken)
-                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
-                                .show()
+//                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
+//                                .show()
                             val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                             intent.flags =
                                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

@@ -3,22 +3,22 @@ package com.example.clientchodientu.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
 import com.example.clientchodientu.entity.Product
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 
-class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerView.Adapter<AdapterSellingProduct.SellingViewHolder> () {
-
+class AdapterPostProductManage(private var listSelling : List<Product>) : RecyclerView.Adapter<AdapterPostProductManage.SellingViewHolder> () {
     var onItemClick: ((Product) -> Unit)? = null
     var onEditClick: ((Product) -> Unit)? = null
     var onDeleteClick: ((Product) -> Unit)? = null
-
+    var onSellingClick:((Product)-> Unit)? = null
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -41,13 +41,22 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
         holder.sellerName.text = p.seller?.fullName ?: "Người bán ẩn danh"
         holder.createAt.text = convertTimeAgo(p.createAt)
 
+        val BASE_URL = "http://10.0.2.2:8080"
+        val thumbnailUrl = BASE_URL + p.thumbnailUrl
+
+        Glide.with(holder.itemView.context)
+            .load(thumbnailUrl)
+            .placeholder(R.drawable.ic_launcher_background)
+            .error(R.drawable.ic_launcher_foreground)
+            .into(holder.img)
+
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(p)
         }
 
         holder.more.setOnClickListener { view ->
             val popup = androidx.appcompat.widget.PopupMenu(view.context, view)
-            popup.menuInflater.inflate(R.menu.more_management_menu, popup.menu) // Thay bằng tên file menu của bạn
+            popup.menuInflater.inflate(R.menu.more_management_menu, popup.menu)
 
             popup.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
@@ -57,6 +66,10 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
                     }
                     R.id.menu_delete -> {
                         onDeleteClick?.invoke(p)
+                        true
+                    }
+                    R.id.menu_sold ->{
+                        onSellingClick?.invoke(p)
                         true
                     }
                     else -> false
@@ -76,6 +89,7 @@ class AdapterSellingProduct(private var listSelling : List<Product>) : RecyclerV
         val location : TextView = itemView.findViewById(R.id.tvLocation)
         val sellerName : TextView = itemView.findViewById(R.id.tvSellerName)
         val createAt : TextView = itemView.findViewById(R.id.tvCreateAt)
+        val img: ImageView = itemView.findViewById(R.id.imgProductM)
         val more : ImageButton = itemView.findViewById(R.id.btnMore)
     }
 

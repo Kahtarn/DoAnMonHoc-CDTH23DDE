@@ -33,21 +33,20 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
         holder.tvSellerName.text = product.seller?.fullName ?: "Người bán ẩn danh"
         holder.tvCreateAt.text = convertTimeAgo(product.createAt)
 
+        val BASE_URL = "http://10.0.2.2:8080"
+        val thumbnailUrl = BASE_URL + product.thumbnailUrl
+
         Glide.with(holder.itemView.context)
-            .load(product.thumbnailUrl)
+            .load(thumbnailUrl)
             .placeholder(R.drawable.ic_launcher_background)
             .error(R.drawable.ic_launcher_foreground)
             .into(holder.img)
 
         holder.itemView.setOnClickListener {
-            // Khi bấm vào, gửi ID sản phẩm ra ngoài
             onItemClick?.invoke(product.id)
         }
     }
-    fun updateData(newList: List<Product>) {
-        this.ListProduct = newList
-        notifyDataSetChanged()
-    }
+
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString == null) return "Lỗi: Không có thời gian"
 
@@ -82,7 +81,7 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
     }
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tvTitle)
-        val img: ImageView = itemView.findViewById(R.id.imgProduct)
+        val img: ImageView = itemView.findViewById(R.id.imgProductM)
         val price: TextView = itemView.findViewById(R.id.tvPrice)
         val position: TextView = itemView.findViewById(R.id.tvLocation)
         val tvSellerName: TextView = itemView.findViewById(R.id.tv_SellerName)

@@ -6,28 +6,39 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.ProductImageAdapter
+import com.example.clientchodientu.dto.product.DetailsData
+import com.example.clientchodientu.dto.product.SetFavoriteRespond
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.ApiResponseData
 import com.example.clientchodientu.entity.ProductDetailData
-import com.example.clientchodientu.ui.auth.ImageViewerActivity
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.ApiResponse
+import com.example.clientchodientu.ui.product.ImageViewerActivity
+import com.example.clientchodientu.ui.chat.DetailChatActivity
+
+import com.example.clientchodientu.untils.token.ApiResponse
+import com.example.clientchodientu.untils.token.TokenManager
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -37,16 +48,13 @@ import java.io.IOException
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.TimeZone
+import java.util.*
 
 class ProductDetailActivity : AppCompatActivity() {
-    // 1. KHAI BÁO BIẾN (VARIABLES)
-    //Thông tin sản phẩm
-    private lateinit var tvTitle: TextView
 
-    private lateinit var imageAdapter: ProductImageAdapter
-    private lateinit var tvSubtitle: TextView
+    private val BASE_URL = "http://10.0.2.2:8080"
+
+    private lateinit var tvTitle: TextView
     private lateinit var tvPrice: TextView
     private lateinit var tvAddress: TextView
     private lateinit var tvTimePosted: TextView
@@ -54,295 +62,315 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var rvProductImages: RecyclerView
     private lateinit var tvImageCounter: TextView
 
-    //Thông tin người bán (Seller)
     private lateinit var layoutSellerInfo: ConstraintLayout
     private lateinit var ivSellerAvatar: ImageView
-    private lateinit var ivSellerBadge: ImageView
     private lateinit var tvSellerName: TextView
-    private lateinit var tvRatingCount: TextView
     private lateinit var tvSellerPhonePreview: TextView
 
-    //Tương tác (Action)
     private lateinit var btnBack: ImageView
-    private lateinit var btnShare: ImageView
-    private lateinit var btnMoreOptions: ImageView
     private lateinit var btnFavorite: ImageView
-    private lateinit var btnChatWithSeller: LinearLayout
     private lateinit var btnCallSeller: AppCompatButton
+    private lateinit var btnChatWithSeller: LinearLayout
 
-    //Bình luận (Comment)
-    private lateinit var layoutListComment: LinearLayout
-    private lateinit var layoutEmptyComment: LinearLayout
-    private lateinit var edtCommentInput: EditText
-    private lateinit var btnSendComment: ImageView
-
-    // Data Variables
-    private val client = OkHttpClient()
     private val gson = Gson()
     private var currentProductId: Int = -1
-    private var sellerId: Int = -1
     private var isFavorited: Boolean = false
 
-    // 2. LIFECYCLE (VÒNG ĐỜI)
+    private var sellerId: Int = -1
+    private var sellerPhoneNumber: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_detail)
 
-        getIntentData()
+        currentProductId = intent.getIntExtra("PRODUCT_ID", -1)
+        if (currentProductId == -1) {
+            showToast("Lỗi: Không tìm thấy sản phẩm!")
+            finish()
+            return
+        }
+        TokenManager.init(this)
+//        getIntentData()
 
         initViews()
-
         setupEvents()
-
         loadProductData()
     }
 
-    // 3. KHỞI TẠO VIEW & DATA (SETUP)
-
-    private fun getIntentData() {
-        // Lấy ID sản phẩm truyền từ màn hình trước
-//        currentProductId = 5//intent.getIntExtra("PRODUCT_ID", -1)
-//        Toast.makeText(this, "Đang chạy chế độ TEST: Product ID = 1", Toast.LENGTH_LONG).show()
-//        if (currentProductId == -1) {
-//            Toast.makeText(this, "Lỗi: Không tìm thấy sản phẩm!", Toast.LENGTH_SHORT).show()
-//            finish()
-//        }
-        // 1. Lấy ID sản phẩm từ Intent (do HomeActivity gửi sang)
-        // Số -1 là giá trị mặc định nếu không nhận được dữ liệu
-        currentProductId = intent.getIntExtra("PRODUCT_ID", -1)
-
-        // 2. Kiểm tra xem có nhận được ID hợp lệ không
-        if (currentProductId == -1) {
-            // Nếu lỗi (không có ID), báo lỗi và đóng màn hình này lại
-            Toast.makeText(this, "Lỗi: Không tìm thấy sản phẩm!", Toast.LENGTH_SHORT).show()
-            finish()
-        } else {
-            // (Tuỳ chọn) Hiện thông báo để kiểm tra xem nhận đúng ID chưa
-            // Toast.makeText(this, "Đang xem sản phẩm ID: $currentProductId", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun initViews() {
-        rvProductImages = findViewById(R.id.rvProductImages)
-        tvImageCounter = findViewById(R.id.tvImageCounter)
-        btnBack = findViewById(R.id.btnBack)
-        btnShare = findViewById(R.id.btnShare)
-        btnMoreOptions = findViewById(R.id.btnMoreOptions)
         tvTitle = findViewById(R.id.tvProductTitle)
         tvPrice = findViewById(R.id.tvProductPrice)
         tvAddress = findViewById(R.id.tvProductAddress)
         tvTimePosted = findViewById(R.id.tvTimePosted)
         tvDescription = findViewById(R.id.tvProductDescription)
-        btnFavorite = findViewById(R.id.btnFavorite)
+        rvProductImages = findViewById(R.id.rvProductImages)
+        tvImageCounter = findViewById(R.id.tvImageCounter)
+
         layoutSellerInfo = findViewById(R.id.layoutSellerInfo)
         ivSellerAvatar = findViewById(R.id.ivSellerAvatar)
-        ivSellerBadge = findViewById(R.id.ivSellerBadge)
         tvSellerName = findViewById(R.id.tvSellerName)
-        tvRatingCount = findViewById(R.id.tvRatingCount)
         tvSellerPhonePreview = findViewById(R.id.tvSellerPhonePreview)
-        layoutListComment = findViewById(R.id.layoutListComment)
-        layoutEmptyComment = findViewById(R.id.layoutEmptyComment)
-        edtCommentInput = findViewById(R.id.edtCommentInput)
-        btnSendComment = findViewById(R.id.btnSendComment)
+
+        btnBack = findViewById(R.id.btnBack)
+        btnFavorite = findViewById(R.id.btnFavorite)
         btnCallSeller = findViewById(R.id.btnCallSeller)
         btnChatWithSeller = findViewById(R.id.btnChatWithSeller)
     }
 
-    // 4. XỬ LÝ SỰ KIỆN (EVENTS)
-
     private fun setupEvents() {
         btnBack.setOnClickListener { finish() }
-
-        btnFavorite.setOnClickListener { toggleFavorite() }
-
-        btnMoreOptions.setOnClickListener { showMoreOptions() }
+        btnFavorite.setOnClickListener { updateFavoriteStatus() }
 
         btnCallSeller.setOnClickListener {
-            if (sellerId != -1) {
-                val phoneNumber = "0987654321"
-                val intent = Intent(Intent.ACTION_DIAL)
-                intent.data = Uri.parse("tel:$phoneNumber")
+            sellerPhoneNumber?.let { phone ->
+                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))
                 startActivity(intent)
-            } else {
-                Toast.makeText(this, "Không tìm thấy thông tin người bán", Toast.LENGTH_SHORT)
-                    .show()
-            }
+            } ?: showToast("Không có số điện thoại người bán")
         }
 
         btnChatWithSeller.setOnClickListener { handleChatAction() }
 
-        layoutSellerInfo.setOnClickListener {
-            Toast.makeText(this, "Xem User ID: $sellerId", Toast.LENGTH_SHORT).show()
-        }
 
-        btnSendComment.setOnClickListener {
-            val content = edtCommentInput.text.toString().trim()
-            if (content.isNotEmpty()) {
-                Toast.makeText(this, "Đã gửi: $content", Toast.LENGTH_SHORT).show()
-                edtCommentInput.setText("")
+    }
+
+    private fun loadProductData() {
+        val url = "$BASE_URL/api/product/details/$currentProductId"
+        val request = Request.Builder().url(url).build()
+
+        ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { showToast("Lỗi kết nối: ${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    runOnUiThread { showToast("Lỗi Server: ${response.code}") }
+                    return
+                }
+
+                response.body?.string()?.let { json ->
+                    try {
+                        val type = object : TypeToken<ApiResponseData<DetailsData>>() {}.type
+                        val apiResponse = gson.fromJson<ApiResponseData<DetailsData>>(json, type)
+
+                        if (apiResponse.success) {
+                            runOnUiThread { bindDataToUI(apiResponse.data) }
+                        } else {
+                            runOnUiThread { showToast(apiResponse.message) }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        runOnUiThread { showToast("Lỗi xử lý dữ liệu") }
+                    }
+                }
+            }
+        })
+    }
+
+    private fun bindDataToUI(data: DetailsData) {
+        val product = data.product
+        val seller = product.seller
+        sellerId = seller.id
+
+        tvTitle.text = product.title
+        tvPrice.text = formatCurrency(product.price)
+        tvDescription.text = product.description ?: "Không có mô tả"
+        tvTimePosted.text = convertTimeAgo(product.createAt)
+        setupFavorite()
+        if (seller != null) {
+            tvSellerName.text = seller.fullName
+            tvAddress.text = "${seller.wardName}, ${seller.provinceName}"
+            tvSellerPhonePreview.text = "Liên hệ: ${seller.phone}"
+            sellerPhoneNumber = seller.phone
+        }
+        val fullImageUrls = data.images.map { resolveUrl(it) }
+        setupImageSlider(fullImageUrls)
+    }
+
+    private fun handleChatAction() {
+//        Toast.makeText(this, "Đang mở chat...", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, DetailChatActivity::class.java)
+        intent.putExtra("PRODUCT_ID", currentProductId)
+        intent.putExtra("PARTNER_ID", sellerId)
+        intent.putExtra("PARTNER_NAME", tvSellerName.text.toString())
+        intent.putExtra("IS_FIRST_TIME_CHAT", true)
+
+        // Tính toán RoomName ngay tại đây để bên kia có cái dùng luôn
+
+        lifecycleScope.launch {
+            val myId =
+                TokenManager.getUserId(
+                    this@ProductDetailActivity
+                )
+            val ids = listOf(myId.toString(), sellerId.toString()).sorted()
+            val calculatedRoomName = "chat_user_${ids[0]}_user_${ids[1]}"
+            intent.putExtra("MY_ID", myId)
+            intent.putExtra("ROOM_NAME", calculatedRoomName)
+
+            withContext(Dispatchers.Main) {
+                Log.d("ProductD_MyId", myId.toString())
+                startActivity(intent)
             }
         }
     }
 
-    // 5. LOGIC NGHIỆP VỤ (BUSINESS LOGIC)
 
-    private fun loadProductData() {
-        val ipAddress = "10.0.2.2"
-        val port = "8080"
-        val url = "http://$ipAddress:$port/api/product/detail/$currentProductId"
+    private fun setupImageSlider(imageUrls: List<String>) {
+        if (imageUrls.isEmpty()) {
+            tvImageCounter.text = "0 / 0"
+            return
+        }
+        val adapter = ProductImageAdapter(imageUrls) { position ->
+            val intent = Intent(this, ImageViewerActivity::class.java)
+            intent.putStringArrayListExtra("IMAGES", ArrayList(imageUrls))
+            intent.putExtra("POSITION", position)
+            startActivity(intent)
+        }
+
+        rvProductImages.adapter = adapter
+        rvProductImages.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvProductImages.onFlingListener = null
+        val snapHelper = PagerSnapHelper()
+        snapHelper.attachToRecyclerView(rvProductImages)
+
+        // Update Counter (1/5)
+        rvProductImages.clearOnScrollListeners()
+        rvProductImages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val layoutManager = rvProductImages.layoutManager as LinearLayoutManager
+                    val pos = layoutManager.findFirstVisibleItemPosition()
+                    if (pos != RecyclerView.NO_POSITION) {
+                        tvImageCounter.text = "${pos + 1} / ${imageUrls.size}"
+                    }
+                }
+            }
+        })
+        tvImageCounter.text = "1 / ${imageUrls.size}"
+    }
+
+    private fun setupFavorite() {
+        // Giả sử có một API để kiểm tra trạng thái yêu thích
+        val url = "$BASE_URL/api/product/favorite-status/$currentProductId"
+        val request =
+            Request.Builder()
+                .url(url)
+                .get()
+                .build()
+
+        ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { showToast("Lỗi kết nối: ${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    runOnUiThread { showToast("Lỗi Server: ${response.code}") }
+                    return
+                }
+                try {
+                    val json = response.body?.string()
+                    val type = object : TypeToken<ApiResponseData<Boolean>>() {}.type
+                    val apiResponse = gson.fromJson<ApiResponseData<Boolean>>(json, type)
+
+                    if (apiResponse.success) {
+                        isFavorited = apiResponse.data
+                        runOnUiThread {
+                            val icon =
+                                if (isFavorited) R.drawable.ic_favorite_filled else R.drawable.outline_favorite_24
+                            btnFavorite.setImageResource(icon)
+                            Log.d("ProductDetail", "Favorite status:$currentProductId $isFavorited")
+                        }
+                    } else {
+                        runOnUiThread { showToast(apiResponse.message) }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread { showToast("Lỗi xử lý dữ liệu") }
+                }
+
+            }
+        })
+    }
+
+    private fun updateFavoriteStatus() {
+        val url = "$BASE_URL/api/product/set-favorite/$currentProductId"
         val request = Request.Builder()
             .url(url)
+            .post("".toRequestBody("application/json".toMediaType()))
             .build()
 
         ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                runOnUiThread {
-                    Toast.makeText(
-                        this@ProductDetailActivity,
-                        "Lỗi kết nối: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+                runOnUiThread { showToast("Lỗi kết nối: ${e.message}") }
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val jsonResponse = response.body?.string()
-                    if (jsonResponse != null) {
-                        try {
-                            val apiResponse = gson.fromJson(jsonResponse, ApiResponse::class.java)
+                if (!response.isSuccessful) {
+                    runOnUiThread {
+                        showToast("Lỗi Server: ${response.code}")
+                    }
+                    return
+                }
+                try {
+                    val json = response.body?.string()
+                    val type = object : TypeToken<ApiResponseData<SetFavoriteRespond>>() {}.type
+                    val apiResponse = gson.fromJson<ApiResponseData<SetFavoriteRespond>>(json, type)
 
-                            val data = apiResponse.data
-
-                            runOnUiThread {
-                                updateUI(data)
-                            }
-                        } catch (e: Exception) {
-                            runOnUiThread {
-                                Toast.makeText(
-                                    this@ProductDetailActivity,
-                                    "Lỗi đọc dữ liệu: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                    if (apiResponse.success) {
+                        isFavorited = apiResponse.data.isFavorite
+                        runOnUiThread {
+                            val icon =
+                                if (isFavorited) R.drawable.ic_favorite_filled else R.drawable.outline_favorite_24
+                            btnFavorite.setImageResource(icon)
+                            Log.d("ProductDetail", "Favorite status:$currentProductId $isFavorited")
+                        }
+                    } else {
+                        runOnUiThread {
+                            showToast(apiResponse.message)
                         }
                     }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@ProductDetailActivity,
-                            "Lỗi Server: ${response.code}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread { showToast("Lỗi xử lý dữ liệu") }
                 }
+
             }
         })
     }
 
-    private fun updateUI(data: ProductDetailData) {
-        val productObj = data.product
-        val sellerObj = productObj.seller
-        tvTitle.text = productObj.title
-        tvPrice.text = formatCurrency(productObj.price)
-        tvDescription.text = productObj.description ?: ""
-        tvTimePosted.text = convertTimeAgo(productObj.createAt)
-        tvSellerName.text = sellerObj.fullName
-        tvAddress.text = "Khu vực: ${sellerObj.wardName}, ${sellerObj.provinceName}"
-        tvSellerPhonePreview.text = "SĐT liên hệ: ${sellerObj.phone}"
-//        com.bumptech.glide.Glide.with(this)
-//            .load(sellerObj.thumbnailUrl)
-//            .placeholder(R.drawable.ic_launcher_foreground)
-//            .into(ivSellerAvatar)
-        setupImageSlider(data.images)
+    // --- HELPER FUNCTIONS ---
+
+    // Hàm nối chuỗi URL thông minh
+    private fun resolveUrl(path: String?): String {
+        if (path.isNullOrEmpty()) return ""
+        return if (path.startsWith("http")) path else BASE_URL + path
     }
 
-
-    private fun handleChatAction() {
-        Toast.makeText(this, "Đang mở chat...", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun toggleFavorite() {
-        isFavorited = !isFavorited
-        if (isFavorited) {
-            btnFavorite.setImageResource(R.drawable.favorite_filled)
-            Toast.makeText(this, "Đã yêu thích", Toast.LENGTH_SHORT).show()
-        } else {
-            btnFavorite.setImageResource(R.drawable.outline_favorite_24)
-            Toast.makeText(this, "Đã bỏ yêu thích", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun setupImageSlider(images: List<String>) {
-        if (images.isEmpty()) {
-            tvImageCounter.text = "0 / 0"
-            return
-        }
-        val adapter = ProductImageAdapter(images) { position ->
-            val intent = Intent(this, ImageViewerActivity::class.java)
-            intent.putStringArrayListExtra("IMAGES", ArrayList(images)) // Truyền list ảnh
-            intent.putExtra("POSITION", position) // Truyền vị trí ảnh đang xem
-            startActivity(intent)
-        }
-        rvProductImages.adapter = adapter
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvProductImages.layoutManager = layoutManager
-        val snapHelper = PagerSnapHelper()
-        rvProductImages.onFlingListener = null
-        snapHelper.attachToRecyclerView(rvProductImages)
-        rvProductImages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val centerView = snapHelper.findSnapView(layoutManager)
-                    if (centerView != null) {
-                        val pos = layoutManager.getPosition(centerView)
-                        tvImageCounter.text = "${pos + 1} / ${images.size}"
-                    }
-                }
-            }
-        })
-        tvImageCounter.text = "1 / ${images.size}"
-    }
-
-    fun formatCurrency(price: BigDecimal?): String {
-        if (price == null) return "0 đ"
-        try {
-            val formatter = DecimalFormat("#,###")
-            return "${formatter.format(price)} đ"
-        } catch (e: Exception) {
-            return "0 đ"
-        }
+    private fun formatCurrency(price: BigDecimal?): String {
+        return price?.let { DecimalFormat("#,###").format(it) + " đ" } ?: "0 đ"
     }
 
     private fun convertTimeAgo(timeString: String?): String {
-        if (timeString == null) return "Lỗi: Không có thời gian"
+        if (timeString.isNullOrEmpty()) return ""
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        format.timeZone = TimeZone.getTimeZone("UTC") // Server trả về giờ UTC
 
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-
-        try {
-            val past = format.parse(timeString) ?: return "Lỗi: Định dạng sai"
+        return try {
+            val past = format.parse(timeString) ?: return ""
             val now = Date()
-            format.timeZone = TimeZone.getTimeZone("UTC")
-            if (past.time > now.time) {
-                return "Lỗi dữ liệu (Thời gian ở tương lai)"
-            }
             val diff = now.time - past.time
-            val second = 1000L
-            val minute = 60 * second
+            val minute = 60 * 1000L
             val hour = 60 * minute
             val day = 24 * hour
-            return when {
+
+            when {
                 diff < minute -> "Vừa xong"
                 diff < hour -> "${diff / minute} phút trước"
                 diff < day -> "${diff / hour} giờ trước"
                 diff < 7 * day -> "${diff / day} ngày trước"
-                else -> {
-                    val outputFormat = SimpleDateFormat("dd/MM/yyyy")
-                    outputFormat.format(past)
-                }
+                else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -350,27 +378,8 @@ class ProductDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun showMoreOptions() {
-        val dialog = Dialog(this)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        val view = layoutInflater.inflate(R.layout.activity_bottom_sheet_options, null)
-        dialog.setContentView(view)
-        val window = dialog.window
-        if (window != null) {
-            window.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            val layoutParams = window.attributes
-            layoutParams.gravity = Gravity.CENTER
-            layoutParams.width = (resources.displayMetrics.widthPixels * 0.90).toInt()
-            window.attributes = layoutParams
-        }
-        val btnClose = view.findViewById<View>(R.id.btnCloseSheet)
-        btnClose.setOnClickListener {
-            dialog.dismiss()
-        }
-        dialog.show()
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 }

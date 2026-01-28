@@ -21,7 +21,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/product/")
+@RequestMapping("/api/product")
 public class ProductController {
     private final ProductService productService;
 
@@ -163,6 +163,18 @@ public class ProductController {
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
+    }
+
+    @GetMapping("/public/selling/{userId}")
+    public ResponseEntity<ApiResponse<List<Product>>> getPublicSelling(@PathVariable Integer userId) {
+        List<Product> products = productService.getPublicSellingProducts(userId);
+        return ResponseEntity.ok(ApiResponse.ok(products));
+    }
+
+    @GetMapping("/public/sold/{userId}")
+    public ResponseEntity<ApiResponse<List<Product>>> getPublicSold(@PathVariable Integer userId) {
+        List<Product> products = productService.getPublicSoldProducts(userId);
+        return ResponseEntity.ok(ApiResponse.ok(products));
     }
 
 }

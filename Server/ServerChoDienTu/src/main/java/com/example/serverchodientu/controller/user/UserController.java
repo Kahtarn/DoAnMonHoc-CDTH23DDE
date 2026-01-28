@@ -1,8 +1,10 @@
 package com.example.serverchodientu.controller.user;
 
 import com.example.serverchodientu.dto.ApiResponse;
+import com.example.serverchodientu.dto.user.privateUser.EditProfileRequest;
 import com.example.serverchodientu.dto.user.privateUser.ProfileUserResponse;
 import com.example.serverchodientu.dto.user.publicUser.DetailsUserResponse;
+import com.example.serverchodientu.entity.User;
 import com.example.serverchodientu.service.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,5 +33,14 @@ public class UserController {
 
         ProfileUserResponse profile = userService.getProfileUser(currentEmail);
         return ResponseEntity.ok(ApiResponse.ok(profile));
+    }
+
+    @PutMapping("/edit-profile/{id}")
+    public ResponseEntity<ApiResponse<String>> editMyProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        User u = userService.editProfile(currentEmail);
+        return ResponseEntity.ok(ApiResponse.success("Chỉnh sửa trang cá nhân thành công!"));
     }
 }

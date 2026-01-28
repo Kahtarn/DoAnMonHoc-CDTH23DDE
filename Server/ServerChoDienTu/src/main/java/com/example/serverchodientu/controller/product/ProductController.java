@@ -24,11 +24,9 @@ import java.util.List;
 @RequestMapping("/api/product/")
 public class ProductController {
     private final ProductService productService;
-    private final UserRepository userRepository;
 
-    public ProductController(ProductService productService, UserRepository userRepository) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping("/getAll")
@@ -44,7 +42,7 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(data));
     }
 
-    @GetMapping("/details/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<ApiResponse<ProductDetailsResponse>> getProductDetail(@PathVariable Integer id) {
         ProductDetailsResponse detail = productService.getProductDetail(id);
 

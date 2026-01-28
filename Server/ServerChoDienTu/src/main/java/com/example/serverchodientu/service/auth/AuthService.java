@@ -3,6 +3,7 @@ package com.example.serverchodientu.service.auth;
 import com.example.serverchodientu.dto.auth.LoginRequest;
 import com.example.serverchodientu.dto.auth.RegisterRequest;
 import com.example.serverchodientu.dto.auth.ResetPasswordRequest;
+import com.example.serverchodientu.dto.auth.VerifyOtpRequest;
 import com.example.serverchodientu.entity.EmailVerification;
 import com.example.serverchodientu.entity.RefreshToken;
 import com.example.serverchodientu.entity.User;
@@ -141,6 +142,17 @@ public class AuthService {
             throw new RuntimeException("Email này chưa được đăng ký tài khoản!");
         }
         mailService.sendOtpToVerifyEmail(email);
+    }
+
+    @Transactional
+    public String verifyOtp(VerifyOtpRequest request) {
+        EmailVerification ev = emailVerificationRepo.findByEmailAndOtpCode(request.getEmail(), request.getOtpCode())
+                .orElseThrow(() -> new RuntimeException("Mã OTP không chính xác! " + request.getEmail() + request.getOtpCode()));
+
+        if (ev.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Mã OTP đã hết hạn!");
+        }
+        return "Xác thực OTP thành công.";
     }
 
     @Transactional

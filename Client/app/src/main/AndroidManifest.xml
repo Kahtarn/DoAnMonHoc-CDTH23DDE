@@ -16,6 +16,9 @@
         android:theme="@style/Theme.ChoDienTuApplication"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.user.PublicDetailsUserActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.favorite.FavoriteActivity"
             android:exported="false" />
         <activity
@@ -81,6 +84,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <receiver
             android:name=".service.NotificationDismissReceiver"
             android:exported="false" />

@@ -11,14 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
 import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.EditPostRequest
 import com.example.clientchodientu.dto.product.EditPostResponse
 import com.example.clientchodientu.entity.Category
-import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.untils.token.ApiResponse
+import com.example.clientchodientu.untils.token.ApiClient
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +25,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody
-import java.math.BigDecimal
 class EditPostActivity : AppCompatActivity() {
     // UI components
     private lateinit var edtTitle: EditText

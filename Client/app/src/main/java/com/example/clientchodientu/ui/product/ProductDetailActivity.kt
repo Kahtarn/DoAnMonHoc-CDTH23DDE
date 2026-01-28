@@ -28,6 +28,7 @@ import com.example.clientchodientu.untils.ApiResponseData
 import com.example.clientchodientu.entity.ProductDetailData
 import com.example.clientchodientu.ui.product.ImageViewerActivity
 import com.example.clientchodientu.ui.chat.DetailChatActivity
+import com.example.clientchodientu.ui.user.PublicDetailsUserActivity
 
 import com.example.clientchodientu.untils.token.ApiResponse
 import com.example.clientchodientu.untils.token.TokenManager
@@ -95,6 +96,13 @@ class ProductDetailActivity : AppCompatActivity() {
         initViews()
         setupEvents()
         loadProductData()
+        layoutSellerInfo.setOnClickListener {
+            if (sellerId != -1) {
+                val nextIntent = Intent(this, PublicDetailsUserActivity::class.java)
+                nextIntent.putExtra("sellerId", sellerId)
+                startActivity(nextIntent)
+            }
+        }
     }
 
     private fun initViews() {

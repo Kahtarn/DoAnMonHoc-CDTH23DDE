@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.AdapterPostOfUser
 import com.example.clientchodientu.dto.product.PostManagerResponse
@@ -42,6 +43,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
     private lateinit var rvPost : RecyclerView
     private lateinit var btnSelling : TextView
     private lateinit var btnSold : TextView
+    private lateinit var ivAvatar: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,14 +89,17 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         postAdapter = AdapterPostOfUser(emptyList())
         rvPost.layoutManager = LinearLayoutManager(this)
         rvPost.adapter = postAdapter
+        ivAvatar = findViewById(R.id.ivAvatar)
         btnBack = findViewById(R.id.ivBack)
     }
 
     private fun receiveData() {
         sellerId = intent.getIntExtra("sellerId", -1)
-        Log.d("CHECK_ID", "ID nhận được: $sellerId")
     }
-
+    private fun resolveUrl(path: String?): String {
+        if (path.isNullOrEmpty()) return ""
+        return if (path.startsWith("http")) path else "http://10.0.2.2:8080" + path
+    }
     private fun bindData(user: DetailsUserResponse) {
         tvFullname.text = user.fullName
         tvEmail.text = "Email: ${user.email}"
@@ -102,6 +107,20 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         tvGender.text = "Giới tính: ${if (user.gender) "Nữ" else "Nam"}"
         tvAddress.text = "Địa chỉ: ${user.wardName}, ${user.provinceName}"
         tvCreateAt.text = "Ngày tham gia: ${formatDate(user.createAt)}"
+
+        val fullAvatarUrl = resolveUrl(user.avatarUrl)
+        Log.d("CHECK_LOAD_ANH", "URL Final: $fullAvatarUrl")
+
+        if (fullAvatarUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(fullAvatarUrl)
+                .placeholder(R.drawable.ic_user_placeholder)
+                .error(R.drawable.ic_user_placeholder)
+                .circleCrop()
+                .into(ivAvatar)
+        } else {
+            ivAvatar.setImageResource(R.drawable.ic_user_placeholder)
+        }
     }
 
     private fun formatDate(dateStr: String): String {
@@ -128,7 +147,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && !responseBodyString.isNullOrEmpty()) {
                     val apiResponse = gson.fromJson(responseBodyString, ApiUserResponse::class.java)
-
+                    Log.d("CHECK_JSON", "Full data: $responseBodyString")
                     withContext(Dispatchers.Main) {
                         apiResponse.data?.let { user ->
                             bindData(user)
@@ -142,10 +161,10 @@ class PublicDetailsUserActivity : AppCompatActivity() {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        android.widget.Toast.makeText(
+                        Toast.makeText(
                             this@PublicDetailsUserActivity,
                             "Lỗi Server: ${response.code}",
-                            android.widget.Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT
                         ).show()
                     }
                 }

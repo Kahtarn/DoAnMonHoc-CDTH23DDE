@@ -54,7 +54,6 @@ import java.util.*
 class ProductDetailActivity : AppCompatActivity() {
 
     private val BASE_URL = "http://10.0.2.2:8080"
-
     private lateinit var tvTitle: TextView
     private lateinit var tvPrice: TextView
     private lateinit var tvAddress: TextView
@@ -62,12 +61,10 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var tvDescription: TextView
     private lateinit var rvProductImages: RecyclerView
     private lateinit var tvImageCounter: TextView
-
     private lateinit var layoutSellerInfo: ConstraintLayout
     private lateinit var ivSellerAvatar: ImageView
     private lateinit var tvSellerName: TextView
     private lateinit var tvSellerPhonePreview: TextView
-
     private lateinit var btnBack: ImageView
     private lateinit var btnFavorite: ImageView
     private lateinit var btnCallSeller: AppCompatButton
@@ -112,12 +109,10 @@ class ProductDetailActivity : AppCompatActivity() {
         tvDescription = findViewById(R.id.tvProductDescription)
         rvProductImages = findViewById(R.id.rvProductImages)
         tvImageCounter = findViewById(R.id.tvImageCounter)
-
         layoutSellerInfo = findViewById(R.id.layoutSellerInfo)
         ivSellerAvatar = findViewById(R.id.ivSellerAvatar)
         tvSellerName = findViewById(R.id.tvSellerName)
         tvSellerPhonePreview = findViewById(R.id.tvSellerPhonePreview)
-
         btnBack = findViewById(R.id.btnBack)
         btnFavorite = findViewById(R.id.btnFavorite)
         btnCallSeller = findViewById(R.id.btnCallSeller)
@@ -136,8 +131,6 @@ class ProductDetailActivity : AppCompatActivity() {
         }
 
         btnChatWithSeller.setOnClickListener { handleChatAction() }
-
-
     }
 
     private fun loadProductData() {
@@ -174,6 +167,10 @@ class ProductDetailActivity : AppCompatActivity() {
         })
     }
 
+    private fun resolveUrl(path: String?): String {
+        if (path.isNullOrEmpty()) return ""
+        return if (path.startsWith("http")) path else BASE_URL + path
+    }
     private fun bindDataToUI(data: DetailsData) {
         val product = data.product
         val seller = product.seller
@@ -189,20 +186,33 @@ class ProductDetailActivity : AppCompatActivity() {
             tvAddress.text = "${seller.wardName}, ${seller.provinceName}"
             tvSellerPhonePreview.text = "Liên hệ: ${seller.phone}"
             sellerPhoneNumber = seller.phone
+
+            val avatarUrl = resolveUrl(seller.avatarUrl)
+
+            com.bumptech.glide.Glide.with(this)
+                .load(avatarUrl)
+                .placeholder(R.drawable.ic_user_placeholder)
+                .error(R.drawable.ic_user_placeholder)
+                .circleCrop()
+                .into(ivSellerAvatar)
+        }
+
+        if (seller != null) {
+            tvSellerName.text = seller.fullName
+            tvAddress.text = "${seller.wardName}, ${seller.provinceName}"
+            tvSellerPhonePreview.text = "Liên hệ: ${seller.phone}"
+            sellerPhoneNumber = seller.phone
         }
         val fullImageUrls = data.images.map { resolveUrl(it) }
         setupImageSlider(fullImageUrls)
     }
 
     private fun handleChatAction() {
-//        Toast.makeText(this, "Đang mở chat...", Toast.LENGTH_SHORT).show()
         val intent = Intent(this, DetailChatActivity::class.java)
         intent.putExtra("PRODUCT_ID", currentProductId)
         intent.putExtra("PARTNER_ID", sellerId)
         intent.putExtra("PARTNER_NAME", tvSellerName.text.toString())
         intent.putExtra("IS_FIRST_TIME_CHAT", true)
-
-        // Tính toán RoomName ngay tại đây để bên kia có cái dùng luôn
 
         lifecycleScope.launch {
             val myId =
@@ -241,7 +251,6 @@ class ProductDetailActivity : AppCompatActivity() {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(rvProductImages)
 
-        // Update Counter (1/5)
         rvProductImages.clearOnScrollListeners()
         rvProductImages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -258,7 +267,6 @@ class ProductDetailActivity : AppCompatActivity() {
     }
 
     private fun setupFavorite() {
-        // Giả sử có một API để kiểm tra trạng thái yêu thích
         val url = "$BASE_URL/api/product/favorite-status/$currentProductId"
         val request =
             Request.Builder()
@@ -307,12 +315,10 @@ class ProductDetailActivity : AppCompatActivity() {
             .url(url)
             .post("".toRequestBody("application/json".toMediaType()))
             .build()
-
         ApiClient.getClient(this).newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread { showToast("Lỗi kết nối: ${e.message}") }
             }
-
             override fun onResponse(call: Call, response: Response) {
                 if (!response.isSuccessful) {
                     runOnUiThread {
@@ -324,7 +330,6 @@ class ProductDetailActivity : AppCompatActivity() {
                     val json = response.body?.string()
                     val type = object : TypeToken<ApiResponseData<SetFavoriteRespond>>() {}.type
                     val apiResponse = gson.fromJson<ApiResponseData<SetFavoriteRespond>>(json, type)
-
                     if (apiResponse.success) {
                         isFavorited = apiResponse.data.isFavorite
                         runOnUiThread {
@@ -342,28 +347,16 @@ class ProductDetailActivity : AppCompatActivity() {
                     e.printStackTrace()
                     runOnUiThread { showToast("Lỗi xử lý dữ liệu") }
                 }
-
             }
         })
     }
-
-    // --- HELPER FUNCTIONS ---
-
-    // Hàm nối chuỗi URL thông minh
-    private fun resolveUrl(path: String?): String {
-        if (path.isNullOrEmpty()) return ""
-        return if (path.startsWith("http")) path else BASE_URL + path
-    }
-
     private fun formatCurrency(price: BigDecimal?): String {
         return price?.let { DecimalFormat("#,###").format(it) + " đ" } ?: "0 đ"
     }
-
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString.isNullOrEmpty()) return ""
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         format.timeZone = TimeZone.getTimeZone("UTC") // Server trả về giờ UTC
-
         return try {
             val past = format.parse(timeString) ?: return ""
             val now = Date()
@@ -371,7 +364,6 @@ class ProductDetailActivity : AppCompatActivity() {
             val minute = 60 * 1000L
             val hour = 60 * minute
             val day = 24 * hour
-
             when {
                 diff < minute -> "Vừa xong"
                 diff < hour -> "${diff / minute} phút trước"
@@ -384,8 +376,6 @@ class ProductDetailActivity : AppCompatActivity() {
             return "Lỗi xử lý thời gian"
         }
     }
-
-
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }

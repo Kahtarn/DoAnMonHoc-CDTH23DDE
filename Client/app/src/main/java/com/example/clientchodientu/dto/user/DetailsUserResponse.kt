@@ -9,5 +9,6 @@ data class DetailsUserResponse(
     val gender : Boolean,
     val provinceName : String,
     val wardName : String,
-    val createAt : String
+    val createAt : String,
+    val avatarUrl: String?
 )

@@ -6,6 +6,14 @@ import com.example.serverchodientu.dto.user.publicUser.DetailsUserResponse;
 import com.example.serverchodientu.entity.User;
 import com.example.serverchodientu.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class UserService {
@@ -55,5 +63,27 @@ public class UserService {
         u.setGender(edit.getGender());
 
         return userRepo.save(u);
+    }
+
+    public User updateAvatar(String email, MultipartFile file) {
+        User u = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        try {
+            String uploadDir = "uploads/avatars/";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) dir.mkdirs();
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            String avatarUrl = "/uploads/avatars/" + fileName;
+            u.setAvatarUrl(avatarUrl);
+
+            return userRepo.save(u);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi lưu file ảnh: " + e.getMessage());
+        }
     }
 }

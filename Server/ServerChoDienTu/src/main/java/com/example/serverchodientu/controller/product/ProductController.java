@@ -6,6 +6,8 @@ import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
 import com.example.serverchodientu.dto.product.SetFavoriteRespond;
 import com.example.serverchodientu.entity.Product;
+import com.example.serverchodientu.entity.User;
+import com.example.serverchodientu.repository.UserRepository;
 import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,7 +40,7 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(data));
     }
 
-    @GetMapping("/details/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<ApiResponse<ProductDetailsResponse>> getProductDetail(@PathVariable Integer id) {
         ProductDetailsResponse detail = productService.getProductDetail(id);
 

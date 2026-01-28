@@ -105,12 +105,20 @@ public class ChatService {
                 // 5. Send FCM Notification
                 // IMPORTANT: Use data payload instead of notification payload
                 // This allows Android to handle the notification styling
+                String productId = "";
+                if (message.getProductId() == null) {
+                    productId = "";
+                }
+
                 Message fcmMessage = Message.builder()
                         .setToken(receiver.getFcmToken())
                         .putData("title", sender.getFullName())           // Sender name as title
                         .putData("body", message.getContent())            // Message content
                         .putData("roomId", roomName)                      // Room ID for grouping
                         .putData("senderId", sender.getId().toString())   // Sender ID
+                        .putData("partnerName", sender.getFullName())
+                        .putData("myId", receiver.getId().toString())
+                        .putData("productId", productId)
                         .build();
 
                 try {
@@ -226,7 +234,6 @@ public class ChatService {
         // Update trường isRevoke = true tại đúng ID đó
         Firestore db = FirestoreClient.getFirestore();
         try {
-
             db.collection("chat_rooms")
                     .document(request.getRoomName())
                     .collection("messages")

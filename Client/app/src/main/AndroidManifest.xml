@@ -22,10 +22,10 @@
             android:name=".ui.edit.EditPostActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.product.ProductDetailActivity"
+            android:name=".ui.product.CreatePostActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.DetailChatActivity"
+            android:name=".ui.product.ProductDetailActivity"
             android:exported="false" />
         <activity
             android:name=".ui.auth.ResetPasswordActivity"
@@ -35,6 +35,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.auth.ForgotPasswordOTPVerificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.product.ImageViewerActivity"
             android:exported="false" />
         <activity
             android:name=".ui.auth.RegisterActivity"
@@ -47,7 +50,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.user.PostManagerActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
@@ -57,6 +60,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.chat.DetailChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.chat.ChatActivity"
+            android:exported="false" />
 
         <service
             android:name=".service.FirebaseMessagingService"
@@ -65,6 +74,9 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <receiver
+            android:name=".service.NotificationDismissReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

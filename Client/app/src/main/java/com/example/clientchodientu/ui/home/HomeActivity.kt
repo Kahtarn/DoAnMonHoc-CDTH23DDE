@@ -3,6 +3,7 @@ package com.example.clientchodientu.ui.home
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import android.widget.Toast
@@ -46,6 +47,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var recyclerViewProduct: RecyclerView
     private lateinit var recyclerViewCategory: RecyclerView
     private lateinit var progressBar: ProgressBar
+    private lateinit var btnFavorite : ImageButton
+
     private lateinit var token: String
     private fun getSearchUrl(query: String) = "$baseUrl/product/filter?name=$query"
     private var searchJob: Job? = null
@@ -55,11 +58,13 @@ class HomeActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
 
+        btnFavorite = findViewById(R.id.btnFavorite)
         progressBar = findViewById(R.id.progressBar)
         recyclerViewProduct = findViewById(R.id.rvProduct)
         recyclerViewCategory = findViewById(R.id.rvCategory)
         recyclerViewProduct.layoutManager = LinearLayoutManager(this)
-        recyclerViewCategory.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewCategory.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         searchView = findViewById(R.id.searchView)
 
         TokenManager.init(this)
@@ -69,6 +74,11 @@ class HomeActivity : AppCompatActivity() {
             setupSearchView()
             loadProduct(urlProductAll)
             loadCategories()
+        }
+
+        btnFavorite.setOnClickListener {
+            val intent = Intent(this, FavoriteActivity::class.java)
+            startActivity(intent)
         }
 
         bottomNav = findViewById(R.id.bottomNavigation)
@@ -88,10 +98,12 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_add -> {
+                    startActivity(Intent(this, CreatePostActivity::class.java))
                     true
                 }
 
                 R.id.nav_chat -> {
+                    startActivity(Intent(this, ChatActivity::class.java))
                     true
                 }
 
@@ -104,6 +116,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
     }
+
     private fun setupSearchView() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -184,7 +197,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    suspend fun loadProduct(url : String) {
+    suspend fun loadProduct(url: String) {
 
         withContext(Dispatchers.IO) {
             try {

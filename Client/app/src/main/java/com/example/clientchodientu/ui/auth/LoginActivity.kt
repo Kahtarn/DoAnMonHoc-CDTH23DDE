@@ -52,6 +52,7 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
+        FirebaseApp.initializeApp(this)
         val btnForgotPassword = findViewById<Button>(R.id.btnForgotPassword)
 
         btnLogin = findViewById<Button>(R.id.btnLogin)
@@ -105,6 +106,7 @@ class LoginActivity : AppCompatActivity() {
                 val data = gson.fromJson(responseString, LoginResponse::class.java)
                 if (response.isSuccessful) {
                     if (data.success) {
+                        // lay fcm token
                         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                             if (!task.isSuccessful) {
                                 Log.w("FCM", "Lấy token thất bại", task.exception)

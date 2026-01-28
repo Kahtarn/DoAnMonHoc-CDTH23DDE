@@ -22,17 +22,26 @@ object TokenManager {
     private const val KEY_ACCESS_TOKEN = "accessToken"
     private const val KEY_REFRESH_TOKEN = "refreshToken"
     private const val KEY_FCM_TOKEN = "fcmToken"
+
+    private const val FIREBASE_TOKEN = "firebaseToken"
+
     private lateinit var prefs: SharedPreferences
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    fun saveTokens(accessToken: String, refreshToken: String, fcmToken: String) {
+    fun saveTokens(
+        accessToken: String = "",
+        refreshToken: String = "",
+        fcmToken: String? = "",
+        firebaseToken: String = ""
+    ) {
         prefs.edit().apply {
             putString(KEY_ACCESS_TOKEN, accessToken)
             putString(KEY_REFRESH_TOKEN, refreshToken)
             putString(KEY_FCM_TOKEN, fcmToken)
+            putString(FIREBASE_TOKEN, firebaseToken)
             apply()
         }
     }
@@ -41,6 +50,8 @@ object TokenManager {
     fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
 
     fun getFCMToken(): String? = prefs.getString(KEY_FCM_TOKEN, null)
+
+    fun getFirebaseToken(): String? = prefs.getString(FIREBASE_TOKEN, null)
 
     fun updateFCMToken(context: Context, token: String) {
         val client = OkHttpClient()
@@ -69,6 +80,35 @@ object TokenManager {
             }
         })
     }
+
+    suspend fun getUserId(context: Context): Int {
+        return withContext(Dispatchers.IO) { // Chạy trên luồng phụ
+            val url = "http://10.0.2.2:8080/api/chat/get-user-id"
+            val request = Request.Builder().url(url).get().build()
+
+            try {
+                val response = ApiClient.getClient(context).newCall(request)
+                    .execute() // Dùng execute() thay vì enqueue
+                if (response.isSuccessful) {
+                    val jsonString = response.body?.string()
+                    // Giả sử server trả về: {"data": 123, "message": "success"}
+                    val apiResponse = Gson().fromJson(jsonString, ApiResponse::class.java)
+
+                    // Ép kiểu data về Double rồi sang Int (Gson hay đọc số thành Double)
+                    withContext(Dispatchers.Main) {
+                        Log.d("Get User Id", apiResponse.data["userId"].toString())
+                    }
+                    apiResponse.data["userId"] ?: -1
+                } else {
+                    -1
+                }
+            } catch (e: Exception) {
+                Log.e("User Id", "Lỗi: ${e.message}")
+                -1
+            }
+        }
+    }
+
     fun clear() {
         prefs.edit().clear().apply()
     }

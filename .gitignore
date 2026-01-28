@@ -1,0 +1,13 @@
+# Android Studio / IntelliJ rác
+.idea/
+.gradle/
+build/
+*.iml
+local.properties
+
+# File rác hệ thống
+Captures/
+.externalNativeBuild/
+.cxx/
+*.swp
+*.DS_Store

@@ -2,7 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
+    <color name="button_temp"> #FF8C31</color>
     <color name="my_active_tab">#FF0000</color>
     <color name="my_inactive_tab">#000000</color>
 </resources>

@@ -28,24 +28,22 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
             }
 
             val refreshToken = TokenManager.getRefreshToken() ?: run {
-                logout()
+                TokenManager.logout(context)
                 return null
             }
 
-            //  Thực hiện gọi API xin cấp lại token
-            // Lưu ý: Phải tạo client mới để không bị dính Interceptor cũ
-            val newTokenResponse = getNewToken(refreshToken)
-            val newFCMToken = TokenManager.getFirebaseToken()
+        //  Thực hiện gọi API xin cấp lại token
+        // Lưu ý: Phải tạo client mới để không bị dính Interceptor cũ
+        val newTokenResponse = getNewToken(refreshToken)
 
-            // 4. Xử lý kết quả
-            if (newTokenResponse != null && newTokenResponse.success) {
-                // A. THÀNH CÔNG: Cấp được chìa khóa mới
-                val newAccessToken = newTokenResponse.data.accessToken
-                val newRefreshToken =
-                    newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
+        // 4. Xử lý kết quả
+        if (newTokenResponse != null && newTokenResponse.success) {
+            // A. THÀNH CÔNG: Cấp được chìa khóa mới
+            val newAccessToken = newTokenResponse.data.accessToken
+            val newRefreshToken = newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
 
 
-                TokenManager.saveTokens(newAccessToken, newRefreshToken, newFCMToken)
+            TokenManager.saveTokens(newAccessToken, newRefreshToken, "")
 
                 // Trả về request cũ nhưng thay Header bằng token MỚI
                 return response.request.newBuilder()
@@ -53,7 +51,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
                     .build()
             } else {
                 // B. THẤT BẠI: Refresh Token cũng hết hạn (sau 7 ngày) -> Về trang đăng nhập
-                logout()
+                TokenManager.logout(context)
                 return null
             }
         }
@@ -85,13 +83,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
     }
 
     // Hàm Logout
-    private fun logout() {
-        TokenManager.clear() // Xóa sạch token cũ
-        val intent = Intent(context, LoginActivity::class.java)
-        // Xóa hết các màn hình cũ, chỉ giữ lại Login
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        context.startActivity(intent)
-    }
+
 
     // Đếm số lần request đã bị thử lại
     private fun responseCount(response: Response): Int {

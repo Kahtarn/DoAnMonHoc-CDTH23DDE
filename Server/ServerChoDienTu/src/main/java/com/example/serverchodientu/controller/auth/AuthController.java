@@ -1,10 +1,7 @@
 package com.example.serverchodientu.controller.auth;
 
 import com.example.serverchodientu.dto.ApiResponse;
-import com.example.serverchodientu.dto.auth.ForgotPasswordRequest;
-import com.example.serverchodientu.dto.auth.LoginRequest;
-import com.example.serverchodientu.dto.auth.RegisterRequest;
-import com.example.serverchodientu.dto.auth.ResetPasswordRequest;
+import com.example.serverchodientu.dto.auth.*;
 import com.example.serverchodientu.service.MailService;
 import com.example.serverchodientu.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
@@ -81,6 +78,15 @@ public class AuthController {
         try {
             authService.sendForgotPasswordOtp(request.getEmail());
             return ResponseEntity.ok(ApiResponse.success("Mã OTP khôi phục đã được gửi vào email!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+    @PostMapping("/verify-otp-to-reset-password")
+    public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        try {
+            String message = authService.verifyOtp(request);
+            return ResponseEntity.ok(ApiResponse.success(message));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }

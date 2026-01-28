@@ -43,10 +43,10 @@ public class UserService {
         profile.setAvatarUrl(u.getAvatarUrl());
         profile.setCreateAt(u.getCreateAt());
 
-        return  profile;
+        return profile;
     }
 
-    public User editProfile(String email,EditProfileRequest edit) {
+    public User editProfile(String email, EditProfileRequest edit) {
         User u = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy dữ liệu người dùng"));
         u.setFullName(edit.getFullName());

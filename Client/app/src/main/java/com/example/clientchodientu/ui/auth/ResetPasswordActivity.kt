@@ -2,6 +2,7 @@ package com.example.clientchodientu.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -25,17 +26,17 @@ import kotlin.text.isEmpty
 import kotlin.text.trim
 
 class ResetPasswordActivity : AppCompatActivity() {
-    private lateinit var newPass : EditText
-    private lateinit var confirmPass : EditText
-    private lateinit var btnResetPassword : Button
+    private lateinit var newPass: EditText
+    private lateinit var confirmPass: EditText
+    private lateinit var btnResetPassword: Button
     private var client = OkHttpClient()
     private var gson = Gson()
-    private var urlBase = "http://10.2.2.2:8080/api/auth/reset-password";
+    private var urlBase = "http://10.0.2.2:8080/api/auth/reset-password";
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_reset_password)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.ProfileUser)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -137,6 +138,7 @@ class ResetPasswordActivity : AppCompatActivity() {
                             "Thất bại: ${response.message}",
                             Toast.LENGTH_SHORT
                         ).show()
+
                     }
                 }
 
@@ -147,6 +149,7 @@ class ResetPasswordActivity : AppCompatActivity() {
                         "Lỗi kết nối: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
+                    Log.d("Reset Password", e.message.toString())
                 }
             }
         }

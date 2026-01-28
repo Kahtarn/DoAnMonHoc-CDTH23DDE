@@ -67,7 +67,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         // IMPORTANT: This token identifies THIS phone.
         // You must send this token to your Spring Boot server and save it in the 'users' table.
         Log.d("FCM", "firebase token: $token")
-        TokenManager.updateFCMToken(this, token)
+        TokenManager.updateFCMToken(this,token)
     }
 
     private fun isUserOnChat(): Boolean {

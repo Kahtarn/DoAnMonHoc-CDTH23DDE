@@ -167,8 +167,10 @@ public class ProductService {
                 img.setImageUrl("/uploads/" + fileName);
                 return img;
             }).collect(Collectors.toList());
+
             productImageRepo.saveAll(images);
         }
+
         return savedProduct;
     }
 

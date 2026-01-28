@@ -6,10 +6,13 @@ import com.example.serverchodientu.dto.product.PostProductRequest;
 import com.example.serverchodientu.dto.product.ProductDetailsResponse;
 import com.example.serverchodientu.dto.product.SetFavoriteRespond;
 import com.example.serverchodientu.entity.Product;
+import com.example.serverchodientu.entity.User;
+import com.example.serverchodientu.repository.UserRepository;
 import com.example.serverchodientu.service.product.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +24,15 @@ import java.util.List;
 @RequestMapping("/api/product/")
 public class ProductController {
     private final ProductService productService;
+    private final UserRepository userRepository;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, UserRepository userRepository) {
         this.productService = productService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/getAll")
+    //Lay danh sach bai ban
     public ResponseEntity<ApiResponse<List<Product>>> getAll() {
         List<Product> data = productService.getAll();
         return ResponseEntity.ok(ApiResponse.ok(data));

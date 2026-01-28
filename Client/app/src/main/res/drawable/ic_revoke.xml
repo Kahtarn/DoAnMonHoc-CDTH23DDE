@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Circular arrow only - clean unsend/revoke icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12.5,3C7.81,3 4,6.81 4,11.5h2c0,-3.59 2.91,-6.5 6.5,-6.5s6.5,2.91 6.5,6.5s-2.91,6.5 -6.5,6.5v-3l-4.5,4.5l4.5,4.5v-3c4.69,0 8.5,-3.81 8.5,-8.5S17.19,3 12.5,3z"/>
+</vector>

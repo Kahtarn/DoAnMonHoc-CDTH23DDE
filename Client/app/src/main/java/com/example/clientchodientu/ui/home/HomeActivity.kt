@@ -21,11 +21,12 @@ import com.example.clientchodientu.entity.Product
 import com.example.clientchodientu.ui.favorite.FavoriteActivity
 import com.example.clientchodientu.ui.product.CreatePostActivity
 import com.example.clientchodientu.ui.product.ProductDetailActivity
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.TokenManager
 import kotlinx.coroutines.launch
 import kotlin.toString
 import com.example.clientchodientu.ui.user.PostManagerActivity
-import com.example.clientchodientu.untils.ApiClient
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.ui.chat.ChatActivity
 import com.example.exampletemplate.AdapterCategory
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
@@ -62,7 +63,8 @@ class HomeActivity : AppCompatActivity() {
         recyclerViewProduct = findViewById(R.id.rvProduct)
         recyclerViewCategory = findViewById(R.id.rvCategory)
         recyclerViewProduct.layoutManager = LinearLayoutManager(this)
-        recyclerViewCategory.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewCategory.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         searchView = findViewById(R.id.searchView)
 
         TokenManager.init(this)
@@ -101,6 +103,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_chat -> {
+                    startActivity(Intent(this, ChatActivity::class.java))
                     true
                 }
 
@@ -113,6 +116,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
     }
+
     private fun setupSearchView() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -193,7 +197,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    suspend fun loadProduct(url : String) {
+    suspend fun loadProduct(url: String) {
 
         withContext(Dispatchers.IO) {
             try {

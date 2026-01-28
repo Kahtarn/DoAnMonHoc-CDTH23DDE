@@ -1,6 +1,5 @@
-package com.example.clientchodientu.untils
+package com.example.clientchodientu.untils.token
 
-import com.example.clientchodientu.untils.TokenManager
 import okhttp3.Interceptor
 import okhttp3.Response
 

@@ -205,10 +205,13 @@ class PostManagerActivity : AppCompatActivity() {
 
         adapter.onEditClick = { product ->
             val intent = Intent(this, EditPostActivity::class.java)
+            intent.putExtra("productId",product.id)
             intent.putExtra("title",product.title)
-            intent.putExtra("category",product.category?.name)
+            intent.putExtra("categoryName",product.category?.name)
+            intent.putExtra("categoryId",product.category?.id)
             intent.putExtra("price",product.price.toString())
             intent.putExtra("description",product.description)
+            intent.putExtra("thumbnailUrl",product.thumbnailUrl)
             startActivity(intent)
         }
         adapter.onSellingClick ={ product ->

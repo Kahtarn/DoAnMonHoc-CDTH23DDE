@@ -108,10 +108,12 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         tvAddress.text = "Địa chỉ: ${user.wardName}, ${user.provinceName}"
         tvCreateAt.text = "Ngày tham gia: ${formatDate(user.createAt)}"
 
-        val fullAvatarUrl = resolveUrl(user.avatarUrl)
-        Log.d("CHECK_LOAD_ANH", "URL Final: $fullAvatarUrl")
+        val avatarPath = user.avatarUrl
+        if (!avatarPath.isNullOrEmpty() && avatarPath != "null") {
+            val fullAvatarUrl = resolveUrl(avatarPath)
 
-        if (fullAvatarUrl.isNotEmpty()) {
+            Log.d("DEBUG_URL", "Đang tải ảnh: $fullAvatarUrl")
+
             Glide.with(this)
                 .load(fullAvatarUrl)
                 .placeholder(R.drawable.ic_user_placeholder)
@@ -119,6 +121,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
                 .circleCrop()
                 .into(ivAvatar)
         } else {
+            Log.e("DEBUG_URL", "Path ảnh bị rỗng hoặc null")
             ivAvatar.setImageResource(R.drawable.ic_user_placeholder)
         }
     }
@@ -152,10 +155,10 @@ class PublicDetailsUserActivity : AppCompatActivity() {
                         apiResponse.data?.let { user ->
                             bindData(user)
                         } ?: run {
-                            android.widget.Toast.makeText(
+                            Toast.makeText(
                                 this@PublicDetailsUserActivity,
                                 "Không có dữ liệu người dùng",
-                                android.widget.Toast.LENGTH_SHORT
+                                Toast.LENGTH_SHORT
                             ).show()
                         }
                     }

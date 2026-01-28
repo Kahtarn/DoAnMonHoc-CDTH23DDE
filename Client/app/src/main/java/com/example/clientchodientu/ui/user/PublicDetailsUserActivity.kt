@@ -227,48 +227,34 @@ class PublicDetailsUserActivity : AppCompatActivity() {
                 val request = Request.Builder()
                     .url("http://10.0.2.2:8080/api/product/public/sold/$sellerId")
                     .build()
-
                 val response = ApiClient
                     .getClient(this@PublicDetailsUserActivity)
                     .newCall(request)
                     .execute()
-
                 val responseBody = response.body?.string()
-
                 if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
                     val result = gson.fromJson(responseBody, PostManagerResponse::class.java)
-
                     withContext(Dispatchers.Main) {
                         if (result.success) {
                             val data = result.data ?: emptyList()
-
+                            setupAdapter(data)
                             if (data.isEmpty()) {
-                                setupAdapter(result.data ?: emptyList())
                                 Toast.makeText(
                                     this@PublicDetailsUserActivity,
-                                    "Không có tin đăng nào",
+                                    "Không có tin đăng đã bán nào",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
                         } else {
-                            Toast.makeText(
-                                this@PublicDetailsUserActivity,
-                                "API trả về thất bại",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this@PublicDetailsUserActivity, "API trả về thất bại", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@PublicDetailsUserActivity,
-                        "Lỗi kết nối",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@PublicDetailsUserActivity, "Lỗi kết nối", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
-
 }

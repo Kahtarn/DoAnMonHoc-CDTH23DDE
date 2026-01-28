@@ -111,13 +111,6 @@ object TokenManager {
         }
     }
 
-    fun logout(context: Context) {
-        TokenManager.clear() // Xóa sạch token cũ
-        val intent = Intent(context, LoginActivity::class.java)
-        // Xóa hết các màn hình cũ, chỉ giữ lại Login
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        context.startActivity(intent)
-    }
 
     fun clear() {
         prefs.edit().clear().apply()

@@ -94,14 +94,19 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(myProduct));
     }
 
-    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Product> update(
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse<String>> update(
             @PathVariable Integer id,
-            @ModelAttribute EditPostRequest request,
-            Principal principal
+            @RequestBody EditPostRequest request
     ) {
-        return ResponseEntity.ok(productService.updateProduct(id, principal.getName(), request));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        productService.updateProduct(id, currentEmail, request);
+
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật sản phẩm thành công!"));
     }
+
 
     @PatchMapping("/{id}/mark-as-sold")
     public ResponseEntity<ApiResponse<String>> markAsSold(@PathVariable Integer id) {

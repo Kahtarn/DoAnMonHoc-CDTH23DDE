@@ -1,10 +1,10 @@
 package com.example.clientchodientu.dto.product
 
+import java.math.BigDecimal
+
 data class EditPostRequest(
-    val id: Int,
     val title: String,
-    val price: String,
+    val price: BigDecimal,
     val description: String,
-    val categoryId: Int,
-    val images: List<Any>
+    val categoryId: Int
 )

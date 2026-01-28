@@ -64,13 +64,7 @@ class AddPost : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
         setContentView(R.layout.activity_add_post)
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
         AddTitle = findViewById(R.id.edtProductName)
         AddPrice = findViewById(R.id.edtProductPrice)
         AddDescription = findViewById(R.id.edtProductDescription)
@@ -90,7 +84,7 @@ class AddPost : AppCompatActivity() {
         }
         btnXN.setOnClickListener {
             lifecycleScope.launch {
-                postNewProduct()
+                //postNewProduct()
             }
         }
 
@@ -102,7 +96,6 @@ class AddPost : AppCompatActivity() {
                 val description = AddDescription.text.toString().trim()
                 val priceStr = AddPrice.text.toString().trim()
 
-                // Kiểm tra dữ liệu đầu vào để tránh lỗi logic
                 if (title.isEmpty() || priceStr.isEmpty()) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@AddPost, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
@@ -113,7 +106,6 @@ class AddPost : AppCompatActivity() {
                 val priceValue = priceStr.toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO
                 val base64Images = urisToBase64List(selectedImageUris)
                 val postData = PostResquest(
-                    sellerId = TokenManager.getUserId(),
                     categoryId = selectedCategoryId,
                     title = title,
                     description = description,
@@ -128,7 +120,7 @@ class AddPost : AppCompatActivity() {
                 val body = jsonString.toRequestBody(mediaType)
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/product/post") // Đảm bảo Server đã fix lỗi "/"
+                    .url("http://10.0.2.2:8080/api/product/post")
                     .post(body)
                     .addHeader("Authorization", "Bearer ${TokenManager.getToken()}")
                     .build()
@@ -170,37 +162,37 @@ class AddPost : AppCompatActivity() {
                 val url = "http://10.0.2.2:8080/api/category/getCategories"
                 val request = Request.Builder().url(url).get().build()
 
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    val body = response.body?.string()
-                    val responseCategory = gson.fromJson(body, CategoryResponse::class.java)
-                    val data: List<Category> = responseCategory.data
-                    Log.d("ItemCategory",data.toString())
-
-                    withContext(Dispatchers.Main) {
-                        val adapter = CategoryAdapterAutoCompleteTextView(this@AddPost, data)
-                        autoCompleteTextView.setAdapter(adapter)
-
-                        // THAY ĐỔI 1: Đặt threshold bằng 0 để nó cho phép hiện dropdown khi ô trống
-                        autoCompleteTextView.threshold = 0
-
-                        // THAY ĐỔI 2: Dùng setOnTouchListener thay vì OnClickListener
-                        // OnClickListener đôi khi không chạy ở lần chạm đầu tiên do vướng Focus
-                        autoCompleteTextView.setOnTouchListener { v, event ->
-                            if (event.action == android.view.MotionEvent.ACTION_UP) {
-                                autoCompleteTextView.showDropDown()
-                            }
-                            false
-                        }
-
-                        autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
-                            val selectedCategory = parent.getItemAtPosition(position) as Category
-                            selectedCategoryId = selectedCategory.id
-                            // THAY ĐỔI 3: filter = false để sau khi chọn, danh sách không bị ẩn đi
-                            autoCompleteTextView.setText(selectedCategory.name, false)
-                        }
-                    }
-                }
+//                val response = ApiClient.getClient
+//                if (response.isSuccessful) {
+//                    val body = response.body?.string()
+//                    val responseCategory = gson.fromJson(body, CategoryResponse::class.java)
+//                    val data: List<Category> = responseCategory.data
+//                    Log.d("ItemCategory",data.toString())
+//
+//                    withContext(Dispatchers.Main) {
+//                        val adapter = CategoryAdapterAutoCompleteTextView(this@AddPost, data)
+//                        autoCompleteTextView.setAdapter(adapter)
+//
+//                        // THAY ĐỔI 1: Đặt threshold bằng 0 để nó cho phép hiện dropdown khi ô trống
+//                        autoCompleteTextView.threshold = 0
+//
+//                        // THAY ĐỔI 2: Dùng setOnTouchListener thay vì OnClickListener
+//                        // OnClickListener đôi khi không chạy ở lần chạm đầu tiên do vướng Focus
+//                        autoCompleteTextView.setOnTouchListener { v, event ->
+//                            if (event.action == android.view.MotionEvent.ACTION_UP) {
+//                                autoCompleteTextView.showDropDown()
+//                            }
+//                            false
+//                        }
+//
+//                        autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+//                            val selectedCategory = parent.getItemAtPosition(position) as Category
+//                            selectedCategoryId = selectedCategory.id
+//                            // THAY ĐỔI 3: filter = false để sau khi chọn, danh sách không bị ẩn đi
+//                            autoCompleteTextView.setText(selectedCategory.name, false)
+//                        }
+//                    }
+//                }
             } catch (e: Exception) {
                 Log.e("API_ERROR", "Lỗi: ${e.message}")
             }

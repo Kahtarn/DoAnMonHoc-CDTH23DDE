@@ -1,8 +1,10 @@
 package com.example.clientchodientu.untils
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
+import com.example.clientchodientu.ui.auth.LoginActivity
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -24,6 +26,7 @@ object TokenManager {
     fun init(context: Context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
+
 
     fun saveTokens(accessToken: String, refreshToken: String, fcmToken: String,userId: Int) {
         prefs.edit().apply {
@@ -67,6 +70,13 @@ object TokenManager {
                 response.close()
             }
         })
+    }
+    fun logout(context: Context) {
+        TokenManager.clear() // Xóa sạch token cũ
+        val intent = Intent(context, LoginActivity::class.java)
+        // Xóa hết các màn hình cũ, chỉ giữ lại Login
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
     }
     fun clear() {
         prefs.edit().clear().apply()

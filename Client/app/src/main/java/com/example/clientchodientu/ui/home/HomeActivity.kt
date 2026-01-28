@@ -17,6 +17,7 @@ import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.ProductResponse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.entity.Product
+import com.example.clientchodientu.ui.auth.ProfileUser
 import com.example.clientchodientu.ui.product.AddPost
 import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.TokenManager
@@ -95,6 +96,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_account -> {
+                    startActivity(Intent(this, ProfileUser::class.java))
                     true
                 }
 

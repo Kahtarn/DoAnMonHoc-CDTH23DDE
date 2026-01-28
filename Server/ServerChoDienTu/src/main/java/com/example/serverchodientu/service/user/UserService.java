@@ -46,14 +46,13 @@ public class UserService {
         return  profile;
     }
 
-    public User editProfile(String email) {
+    public User editProfile(String email,EditProfileRequest edit) {
         User u = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy dữ liệu người dùng"));
-        EditProfileRequest edit = new EditProfileRequest();
-        edit.setFullName(u.getFullName());
-        edit.setProvinceName(u.getProvinceName());
-        edit.setWardName(u.getWardName());
-        edit.setGender(u.isGender());
+        u.setFullName(edit.getFullName());
+        u.setProvinceName(edit.getProvinceName());
+        u.setWardName(edit.getWardName());
+        u.setGender(edit.getGender());
 
         return userRepo.save(u);
     }

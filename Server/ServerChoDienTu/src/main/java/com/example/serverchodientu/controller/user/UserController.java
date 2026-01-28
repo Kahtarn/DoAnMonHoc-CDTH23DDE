@@ -35,12 +35,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(profile));
     }
 
-    @PutMapping("/edit-profile/{id}")
-    public ResponseEntity<ApiResponse<String>> editMyProfile() {
+    @PutMapping("/edit-profile")
+    public ResponseEntity<ApiResponse<Object>> editMyProfile(@RequestBody EditProfileRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentEmail = authentication.getName();
 
-        User u = userService.editProfile(currentEmail);
-        return ResponseEntity.ok(ApiResponse.success("Chỉnh sửa trang cá nhân thành công!"));
+        User u = userService.editProfile(currentEmail,request);
+        return ResponseEntity.ok(ApiResponse.ok(u));
     }
 }

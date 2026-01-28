@@ -1,9 +1,11 @@
 package com.example.clientchodientu.untils.token
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import com.example.clientchodientu.dto.chat.ApiResponse
+import com.example.clientchodientu.ui.auth.LoginActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -107,6 +109,14 @@ object TokenManager {
                 -1
             }
         }
+    }
+
+    fun logout(context: Context) {
+        TokenManager.clear() // Xóa sạch token cũ
+        val intent = Intent(context, LoginActivity::class.java)
+        // Xóa hết các màn hình cũ, chỉ giữ lại Login
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
     }
 
     fun clear() {

@@ -23,8 +23,8 @@ import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.PostResponse
 import com.example.clientchodientu.dto.product.PostResquest
 import com.example.clientchodientu.entity.Category
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.TokenManager
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers

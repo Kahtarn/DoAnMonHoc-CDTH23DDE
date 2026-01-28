@@ -21,6 +21,13 @@
         <activity
             android:name=".ui.edit.EditPostActivity"
             android:exported="false" />
+       <activity android:name=".ui.auth.ProfileUser"
+           android:exported="false"/>
+        <activity android:name=".ui.auth.EditProfileUser"
+            android:exported="false"/>
+        <activity
+            android:name=".ui.auth.ChangePassword"
+            android:exported="false"/>
         <activity
             android:name=".ui.product.CreatePostActivity"
             android:exported="false" />
@@ -50,7 +57,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.user.PostManagerActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">

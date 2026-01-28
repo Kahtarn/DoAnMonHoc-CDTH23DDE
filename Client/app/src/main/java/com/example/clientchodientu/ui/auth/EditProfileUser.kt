@@ -24,8 +24,8 @@ import com.example.clientchodientu.dto.user.ResquestEditProfile
 import com.example.clientchodientu.entity.Province
 import com.example.clientchodientu.entity.User
 import com.example.clientchodientu.entity.Ward
-import com.example.clientchodientu.untils.ApiClient
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.TokenManager
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

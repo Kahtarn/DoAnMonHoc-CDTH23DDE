@@ -18,44 +18,36 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
             return null
         }
 
-        synchronized(this) {
-            val accessTokenInManager = TokenManager.getToken()
+        //  Lấy Refresh Token ra
+        val refreshToken = TokenManager.getRefreshToken()
 
-            if (response.request.header("Authorization") != "Bearer $accessTokenInManager") {
-                return response.request.newBuilder()
-                    .header("Authorization", "Bearer $accessTokenInManager")
-                    .build()
-            }
+        // Nếu không có Refresh TokenVề trang đăng nhập
+        if (refreshToken == null) {
+            logout()
+            return null
+        }
 
-            val refreshToken = TokenManager.getRefreshToken() ?: run {
-                logout()
-                return null
-            }
+        //  Thực hiện gọi API xin cấp lại token
+        // Lưu ý: Phải tạo client mới để không bị dính Interceptor cũ
+        val newTokenResponse = getNewToken(refreshToken)
 
-            //  Thực hiện gọi API xin cấp lại token
-            // Lưu ý: Phải tạo client mới để không bị dính Interceptor cũ
-            val newTokenResponse = getNewToken(refreshToken)
-            val newFCMToken = TokenManager.getFirebaseToken()
-
-            // 4. Xử lý kết quả
-            if (newTokenResponse != null && newTokenResponse.success) {
-                // A. THÀNH CÔNG: Cấp được chìa khóa mới
-                val newAccessToken = newTokenResponse.data.accessToken
-                val newRefreshToken =
-                    newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
+        // 4. Xử lý kết quả
+        if (newTokenResponse != null && newTokenResponse.success) {
+            // A. THÀNH CÔNG: Cấp được chìa khóa mới
+            val newAccessToken = newTokenResponse.data.accessToken
+            val newRefreshToken = newTokenResponse.data.refreshToken // Server thường cấp luôn refresh token mới
 
 
-                TokenManager.saveTokens(newAccessToken, newRefreshToken, newFCMToken)
+            TokenManager.saveTokens(newAccessToken, newRefreshToken, "")
 
-                // Trả về request cũ nhưng thay Header bằng token MỚI
-                return response.request.newBuilder()
-                    .header("Authorization", "Bearer $newAccessToken")
-                    .build()
-            } else {
-                // B. THẤT BẠI: Refresh Token cũng hết hạn (sau 7 ngày) -> Về trang đăng nhập
-                logout()
-                return null
-            }
+            // Trả về request cũ nhưng thay Header bằng token MỚI
+            return response.request.newBuilder()
+                .header("Authorization", "Bearer $newAccessToken")
+                .build()
+        } else {
+            // B. THẤT BẠI: Refresh Token cũng hết hạn (sau 7 ngày) -> Về trang đăng nhập
+            logout()
+            return null
         }
     }
 
@@ -79,7 +71,6 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
                 null
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }

@@ -37,15 +37,24 @@ android {
 }
 
 dependencies {
-
+    // --- PHẦN GỐC CỦA FILE 1 ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    // --- THÊM MỚI TỪ FILE 2 ---
+    // Thay dòng bị lỗi bằng dòng này:
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("com.github.chrisbanes:PhotoView:2.3.0") // Thêm cái này (Zoom ảnh)
+
+    // --- TIẾP TỤC PHẦN GỐC CỦA FILE 1 ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Networking (Giữ bản 4.12.0 của File 1 vì mới hơn bản 4.10.0 của File 2)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")

@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.clientchodientu.R
-import com.example.clientchodientu.untils.TokenAuthenticator
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.TokenAuthenticator
+import com.example.clientchodientu.untils.token.TokenManager
 
 class ProfileUser : AppCompatActivity() {
     private lateinit var tvActivityEditProfileUser: TextView

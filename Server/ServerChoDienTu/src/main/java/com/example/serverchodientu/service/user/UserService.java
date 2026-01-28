@@ -1,5 +1,6 @@
 package com.example.serverchodientu.service.user;
 
+import com.example.serverchodientu.dto.user.privateUser.EditProfileRequest;
 import com.example.serverchodientu.dto.user.privateUser.ProfileUserResponse;
 import com.example.serverchodientu.dto.user.publicUser.DetailsUserResponse;
 import com.example.serverchodientu.entity.User;
@@ -43,5 +44,17 @@ public class UserService {
         profile.setCreateAt(u.getCreateAt());
 
         return  profile;
+    }
+
+    public User editProfile(String email) {
+        User u = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy dữ liệu người dùng"));
+        EditProfileRequest edit = new EditProfileRequest();
+        edit.setFullName(u.getFullName());
+        edit.setProvinceName(u.getProvinceName());
+        edit.setWardName(u.getWardName());
+        edit.setGender(u.isGender());
+
+        return userRepo.save(u);
     }
 }

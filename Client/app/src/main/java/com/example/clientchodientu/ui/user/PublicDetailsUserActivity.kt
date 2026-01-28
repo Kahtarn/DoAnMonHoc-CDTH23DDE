@@ -82,7 +82,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         tvAddress = findViewById(R.id.tvAddress)
         tvEmail = findViewById(R.id.tvEmail)
         tvPhone = findViewById(R.id.tvPhone)
-        tvCreateAt = findViewById(R.id.tvCreateAt)
+        tvCreateAt = findViewById(R.id.tvCreatedAt)
         rvPost = findViewById(R.id.rvUserProducts)
         btnSelling = findViewById(R.id.btnSelling)
         btnSold = findViewById(R.id.btnSold)
@@ -97,8 +97,10 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         sellerId = intent.getIntExtra("sellerId", -1)
     }
     private fun resolveUrl(path: String?): String {
-        if (path.isNullOrEmpty()) return ""
-        return if (path.startsWith("http")) path else "http://10.0.2.2:8080" + path
+        val baseUrl = "http://10.0.2.2:8080"
+        if (path.isNullOrBlank() || path == "null") return ""
+        val cleanPath = if (path.startsWith("/")) path else "/$path"
+        return if (path.startsWith("http")) path else baseUrl + cleanPath
     }
     private fun bindData(user: DetailsUserResponse) {
         tvFullname.text = user.fullName
@@ -111,8 +113,6 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         val avatarPath = user.avatarUrl
         if (!avatarPath.isNullOrEmpty() && avatarPath != "null") {
             val fullAvatarUrl = resolveUrl(avatarPath)
-
-            Log.d("DEBUG_URL", "Đang tải ảnh: $fullAvatarUrl")
 
             Glide.with(this)
                 .load(fullAvatarUrl)
@@ -143,36 +143,21 @@ class PublicDetailsUserActivity : AppCompatActivity() {
             try {
                 val url = "http://10.0.2.2:8080/api/user/details-user/${sellerId}"
                 val request = Request.Builder().url(url).build()
-                val response =
-                    ApiClient.getClient(this@PublicDetailsUserActivity).newCall(request).execute()
-
+                val response = ApiClient.getClient(this@PublicDetailsUserActivity).newCall(request).execute()
                 val responseBodyString = response.body?.string()
-
                 if (response.isSuccessful && !responseBodyString.isNullOrEmpty()) {
                     val apiResponse = gson.fromJson(responseBodyString, ApiUserResponse::class.java)
-                    Log.d("CHECK_JSON", "Full data: $responseBodyString")
                     withContext(Dispatchers.Main) {
-                        apiResponse.data?.let { user ->
-                            bindData(user)
-                        } ?: run {
-                            Toast.makeText(
-                                this@PublicDetailsUserActivity,
-                                "Không có dữ liệu người dùng",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                        val userData = apiResponse.data
+                        if (userData != null) {
+                            bindData(userData)
+                        } else {
+                            Log.e("AAA", "Loi: apiResponse.data bi NULL sau khi parse Gson")
                         }
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@PublicDetailsUserActivity,
-                            "Lỗi Server: ${response.code}",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
                 }
             } catch (e: Exception) {
-
+                e.printStackTrace()
             }
         }
     }
@@ -180,7 +165,6 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         val adapter = AdapterPostOfUser(list)
         rvPost.layoutManager = LinearLayoutManager(this)
         rvPost.adapter = adapter
-
         adapter.onItemClick = { productId ->
             val intent = Intent(this, ProductDetailActivity::class.java)
             intent.putExtra("PRODUCT_ID", productId)
@@ -237,8 +221,6 @@ class PublicDetailsUserActivity : AppCompatActivity() {
             }
         }
     }
-
-
     suspend fun loadSoldProduct() {
         withContext(Dispatchers.IO) {
             try {

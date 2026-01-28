@@ -91,7 +91,6 @@ class ProductDetailActivity : AppCompatActivity() {
             return
         }
         TokenManager.init(this)
-//        getIntentData()
 
         initViews()
         setupEvents()
@@ -142,7 +141,7 @@ class ProductDetailActivity : AppCompatActivity() {
     }
 
     private fun loadProductData() {
-        val url = "$BASE_URL/api/product/details/$currentProductId"
+        val url = "$BASE_URL/api/product/detail/$currentProductId"
         val request = Request.Builder().url(url).build()
 
         ApiClient.getClient(this).newCall(request).enqueue(object : Callback {

@@ -14,7 +14,7 @@ class ProductImageAdapter(
 
     inner class ImageViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.imgProductM)
+        val imageView: ImageView = itemView.findViewById(R.id.imgProduct)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {

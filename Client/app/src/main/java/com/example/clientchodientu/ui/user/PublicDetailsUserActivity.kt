@@ -1,18 +1,26 @@
 package com.example.clientchodientu.ui.user
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientchodientu.R
+import com.example.clientchodientu.adapter.AdapterPostOfUser
+import com.example.clientchodientu.dto.product.PostManagerResponse
 import com.example.clientchodientu.dto.user.ApiUserResponse
 import com.example.clientchodientu.dto.user.DetailsUserResponse
+import com.example.clientchodientu.entity.Product
+import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.token.ApiClient
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -21,9 +29,8 @@ import kotlinx.coroutines.withContext
 import okhttp3.Request
 
 class PublicDetailsUserActivity : AppCompatActivity() {
-
-    private var provinceName = ""
-    private var wardName = ""
+    private lateinit var postAdapter: AdapterPostOfUser
+    private lateinit var btnBack : ImageView
     private val gson = Gson()
     private var sellerId = -1
     private lateinit var tvFullname : TextView
@@ -49,7 +56,22 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         receiveData()
         lifecycleScope.launch {
             loadDetailsUser()
+            loadSellingProduct()
         }
+
+        btnSelling.setOnClickListener {
+            btnSelling.setTextColor(resources.getColor(R.color.my_active_tab, null))
+            btnSold.setTextColor(resources.getColor(R.color.my_inactive_tab, null))
+            lifecycleScope.launch { loadSellingProduct() }
+        }
+
+        btnSold.setOnClickListener {
+            btnSold.setTextColor(resources.getColor(R.color.my_active_tab, null))
+            btnSelling.setTextColor(resources.getColor(R.color.my_inactive_tab, null))
+            lifecycleScope.launch { loadSoldProduct() }
+        }
+
+        btnBack.setOnClickListener { finish() }
     }
 
     private fun init() {
@@ -62,6 +84,10 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         rvPost = findViewById(R.id.rvUserProducts)
         btnSelling = findViewById(R.id.btnSelling)
         btnSold = findViewById(R.id.btnSold)
+        postAdapter = AdapterPostOfUser(emptyList())
+        rvPost.layoutManager = LinearLayoutManager(this)
+        rvPost.adapter = postAdapter
+        btnBack = findViewById(R.id.ivBack)
     }
 
     private fun receiveData() {
@@ -124,15 +150,121 @@ class PublicDetailsUserActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+
+            }
+        }
+    }
+    private fun setupAdapter(list: List<Product>) {
+        val adapter = AdapterPostOfUser(list)
+        rvPost.layoutManager = LinearLayoutManager(this)
+        rvPost.adapter = adapter
+
+        adapter.onItemClick = { productId ->
+            val intent = Intent(this, ProductDetailActivity::class.java)
+            intent.putExtra("PRODUCT_ID", productId)
+            startActivity(intent)
+        }
+    }
+
+    suspend fun loadSellingProduct() {
+        withContext(Dispatchers.IO) {
+            try {
+                val request = Request.Builder()
+                    .url("http://10.0.2.2:8080/api/product/public/selling/$sellerId")
+                    .build()
+
+                val response = ApiClient
+                    .getClient(this@PublicDetailsUserActivity)
+                    .newCall(request)
+                    .execute()
+
+                val responseBody = response.body?.string()
+
+                if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
+                    val result = gson.fromJson(responseBody, PostManagerResponse::class.java)
+
+                    withContext(Dispatchers.Main) {
+                        if (result.success) {
+                            val data = result.data ?: emptyList()
+                            setupAdapter(result.data ?: emptyList())
+
+                            if (data.isEmpty()) {
+                                Toast.makeText(
+                                    this@PublicDetailsUserActivity,
+                                    "Không có tin đăng nào",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } else {
+                            Toast.makeText(
+                                this@PublicDetailsUserActivity,
+                                "API trả về thất bại",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    android.widget.Toast.makeText(
+                    Toast.makeText(
                         this@PublicDetailsUserActivity,
-                        "Lỗi kết nối mạng",
-                        android.widget.Toast.LENGTH_SHORT
+                        "Lỗi kết nối",
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
             }
         }
     }
+
+
+    suspend fun loadSoldProduct() {
+        withContext(Dispatchers.IO) {
+            try {
+                val request = Request.Builder()
+                    .url("http://10.0.2.2:8080/api/product/public/sold/$sellerId")
+                    .build()
+
+                val response = ApiClient
+                    .getClient(this@PublicDetailsUserActivity)
+                    .newCall(request)
+                    .execute()
+
+                val responseBody = response.body?.string()
+
+                if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
+                    val result = gson.fromJson(responseBody, PostManagerResponse::class.java)
+
+                    withContext(Dispatchers.Main) {
+                        if (result.success) {
+                            val data = result.data ?: emptyList()
+
+                            if (data.isEmpty()) {
+                                setupAdapter(result.data ?: emptyList())
+                                Toast.makeText(
+                                    this@PublicDetailsUserActivity,
+                                    "Không có tin đăng nào",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } else {
+                            Toast.makeText(
+                                this@PublicDetailsUserActivity,
+                                "API trả về thất bại",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@PublicDetailsUserActivity,
+                        "Lỗi kết nối",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
 }

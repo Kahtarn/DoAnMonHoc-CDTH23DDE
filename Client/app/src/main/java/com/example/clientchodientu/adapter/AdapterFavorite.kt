@@ -3,10 +3,8 @@ package com.example.clientchodientu.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -75,7 +73,7 @@ class AdapterFavorite(
         val location: TextView = itemView.findViewById(R.id.tvLocation)
         val sellerName: TextView = itemView.findViewById(R.id.tvSellerName)
         val createAt: TextView = itemView.findViewById(R.id.tvCreateAt)
-        val img: ImageView = itemView.findViewById(R.id.imgProductM)
+        val img: ImageView = itemView.findViewById(R.id.imgProduct)
         val btnFavorite: AppCompatImageView = itemView.findViewById(R.id.btnFavorite)
     }
 

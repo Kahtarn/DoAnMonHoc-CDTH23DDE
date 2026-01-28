@@ -223,5 +223,12 @@ public class ProductService {
         }
     }
 
+    public List<Product> getPublicSellingProducts(Integer userId) {
+        return productRepo.findBySellerIdAndStatusOrderByCreateAtDesc(userId, 0);
+    }
+
+    public List<Product> getPublicSoldProducts(Integer userId) {
+        return productRepo.findBySellerIdAndStatusOrderByCreateAtDesc(userId, 1);
+    }
 
 }

@@ -89,7 +89,7 @@ class AdapterPostProductManage(private var listSelling : List<Product>) : Recycl
         val location : TextView = itemView.findViewById(R.id.tvLocation)
         val sellerName : TextView = itemView.findViewById(R.id.tvSellerName)
         val createAt : TextView = itemView.findViewById(R.id.tvCreateAt)
-        val img: ImageView = itemView.findViewById(R.id.imgProductM)
+        val img: ImageView = itemView.findViewById(R.id.imgProduct)
         val more : ImageButton = itemView.findViewById(R.id.btnMore)
     }
 

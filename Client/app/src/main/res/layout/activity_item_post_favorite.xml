@@ -14,7 +14,7 @@
         android:paddingBottom="12dp">
 
         <ImageView
-            android:id="@+id/imgProductM"
+            android:id="@+id/imgProduct"
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
@@ -47,7 +47,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/btnMore"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgProductM" />
+            app:layout_constraintTop_toBottomOf="@id/imgProduct" />
 
         <TextView
             android:id="@+id/tvPrice"

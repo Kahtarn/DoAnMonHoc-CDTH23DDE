@@ -28,9 +28,6 @@
             android:name=".ui.product.ProductDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.DetailChatActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.auth.ResetPasswordActivity"
             android:exported="false" />
         <activity
@@ -63,6 +60,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.chat.DetailChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.chat.ChatActivity"
+            android:exported="false" />
 
         <service
             android:name=".service.FirebaseMessagingService"
@@ -71,6 +74,9 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <receiver
+            android:name=".service.NotificationDismissReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

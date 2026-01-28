@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="@android:color/transparent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_popup"
+        android:orientation="vertical"
+        android:paddingVertical="8dp">
+
+
+        <TextView
+            android:id="@+id/btnCopy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:drawablePadding="16dp"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:text="Copy"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_content_copy"
+            app:drawableTint="#FFFFFF" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="4dp"
+            android:background="#40000000" />
+
+        <TextView
+            android:id="@+id/btnRevoke"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:drawablePadding="16dp"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:text="Thu hồi"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_revoke"
+            app:drawableTint="#FFFFFF" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

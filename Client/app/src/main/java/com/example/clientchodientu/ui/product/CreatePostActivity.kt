@@ -20,7 +20,7 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.adapters.SelectedImageAdapter
 import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.entity.Category
-import com.example.clientchodientu.untils.ApiClient
+import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.untils.FileUtils
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers

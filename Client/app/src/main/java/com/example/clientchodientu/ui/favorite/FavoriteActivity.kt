@@ -22,9 +22,9 @@ import com.example.clientchodientu.dto.product.SetFavoriteRespond
 import com.example.clientchodientu.entity.Product
 import com.example.clientchodientu.ui.edit.EditPostActivity
 import com.example.clientchodientu.ui.product.ProductDetailActivity
-import com.example.clientchodientu.untils.ApiClient
+import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.untils.ApiResponseData
-import com.example.clientchodientu.untils.TokenManager
+import com.example.clientchodientu.untils.token.TokenManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers

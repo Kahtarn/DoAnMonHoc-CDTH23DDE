@@ -15,6 +15,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -22,13 +23,27 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.adapter.ProductImageAdapter
 import com.example.clientchodientu.dto.product.DetailsData
 import com.example.clientchodientu.dto.product.SetFavoriteRespond
-import com.example.clientchodientu.untils.ApiClient
+import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.untils.ApiResponseData
+import com.example.clientchodientu.entity.ProductDetailData
+import com.example.clientchodientu.ui.product.ImageViewerActivity
+import com.example.clientchodientu.ui.chat.DetailChatActivity
+
+import com.example.clientchodientu.untils.token.ApiResponse
+import com.example.clientchodientu.untils.token.TokenManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 import java.math.BigDecimal
 import java.text.DecimalFormat
@@ -60,6 +75,8 @@ class ProductDetailActivity : AppCompatActivity() {
     private val gson = Gson()
     private var currentProductId: Int = -1
     private var isFavorited: Boolean = false
+
+    private var sellerId: Int = -1
     private var sellerPhoneNumber: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,6 +89,8 @@ class ProductDetailActivity : AppCompatActivity() {
             finish()
             return
         }
+        TokenManager.init(this)
+//        getIntentData()
 
         initViews()
         setupEvents()
@@ -109,7 +128,9 @@ class ProductDetailActivity : AppCompatActivity() {
             } ?: showToast("Không có số điện thoại người bán")
         }
 
-        btnChatWithSeller.setOnClickListener { showToast("Tính năng Chat đang phát triển") }
+        btnChatWithSeller.setOnClickListener { handleChatAction() }
+
+
     }
 
     private fun loadProductData() {
@@ -149,6 +170,7 @@ class ProductDetailActivity : AppCompatActivity() {
     private fun bindDataToUI(data: DetailsData) {
         val product = data.product
         val seller = product.seller
+        sellerId = seller.id
 
         tvTitle.text = product.title
         tvPrice.text = formatCurrency(product.price)
@@ -164,6 +186,34 @@ class ProductDetailActivity : AppCompatActivity() {
         val fullImageUrls = data.images.map { resolveUrl(it) }
         setupImageSlider(fullImageUrls)
     }
+
+    private fun handleChatAction() {
+//        Toast.makeText(this, "Đang mở chat...", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, DetailChatActivity::class.java)
+        intent.putExtra("PRODUCT_ID", currentProductId)
+        intent.putExtra("PARTNER_ID", sellerId)
+        intent.putExtra("PARTNER_NAME", tvSellerName.text.toString())
+        intent.putExtra("IS_FIRST_TIME_CHAT", true)
+
+        // Tính toán RoomName ngay tại đây để bên kia có cái dùng luôn
+
+        lifecycleScope.launch {
+            val myId =
+                TokenManager.getUserId(
+                    this@ProductDetailActivity
+                )
+            val ids = listOf(myId.toString(), sellerId.toString()).sorted()
+            val calculatedRoomName = "chat_user_${ids[0]}_user_${ids[1]}"
+            intent.putExtra("MY_ID", myId)
+            intent.putExtra("ROOM_NAME", calculatedRoomName)
+
+            withContext(Dispatchers.Main) {
+                Log.d("ProductD_MyId", myId.toString())
+                startActivity(intent)
+            }
+        }
+    }
+
 
     private fun setupImageSlider(imageUrls: List<String>) {
         if (imageUrls.isEmpty()) {
@@ -323,26 +373,11 @@ class ProductDetailActivity : AppCompatActivity() {
                 else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
             }
         } catch (e: Exception) {
-            ""
+            e.printStackTrace()
+            return "Lỗi xử lý thời gian"
         }
     }
 
-
-    private fun showMoreOptions() {
-        val dialog = Dialog(this)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        val view = layoutInflater.inflate(R.layout.activity_bottom_sheet_options, null)
-        dialog.setContentView(view)
-
-        dialog.window?.apply {
-            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            attributes.gravity = Gravity.BOTTOM // Bottom Sheet nên hiện ở dưới cùng
-        }
-
-        view.findViewById<View>(R.id.btnCloseSheet).setOnClickListener { dialog.dismiss() }
-        dialog.show()
-    }
 
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()

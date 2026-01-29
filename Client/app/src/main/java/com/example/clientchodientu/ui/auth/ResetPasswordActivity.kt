@@ -44,14 +44,18 @@ class ResetPasswordActivity : AppCompatActivity() {
         newPass = findViewById<EditText>(R.id.edtNewPassword)
         confirmPass = findViewById<EditText>(R.id.edtConfirmPassword)
         btnResetPassword = findViewById<Button>(R.id.btnDone)
-
+        newPass.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        confirmPass.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
         btnResetPassword.setOnClickListener {
             lifecycleScope.launch {
                 handleResetClick()
             }
         }
     }
-
+    fun isPasswordValid(password: String): Boolean {
+        val passwordPattern = "^(?=.*[0-9])(?=.*[A-Z])(?=\\S+$).{8,}$"
+        return password.matches(passwordPattern.toRegex())
+    }
     private fun handleResetClick() {
         val newPassword = newPass.text.toString().trim()
         val confirmPassword = confirmPass.text.toString().trim()
@@ -60,6 +64,10 @@ class ResetPasswordActivity : AppCompatActivity() {
         if (newPassword.isEmpty()) {
             newPass.error = "Vui lòng nhập mật khẩu mới"
             newPass.requestFocus()
+            return
+        }
+        if(!isPasswordValid(newPassword) || !isPasswordValid(confirmPassword)) {
+            Toast.makeText(this@ResetPasswordActivity, "Mật khẩu cần ít nhất 8 ký tự, 1 chữ hoa, 1 chữ số và KHÔNG có khoảng trắng!", Toast.LENGTH_SHORT).show()
             return
         }
         if (confirmPassword.isEmpty()) {

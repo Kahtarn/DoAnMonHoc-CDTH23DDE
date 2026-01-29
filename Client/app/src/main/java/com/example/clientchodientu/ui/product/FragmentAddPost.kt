@@ -79,6 +79,7 @@ class FragmentAddPost : Fragment() {
         spnCategory = view.findViewById(R.id.spnCategory)
         btnPost = view.findViewById(R.id.btnPost)
         rvImages = view.findViewById(R.id.rvSelectedImages)
+        edtPrice.filters = arrayOf(android.text.InputFilter.LengthFilter(10))
     }
 
     private val pickMultipleMedia =
@@ -144,6 +145,7 @@ class FragmentAddPost : Fragment() {
     suspend fun handlePost() {
         val title = edtTitle.text.toString()
         val price = edtPrice.text.toString()
+        val description = edtDescription.text.toString()
 
         if (title.isEmpty() || price.isEmpty()) {
             Toast.makeText(requireContext(), "Vui lòng nhập tiêu đề và giá", Toast.LENGTH_SHORT)
@@ -153,6 +155,11 @@ class FragmentAddPost : Fragment() {
 
         if (selectedUris.isEmpty()) {
             Toast.makeText(requireContext(), "Hãy chọn ít nhất 1 cái ảnh bìa", Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
+        if(description.isEmpty()) {
+            Toast.makeText(requireContext(), "Vui lòng nhập mô tả sản phẩm!", Toast.LENGTH_SHORT)
                 .show()
             return
         }
@@ -189,7 +196,6 @@ class FragmentAddPost : Fragment() {
                     .post(builder.build())
                     .build()
 
-                // 3. Thực thi gọi API
                 val response = ApiClient.getClient(requireContext()).newCall(request).execute()
 
                 withContext(Dispatchers.Main) {

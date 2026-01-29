@@ -260,7 +260,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
             .document(roomName)
             .collection("messages")
 
-        // 2. Yêu cầu Firestore sinh ra một Document Reference MỚI (chưa có dữ liệu)
+
         // Lúc này Firestore tự động tạo ra một ID ngẫu nhiên, ví dụ: "Az9s8d7f6g5h4j3k2l"
         val newMsgRef = messagesCollection.document()
 

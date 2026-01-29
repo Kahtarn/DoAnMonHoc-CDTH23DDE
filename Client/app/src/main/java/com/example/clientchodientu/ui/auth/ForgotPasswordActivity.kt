@@ -61,7 +61,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 focusEditText(edtemail)
                 return@setOnClickListener
             } else {
-                //dung dinh dang email
                 if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     startCountDown(btnSendOTP)
                     lifecycleScope.launch {

@@ -39,7 +39,7 @@ import kotlin.jvm.java
 class EditProfileUser : AppCompatActivity() {
     private lateinit var btnBackHome: ImageButton
     private lateinit var edtFullname: EditText
-    private var idUser =0
+    private var idUser = 0
     private lateinit var sProvinceName: Spinner
     private lateinit var rgGenderEdit: RadioGroup
     private lateinit var sWardName: Spinner

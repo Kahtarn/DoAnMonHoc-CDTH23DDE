@@ -1,5 +1,6 @@
 package com.example.clientchodientu.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,39 +53,55 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString.isNullOrBlank()) return "Không rõ thời gian"
 
-        // 1. Định dạng ISO 8601 từ Server
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC") // Ép nó hiểu String đầu vào là UTC
+        // Thử parse với nhiều định dạng để tránh lỗi
+        val patterns = arrayOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss"
+        )
+
+        var past: Date? = null
+
+        for (pattern in patterns) {
+            try {
+                val format = SimpleDateFormat(pattern, Locale.getDefault())
+                // Nếu chuỗi có chữ Z, ta ép nó hiểu là UTC. Nếu không, để mặc định Local.
+                if (timeString.endsWith("Z")) {
+                    format.timeZone = TimeZone.getTimeZone("UTC")
+                } else {
+                    format.timeZone = TimeZone.getDefault()
+                }
+                past = format.parse(timeString)
+                if (past != null) break
+            } catch (e: Exception) { continue }
         }
 
-        try {
-            val past = format.parse(timeString) ?: return "Định dạng sai"
-            val now = Date()
-            val diffMillis = now.time - past.time
+        if (past == null) return "Lỗi định dạng"
 
-            if (diffMillis < 0) return "Vừa xong"
+        val now = Date()
+        val diffMillis = now.time - past.time
 
-            val seconds = TimeUnit.MILLISECONDS.toSeconds(diffMillis)
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis)
-            val hours = TimeUnit.MILLISECONDS.toHours(diffMillis)
-            val days = TimeUnit.MILLISECONDS.toDays(diffMillis)
+        // LOG DEBUG: Boss mở Logcat xem 2 con số này có khớp nhau không
+        Log.d("TIME_CHECK", "Giờ máy: ${now.time} | Giờ Server: ${past.time} | Lệch: ${diffMillis/1000} giây")
 
-            return when {
-                seconds < 60 -> "Vừa xong"
-                minutes < 60 -> "$minutes phút trước"
-                hours < 24 -> "$hours giờ trước"
-                days < 7 -> "$days ngày trước"
-                else -> {
-                    // Hiển thị ngày tháng cụ thể nếu quá 7 ngày
-                    val outputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    outputFormat.format(past)
-                }
-            }
-        } catch (e: Exception) {
-            return "Lỗi thời gian"
+        // Nếu lệch quá lớn (ví dụ lệch 7 tiếng = 25.200.000 ms)
+        // thì khả năng cao vẫn sai múi giờ, ta dùng Math.abs để chữa cháy
+        val absDiff = Math.abs(diffMillis)
+
+        if (absDiff < 60000) return "Vừa xong"
+
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(absDiff)
+        val hours = TimeUnit.MILLISECONDS.toHours(absDiff)
+        val days = TimeUnit.MILLISECONDS.toDays(absDiff)
+
+        return when {
+            minutes < 60 -> "$minutes phút trước"
+            hours < 24 -> "$hours giờ trước"
+            days < 7 -> "$days ngày trước"
+            else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
         }
     }
-    inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+     class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tvTitle)
         val img: ImageView = itemView.findViewById(R.id.imgProduct)
         val price: TextView = itemView.findViewById(R.id.tvPrice)

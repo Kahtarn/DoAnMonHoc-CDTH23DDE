@@ -1,5 +1,6 @@
 package com.example.serverchodientu.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -35,6 +36,7 @@ public class Product {
     private Integer status;
 
     @Column(name = "create_at", insertable = false, updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", timezone = "Asia/Ho_Chi_Minh")
     private Timestamp createAt;
 
     public Product(Integer id, User seller, Categories category, String thumbnailUrl, String title, String description, BigDecimal price, Integer status, Timestamp createAt) {

@@ -2,6 +2,7 @@ package com.example.clientchodientu.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -11,10 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.dto.auth.login.LoginRequest
-import com.example.chodientuapplication.dto.auth.login.LoginResponse
-import com.example.chodientuapplication.ui.home.HomeActivity
+import com.example.clientchodientu.MainActivity
+import com.example.clientchodientu.R
+import com.example.clientchodientu.dto.auth.login.LoginRequest
+import com.example.clientchodientu.dto.auth.login.LoginResponse
+import com.example.clientchodientu.untils.token.ApiClient
+import com.example.clientchodientu.untils.token.TokenManager
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,7 +38,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
     private lateinit var btnRegister: Button
     private var client = OkHttpClient()
-    private val urlLogin = "http://10.0.2.2:8080/api/auth/login"
+    private val urlLogin = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/login"
+
+    private val urlSetFCMToken = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/chat/set-fcm-token"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
         edtUsernameOrEmail = findViewById<EditText>(R.id.edtUsernameOrEmail)
         edtPassword = findViewById<EditText>(R.id.edtPassword)
 
+        TokenManager.init(this)
         btnRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
@@ -92,25 +100,41 @@ class LoginActivity : AppCompatActivity() {
                     .url(urlLogin)
                     .post(requestBody)
                     .build()
-                val response = client.newCall(request).execute()
+                val response = ApiClient.getClient(this@LoginActivity).newCall(request).execute()
                 val responseString = response.body?.string()
                 val data = gson.fromJson(responseString, LoginResponse::class.java)
                 if (response.isSuccessful) {
                     if (data.success) {
-                        val prefs = getSharedPreferences("TokenValues", MODE_PRIVATE)
-                        with(prefs.edit()) {
-                            putString("accessToken", data.data.accessToken)
-                            putString("tokenType", data.data.refreshToken)
-                            apply()
+                        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                            if (!task.isSuccessful) {
+                                Log.w("FCM", "Lấy token thất bại", task.exception)
+                                return@addOnCompleteListener
+                            }
+
+                            // 3. Gửi Token lên Server
+                            val token = task.result
+                            Log.d("FCM", "Token hiện tại: $token")
+                            TokenManager.updateFCMToken(this@LoginActivity, token)
+                            TokenManager.saveTokens(
+                                data.data.accessToken,
+                                data.data.refreshToken,
+                                token,
+                                data.data.firebaseToken
+
+                            )
                         }
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
-                                .show()
-                            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                            Log.d("token", data.data.accessToken)
+//                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
+//                                .show()
+                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
-                            finish()
+//                            finish()
                             Result.success(data)
                         }
+
                     } else {
                         withContext(Dispatchers.Main) {
                             val dialog = AlertDialog.Builder(this@LoginActivity)
@@ -134,6 +158,14 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    val dialog = AlertDialog.Builder(this@LoginActivity)
+                        .setTitle("Lỗi")
+                        .setMessage("Đã xảy ra lỗi: ${e.localizedMessage}")
+                        .setPositiveButton("OK", null)
+                        .create()
+                    dialog.show()
+                }
                 Result.failure(e)
             }
         }

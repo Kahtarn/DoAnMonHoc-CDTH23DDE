@@ -2,6 +2,7 @@ package com.example.clientchodientu.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -25,17 +26,17 @@ import kotlin.text.isEmpty
 import kotlin.text.trim
 
 class ResetPasswordActivity : AppCompatActivity() {
-    private lateinit var newPass : EditText
-    private lateinit var confirmPass : EditText
-    private lateinit var btnResetPassword : Button
+    private lateinit var newPass: EditText
+    private lateinit var confirmPass: EditText
+    private lateinit var btnResetPassword: Button
     private var client = OkHttpClient()
     private var gson = Gson()
-    private var urlBase = "http://10.0.2.2:8080/api/auth/reset-password";
+    private var urlBase = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/reset-password";
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_reset_password)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.ProfileUser)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -43,12 +44,20 @@ class ResetPasswordActivity : AppCompatActivity() {
         newPass = findViewById<EditText>(R.id.edtNewPassword)
         confirmPass = findViewById<EditText>(R.id.edtConfirmPassword)
         btnResetPassword = findViewById<Button>(R.id.btnDone)
-
+        newPass.transformationMethod =
+            android.text.method.PasswordTransformationMethod.getInstance()
+        confirmPass.transformationMethod =
+            android.text.method.PasswordTransformationMethod.getInstance()
         btnResetPassword.setOnClickListener {
             lifecycleScope.launch {
                 handleResetClick()
             }
         }
+    }
+
+    fun isPasswordValid(password: String): Boolean {
+        val passwordPattern = "^(?=.*[0-9])(?=.*[A-Z])(?=\\S+$).{8,}$"
+        return password.matches(passwordPattern.toRegex())
     }
 
     private fun handleResetClick() {
@@ -59,6 +68,14 @@ class ResetPasswordActivity : AppCompatActivity() {
         if (newPassword.isEmpty()) {
             newPass.error = "Vui lòng nhập mật khẩu mới"
             newPass.requestFocus()
+            return
+        }
+        if (!isPasswordValid(newPassword) || !isPasswordValid(confirmPassword)) {
+            Toast.makeText(
+                this@ResetPasswordActivity,
+                "Mật khẩu cần ít nhất 8 ký tự, 1 chữ hoa, 1 chữ số và KHÔNG có khoảng trắng!",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         if (confirmPassword.isEmpty()) {
@@ -137,6 +154,7 @@ class ResetPasswordActivity : AppCompatActivity() {
                             "Thất bại: ${response.message}",
                             Toast.LENGTH_SHORT
                         ).show()
+
                     }
                 }
 
@@ -147,6 +165,7 @@ class ResetPasswordActivity : AppCompatActivity() {
                         "Lỗi kết nối: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
+                    Log.d("Reset Password", e.message.toString())
                 }
             }
         }

@@ -45,7 +45,10 @@ public class User {
     @Column(name = "create_at")
     private Timestamp createAt;
 
-    public User(Integer id, String email, String username, String password, String fullName, String phone, boolean gender, String avatarUrl, String provinceName, String wardName, Timestamp createAt) {
+    @Column(name = "fcm_token")
+    private String firebaseToken;
+
+    public User(Integer id, String email, String username, String password, String fullName, String phone, boolean gender, String avatarUrl, String provinceName, String wardName, Timestamp createAt, String firebaseToken) {
         this.id = id;
         this.email = email;
         this.username = username;
@@ -70,9 +73,13 @@ public class User {
         this.id = id;
     }
 
-    public String getEmail() {return email;}
+    public String getEmail() {
+        return email;
+    }
 
-    public void setEmail(String email) {this.email = email;}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getUsername() {
         return username;
@@ -106,9 +113,13 @@ public class User {
         this.phone = phone;
     }
 
-    public boolean isGender() {return gender;}
+    public boolean isGender() {
+        return gender;
+    }
 
-    public void setGender(boolean gender) {this.gender = gender;}
+    public void setGender(boolean gender) {
+        this.gender = gender;
+    }
 
     public String getAvatarUrl() {
         return avatarUrl;
@@ -140,5 +151,13 @@ public class User {
 
     public void setCreateAt(Timestamp createAt) {
         this.createAt = createAt;
+    }
+
+    public void setFcmToken(String firebaseToken) {
+        this.firebaseToken = firebaseToken;
+    }
+
+    public String getFcmToken() {
+        return this.firebaseToken;
     }
 }

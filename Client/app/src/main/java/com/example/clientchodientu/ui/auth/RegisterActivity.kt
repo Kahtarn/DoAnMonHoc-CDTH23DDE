@@ -1,7 +1,5 @@
 package com.example.clientchodientu.ui.auth
 
-import android.R
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -17,9 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.entity.Province
-import com.example.chodientuapplication.entity.Ward
+import com.example.clientchodientu.entity.Province
+import com.example.clientchodientu.entity.Ward
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,12 +26,10 @@ import android.view.View // FIX: Thêm import này
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Button
-import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.dto.auth.register.OtpRequest
-import com.example.chodientuapplication.dto.auth.register.OtpResponse
-import com.example.chodientuapplication.dto.auth.register.RegisterRequest
-import com.example.chodientuapplication.dto.auth.register.RegisterResponse
-import kotlinx.coroutines.launch
+import com.example.clientchodientu.dto.auth.register.OtpRequest
+import com.example.clientchodientu.dto.auth.register.OtpResponse
+import com.example.clientchodientu.dto.auth.register.RegisterRequest
+import com.example.clientchodientu.dto.auth.register.RegisterResponse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -45,6 +40,8 @@ import kotlin.stackTraceToString
 import kotlin.text.isEmpty
 import kotlin.text.trim
 import kotlin.toString
+import com.example.clientchodientu.R
+
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var edtUsername: EditText
@@ -54,55 +51,50 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var edtPhone: EditText
     private lateinit var btnSendOtp: Button
     private lateinit var btnRegister: Button
-
     private lateinit var radioGroupGender: RadioGroup
-    private var selectedGender: Boolean = true
+    private var selectedGender: Boolean = false
     private lateinit var sTinh: Spinner
     private lateinit var sHuyen: Spinner
     private lateinit var edtOtpCode: EditText
     private var selectedProvinceCode: Int = 0
     private var selectedWardCode: Int = 0
-
     private var countDownTimer: CountDownTimer? = null
     private val client = OkHttpClient()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.ProfileUser)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        sTinh = findViewById<Spinner>(R.id.sTinh)
-        sHuyen = findViewById<Spinner>(R.id.sHuyen)
-        edtUsername = findViewById<EditText>(R.id.edtUsername)
-        edtEmail = findViewById<EditText>(R.id.edtEmail)
-        edtPassword = findViewById<EditText>(R.id.edtPassword)
-        edtFullName = findViewById<EditText>(R.id.edtFullname)
-        edtPhone = findViewById<EditText>(R.id.edtPhone)
-        edtOtpCode = findViewById<EditText>(R.id.edtOtp)
-        radioGroupGender = findViewById(R.id.radioGroupGender)
-        btnRegister = findViewById<Button>(R.id.btnRegister)
-        btnSendOtp = findViewById<Button>(R.id.btnSendOTPRegister)
 
-        //mac dinh la Nam
+        sTinh = findViewById(R.id.sTinh)
+        sHuyen = findViewById(R.id.sHuyen)
+        edtUsername = findViewById(R.id.edtUsername)
+        edtEmail = findViewById(R.id.edtEmail)
+        edtPassword = findViewById(R.id.edtPassword)
+        edtFullName = findViewById(R.id.edtFullname)
+        edtPhone = findViewById(R.id.edtPhone)
+        edtOtpCode = findViewById(R.id.edtOtp)
+        radioGroupGender = findViewById(R.id.radioGroupGender)
+        btnRegister = findViewById(R.id.btnRegister)
+        btnSendOtp = findViewById(R.id.btnSendOTPRegister)
         radioGroupGender.check(R.id.rbtnNam)
         radioGroupGender.setOnCheckedChangeListener { group, checkedId ->
             when (checkedId) {
-                R.id.rbtnNam -> selectedGender = true
-                R.id.rbtnNu -> selectedGender = false
+                R.id.rbtnNam -> selectedGender = false
+                R.id.rbtnNu -> selectedGender = true
             }
         }
-
 
         lifecycleScope.launch {
             loadProviceData()
         }
+
         btnSendOtp.setOnClickListener {
             edtEmail.clearFocus()
-
-            // Hide keyboard
             val imm = getSystemService(INPUT_METHOD_SERVICE)
                     as InputMethodManager
             imm.hideSoftInputFromWindow(window.decorView.windowToken, 0)
@@ -138,6 +130,12 @@ class RegisterActivity : AppCompatActivity() {
             val wardName = sHuyen.selectedItem.toString()
             val otpCode = edtOtpCode.text.toString().trim()
 
+            if (!isPasswordValid(password)) {
+                focusEditText(edtPassword)
+                edtPassword.error = "Mật khẩu cần ít nhất 8 ký tự, 1 chữ hoa, 1 chữ số và KHÔNG có khoảng trắng!"
+                return@setOnClickListener
+            }
+
             if (userName.isEmpty()) {
                 focusEditText(edtUsername)
                 edtUsername.error = "Vui lòng nhập tên đăng nhập"
@@ -163,9 +161,9 @@ class RegisterActivity : AppCompatActivity() {
                 edtPhone.error = "Vui lòng nhập số điện thoại"
                 return@setOnClickListener
             }
-            if (phone.length !== 10) {
+            if (phone.length < 10 || phone.length > 15) {
                 focusEditText(edtPhone)
-                edtPhone.error = "Số điện thoại phải có 10 chữ số"
+                edtPhone.error = "Số điện thoại phải có 10 chữ số và dưới 15 chữ số"
                 return@setOnClickListener
             }
             if (email.isEmpty()) {
@@ -197,6 +195,11 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    fun isPasswordValid(password: String): Boolean {
+        val passwordPattern = "^(?=.*[0-9])(?=.*[A-Z])(?=\\S+$).{8,}$"
+        return password.matches(passwordPattern.toRegex())
+    }
+
     fun focusEditText(editText: EditText) {
         editText.requestFocus()
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
@@ -207,7 +210,7 @@ class RegisterActivity : AppCompatActivity() {
         startCountDown(btnSendOtp)
         withContext(Dispatchers.IO) {
             try {
-                val url = "http://10.0.2.2:8080/api/auth/send-otp"
+                val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/send-otp"
 
                 val gson = Gson()
                 val otpRequest = OtpRequest(email)
@@ -300,7 +303,7 @@ class RegisterActivity : AppCompatActivity() {
                     jsonString.toRequestBody("application/json".toMediaType())
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/auth/register")
+                    .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/register")
                     .post(requestBody)
                     .build()
 
@@ -371,10 +374,10 @@ class RegisterActivity : AppCompatActivity() {
                             // Bind dữ liệu vào Spinner luôn
                             val adapter = ArrayAdapter(
                                 this@RegisterActivity,
-                                R.layout.simple_spinner_item,
+                                android.R.layout.simple_spinner_item,
                                 data
                             )
-                            adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                             sTinh.adapter = adapter
 
                             sTinh.onItemSelectedListener =
@@ -432,10 +435,10 @@ class RegisterActivity : AppCompatActivity() {
                             // Bind dữ liệu vào Spinner luôn
                             val adapter = ArrayAdapter(
                                 this@RegisterActivity,
-                                R.layout.simple_spinner_item,
+                                android.R.layout.simple_spinner_item,
                                 listWard
                             )
-                            adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                             sHuyen.adapter = adapter
                             sHuyen.onItemSelectedListener =
                                 object : AdapterView.OnItemSelectedListener {

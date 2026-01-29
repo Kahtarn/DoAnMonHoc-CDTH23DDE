@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -15,10 +16,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.chodientuapplication.R
-import com.example.chodientuapplication.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRequest
-import com.example.chodientuapplication.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRespond
-import com.example.chodientuapplication.dto.auth.forgotpassword.ForgotPasswordRequest
+import com.example.clientchodientu.R
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRequest
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordOTPVerificationRespond
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,13 +28,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.core.content.edit
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordRequest
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordRespond
 import kotlin.collections.forEachIndexed
 import kotlin.jvm.java
-import kotlin.math.log
 import kotlin.text.isEmpty
 import kotlin.text.isNotEmpty
 import kotlin.text.last
@@ -43,7 +40,7 @@ import kotlin.toString
 
 class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
     private var client = OkHttpClient()
-    private var urlBase = "http://10.0.2.2:8080/api/auth/";
+    private var urlBase = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/";
     private var gson = Gson()
     private lateinit var otp1: EditText
     private lateinit var otp2: EditText
@@ -54,11 +51,12 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
     private lateinit var btnVerify: Button
     private lateinit var ReSendOtp: TextView
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_forgot_password_otp_verification)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.ProfileUser)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -70,8 +68,8 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
         otp5 = findViewById(R.id.edtOtp5)
         otp6 = findViewById(R.id.edtOtp6)
         setupOtpInputs(otp1, otp2, otp3, otp4, otp5, otp6)
-        btnVerify = findViewById<Button>(R.id.btnVerify)
-        ReSendOtp = findViewById<TextView>(R.id.tvReSendOtp)
+        btnVerify = findViewById(R.id.btnVerify)
+        ReSendOtp = findViewById(R.id.tvReSendOtp)
 
         btnVerify.setOnClickListener {
             lifecycleScope.launch {
@@ -79,7 +77,79 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
             }
         }
 
+        ReSendOtp.setOnClickListener {
+            lifecycleScope.launch {
+                var email = ""
+                val pref = getSharedPreferences("auth", MODE_PRIVATE)
+                email = pref.getString("email", "")!!
+                sendOTPEmail(email)
+            }
+        }
+
     }
+
+    suspend fun sendOTPEmail(email: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val gson = Gson()
+                val client = OkHttpClient()
+                val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/forgot-password"
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val forgotPasswordRequest = ForgotPasswordRequest(email)
+
+                val jsonString = gson.toJson(forgotPasswordRequest)
+                val requestBody = jsonString.toRequestBody(mediaType)
+
+                val request = Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .header("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val repdpondyBody = response.body?.string()
+
+                val data = gson.fromJson(
+                    repdpondyBody, ForgotPasswordRespond::class.java
+                )
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@ForgotPasswordOTPVerificationActivity,
+                            data.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.d("ForgotPasswordActivity", "Response body: $data")
+                        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+                        prefs.edit { putString("email", email) }
+
+                        Log.d("emailForgotPassword", email.toString().trim())
+                        val intent = Intent(
+                            this@ForgotPasswordOTPVerificationActivity,
+                            ForgotPasswordOTPVerificationActivity::class.java
+                        )
+                        startActivity(intent);
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@ForgotPasswordOTPVerificationActivity,
+                            data.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.d("ForgotPasswordActivity", "Response body: $data")
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ForgotPasswordOTPVerificationActivity,
+                    e.message.toString(),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
 
     suspend fun verifyOtp() {
         withContext(Dispatchers.IO) {
@@ -147,6 +217,7 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
+                    Log.d("error message", e.message.toString())
                     Toast.makeText(
                         this@ForgotPasswordOTPVerificationActivity,
                         e.message,

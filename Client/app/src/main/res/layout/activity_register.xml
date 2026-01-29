@@ -8,7 +8,7 @@
     android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main"
+        android:id="@+id/ProfileUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="30dp"
@@ -29,11 +29,14 @@
         <EditText
             android:id="@+id/edtUsername"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:hint="Tên đăng nhập"
+            android:inputType="text"
+            android:padding="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
@@ -41,33 +44,46 @@
         <EditText
             android:id="@+id/edtFullname"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
-            android:hint="Họ tên"
-            app:layout_constraintEnd_toEndOf="@+id/edtUsername"
-            app:layout_constraintStart_toStartOf="@+id/edtUsername"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:hint="Họ và tên"
+            android:inputType="text"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edtUsername" />
 
         <EditText
             android:id="@+id/edtPassword"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
             android:hint="Mật khẩu"
-            android:inputType="textPassword"
-            app:layout_constraintEnd_toEndOf="@+id/edtFullname"
-            app:layout_constraintStart_toStartOf="@+id/edtFullname"
+            android:inputType="text"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edtFullname" />
 
         <EditText
             android:id="@+id/edtPhone"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
             android:hint="Số điện thoại"
-            android:inputType="phone"
-            app:layout_constraintEnd_toEndOf="@+id/edtPassword"
-            app:layout_constraintStart_toStartOf="@+id/edtPassword"
+            android:inputType="text"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edtPassword" />
 
         <TextView

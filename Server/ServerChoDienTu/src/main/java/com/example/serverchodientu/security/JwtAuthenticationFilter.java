@@ -29,15 +29,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = parseJwt(request);
 
+            System.out.println("Request URL: " + request.getRequestURI());
+            System.out.println("JWT Token: " + jwt);
+
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String email = jwtUtils.getEmailFromJwtToken(jwt);
 
+                System.out.println("Token Valid for: " + email);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                System.out.println("Token Invalid or Null");
             }
         } catch (Exception e) {
+            System.out.println("Auth Error: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

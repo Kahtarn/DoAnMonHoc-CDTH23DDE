@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -111,7 +112,7 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setStatus(0);
-        product.setCreateAt(Timestamp.valueOf(LocalDateTime.now()));
+        product.setCreateAt(Timestamp.from(Instant.now()));
 
 
         if (request.getThumbnailUrl() != null) {

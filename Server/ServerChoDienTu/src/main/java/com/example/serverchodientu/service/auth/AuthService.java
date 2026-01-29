@@ -57,6 +57,14 @@ public class AuthService {
             throw new RuntimeException("Email này đã được sử dụng!");
         }
 
+        if(userRepo.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Tên đăng nhập này đã được sử dụng!");
+        }
+
+        if(userRepo.existsByPhone(request.getPhone())) {
+            throw new RuntimeException("Số điện thoại này đã được đăng ký!");
+        }
+
         EmailVerification ev = emailVerificationRepo.findByEmailAndOtpCode(request.getEmail(), request.getOtpCode())
                 .orElseThrow(() -> new RuntimeException("Mã OTP không chính xác!"));
 

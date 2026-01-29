@@ -163,6 +163,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
     }
     private fun setupAdapter(list: List<Product>) {
         val adapter = AdapterPostOfUser(list)
+        Log.d("Public-detail-user",list.toString())
         rvPost.layoutManager = LinearLayoutManager(this)
         rvPost.adapter = adapter
         adapter.onItemClick = { productId ->

@@ -60,7 +60,6 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var tvTimePosted: TextView
     private lateinit var tvDescription: TextView
     private lateinit var rvProductImages: RecyclerView
-    private lateinit var tvImageCounter: TextView
     private lateinit var layoutSellerInfo: ConstraintLayout
     private lateinit var ivSellerAvatar: ImageView
     private lateinit var tvSellerName: TextView
@@ -108,7 +107,6 @@ class ProductDetailActivity : AppCompatActivity() {
         tvTimePosted = findViewById(R.id.tvTimePosted)
         tvDescription = findViewById(R.id.tvProductDescription)
         rvProductImages = findViewById(R.id.rvProductImages)
-        tvImageCounter = findViewById(R.id.tvImageCounter)
         layoutSellerInfo = findViewById(R.id.layoutSellerInfo)
         ivSellerAvatar = findViewById(R.id.ivSellerAvatar)
         tvSellerName = findViewById(R.id.tvSellerName)
@@ -233,10 +231,6 @@ class ProductDetailActivity : AppCompatActivity() {
 
 
     private fun setupImageSlider(imageUrls: List<String>) {
-        if (imageUrls.isEmpty()) {
-            tvImageCounter.text = "0 / 0"
-            return
-        }
         val adapter = ProductImageAdapter(imageUrls) { position ->
             val intent = Intent(this, ImageViewerActivity::class.java)
             intent.putStringArrayListExtra("IMAGES", ArrayList(imageUrls))
@@ -257,13 +251,9 @@ class ProductDetailActivity : AppCompatActivity() {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     val layoutManager = rvProductImages.layoutManager as LinearLayoutManager
                     val pos = layoutManager.findFirstVisibleItemPosition()
-                    if (pos != RecyclerView.NO_POSITION) {
-                        tvImageCounter.text = "${pos + 1} / ${imageUrls.size}"
-                    }
                 }
             }
         })
-        tvImageCounter.text = "1 / ${imageUrls.size}"
     }
 
     private fun setupFavorite() {

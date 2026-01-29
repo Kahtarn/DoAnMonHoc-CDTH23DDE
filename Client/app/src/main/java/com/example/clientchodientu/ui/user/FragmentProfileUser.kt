@@ -87,7 +87,7 @@ class FragmentProfileUser : Fragment() {
             startActivity(Intent(requireContext(), EditProfileUser::class.java))
         }
         tvActivityChangePassword.setOnClickListener {
-            startActivity(Intent(requireContext(), ChangePassword::class.java))
+            startActivity(Intent(requireContext(), ForgotPasswordActivity::class.java))
         }
         tvActivityLogout.setOnClickListener {
             TokenManager.logout(requireContext())

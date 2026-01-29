@@ -52,7 +52,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var btnSendOtp: Button
     private lateinit var btnRegister: Button
     private lateinit var radioGroupGender: RadioGroup
-    private var selectedGender: Boolean = true
+    private var selectedGender: Boolean = false
     private lateinit var sTinh: Spinner
     private lateinit var sHuyen: Spinner
     private lateinit var edtOtpCode: EditText
@@ -84,8 +84,8 @@ class RegisterActivity : AppCompatActivity() {
         radioGroupGender.check(R.id.rbtnNam)
         radioGroupGender.setOnCheckedChangeListener { group, checkedId ->
             when (checkedId) {
-                R.id.rbtnNam -> selectedGender = true
-                R.id.rbtnNu -> selectedGender = false
+                R.id.rbtnNam -> selectedGender = false
+                R.id.rbtnNu -> selectedGender = true
             }
         }
 

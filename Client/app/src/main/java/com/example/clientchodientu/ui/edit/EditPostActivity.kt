@@ -19,6 +19,7 @@ import com.example.clientchodientu.dto.product.EditPostResponse
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.untils.token.ApiResponse
 import com.example.clientchodientu.untils.token.ApiClient
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,6 +34,7 @@ class EditPostActivity : AppCompatActivity() {
     private lateinit var edtPrice: EditText
     private lateinit var edtDescription: EditText
     private lateinit var btnBack : ImageView
+    private lateinit var btnCancel: Button
     private val gson = Gson()
     private var productId: Int = -1
     private var intentCategoryId: Int = -1
@@ -42,12 +44,22 @@ class EditPostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_edit_post)
-
         initViews()
         receiveData()
         loadCategories()
 
-        findViewById<Button>(R.id.btnCancel).setOnClickListener { finish() }
+        btnCancel= findViewById(R.id.btnCancel)
+        btnCancel.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Hủy chỉnh sửa?")
+                .setMessage("Dữ liệu đã nhập sẽ bị mất.")
+                .setPositiveButton("Thoát") { _, _ ->
+                    finish()
+                }
+                .setNegativeButton("Ở lại", null)
+                .show()
+
+        }
         btnBack.setOnClickListener {finish()}
         findViewById<Button>(R.id.btnUpdate).setOnClickListener { validateAndSave() }
     }

@@ -1,5 +1,6 @@
 package com.example.clientchodientu.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -109,33 +110,33 @@ class AdapterPostProductManage(
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString.isNullOrBlank()) return "Không rõ thời gian"
 
-        // 1. Định dạng ISO 8601 từ Server
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC") // Ép nó hiểu String đầu vào là UTC
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
         }
 
         try {
             val past = format.parse(timeString) ?: return "Định dạng sai"
             val now = Date()
+
+            // Sử dụng giá trị tuyệt đối Math.abs để tránh số âm khi máy chậm hơn server
             val diffMillis = now.time - past.time
+            val absDiff = Math.abs(diffMillis)
 
-            if (diffMillis < 0) return "Vừa xong"
+            // Nếu lệch dưới 1 phút (bất kể âm hay dương) thì coi là vừa xong
+            if (absDiff < 60000) return "Vừa xong"
 
-            val seconds = TimeUnit.MILLISECONDS.toSeconds(diffMillis)
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis)
-            val hours = TimeUnit.MILLISECONDS.toHours(diffMillis)
-            val days = TimeUnit.MILLISECONDS.toDays(diffMillis)
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(absDiff)
+            val hours = TimeUnit.MILLISECONDS.toHours(absDiff)
+            val days = TimeUnit.MILLISECONDS.toDays(absDiff)
+
+            // Log để debug: Bạn sẽ thấy sự chênh lệch khủng khiếp nếu giờ máy bị sai
+            Log.d("TIME_DEBUG", "Diff: $diffMillis | Now: ${now.time} | Past: ${past.time}")
 
             return when {
-                seconds < 60 -> "Vừa xong"
                 minutes < 60 -> "$minutes phút trước"
                 hours < 24 -> "$hours giờ trước"
                 days < 7 -> "$days ngày trước"
-                else -> {
-                    // Hiển thị ngày tháng cụ thể nếu quá 7 ngày
-                    val outputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    outputFormat.format(past)
-                }
+                else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
             }
         } catch (e: Exception) {
             return "Lỗi thời gian"

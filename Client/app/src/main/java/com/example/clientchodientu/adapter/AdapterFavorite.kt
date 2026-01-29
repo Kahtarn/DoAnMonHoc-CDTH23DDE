@@ -1,5 +1,6 @@
 package com.example.clientchodientu.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +13,9 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.entity.Product
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
+import java.util.concurrent.TimeUnit
 
 class AdapterFavorite(
     private var favoritePost: List<Product>,
@@ -78,35 +81,38 @@ class AdapterFavorite(
     }
 
     private fun convertTimeAgo(timeString: String?): String {
-        if (timeString == null) return "Lỗi: Không có thời gian"
+        if (timeString.isNullOrBlank()) return "Không rõ thời gian"
 
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
 
         try {
-            val past = format.parse(timeString) ?: return "Lỗi: Định dạng sai"
+            val past = format.parse(timeString) ?: return "Định dạng sai"
             val now = Date()
-            format.timeZone = TimeZone.getTimeZone("UTC")
-            if (past.time > now.time) {
-                return "Lỗi dữ liệu (Thời gian ở tương lai)"
-            }
-            val diff = now.time - past.time
-            val second = 1000L
-            val minute = 60 * second
-            val hour = 60 * minute
-            val day = 24 * hour
+
+            // Sử dụng giá trị tuyệt đối Math.abs để tránh số âm khi máy chậm hơn server
+            val diffMillis = now.time - past.time
+            val absDiff = Math.abs(diffMillis)
+
+            // Nếu lệch dưới 1 phút (bất kể âm hay dương) thì coi là vừa xong
+            if (absDiff < 60000) return "Vừa xong"
+
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(absDiff)
+            val hours = TimeUnit.MILLISECONDS.toHours(absDiff)
+            val days = TimeUnit.MILLISECONDS.toDays(absDiff)
+
+            // Log để debug: Bạn sẽ thấy sự chênh lệch khủng khiếp nếu giờ máy bị sai
+            Log.d("TIME_DEBUG", "Diff: $diffMillis | Now: ${now.time} | Past: ${past.time}")
+
             return when {
-                diff < minute -> "Vừa xong"
-                diff < hour -> "${diff / minute} phút trước"
-                diff < day -> "${diff / hour} giờ trước"
-                diff < 7 * day -> "${diff / day} ngày trước"
-                else -> {
-                    val outputFormat = SimpleDateFormat("dd/MM/yyyy")
-                    outputFormat.format(past)
-                }
+                minutes < 60 -> "$minutes phút trước"
+                hours < 24 -> "$hours giờ trước"
+                days < 7 -> "$days ngày trước"
+                else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            return "Lỗi xử lý thời gian"
+            return "Lỗi thời gian"
         }
     }
 

@@ -63,6 +63,7 @@ class FragmentProfileUser : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_profile_user,container,false)
     }
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init(view)

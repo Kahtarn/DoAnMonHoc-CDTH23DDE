@@ -41,7 +41,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 
-class FragmentHome : Fragment(){
+class FragmentHome : Fragment() {
     private val baseUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api"
     private val urlProductAll = "$baseUrl/product/getAll"
     private val urlCategory = "$baseUrl/category/getCategories"
@@ -52,7 +52,7 @@ class FragmentHome : Fragment(){
     private lateinit var recyclerViewProduct: RecyclerView
     private lateinit var recyclerViewCategory: RecyclerView
     private lateinit var progressBar: ProgressBar
-    private lateinit var btnFavorite : ImageButton
+    private lateinit var btnFavorite: ImageButton
 
     private lateinit var token: String
     private fun getSearchUrl(query: String) = "$baseUrl/product/filter?name=$query"
@@ -62,7 +62,7 @@ class FragmentHome : Fragment(){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_home,container,false)
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -195,7 +195,7 @@ class FragmentHome : Fragment(){
                         val listProduct = product.data
 
                         if (success) {
-                            println(message)
+                            Log.d("Product_list_home", listProduct.toString())
                             setUpAdapterProduct(listProduct)
 
                         } else {

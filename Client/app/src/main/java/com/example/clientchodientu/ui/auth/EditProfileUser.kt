@@ -87,7 +87,7 @@ class EditProfileUser : AppCompatActivity() {
         }
     }
     suspend fun editInfoUser(){
-        val fullNameEdit = edtFullname.text.toString()
+        val fullNameEdit = edtFullname.text.toString().trim()
         val provinceNameEdit=sProvinceName.selectedItem.toString()
         val wardNameEdit=sWardName.selectedItem.toString()
         val genderEdit=SelectedGender

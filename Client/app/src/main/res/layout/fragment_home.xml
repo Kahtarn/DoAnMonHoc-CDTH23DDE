@@ -112,7 +112,7 @@
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
             android:paddingHorizontal="8dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:spanCount="2" />
     </androidx.core.widget.NestedScrollView>
     <TextView

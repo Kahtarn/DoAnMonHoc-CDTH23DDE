@@ -134,6 +134,7 @@ class LoginActivity : AppCompatActivity() {
 //                            finish()
                             Result.success(data)
                         }
+
                     } else {
                         withContext(Dispatchers.Main) {
                             val dialog = AlertDialog.Builder(this@LoginActivity)

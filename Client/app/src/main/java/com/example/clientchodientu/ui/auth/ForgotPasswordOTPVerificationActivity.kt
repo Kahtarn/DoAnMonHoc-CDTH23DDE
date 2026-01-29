@@ -28,6 +28,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.core.content.edit
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordRequest
+import com.example.clientchodientu.dto.auth.forgotpassword.ForgotPasswordRespond
 import kotlin.collections.forEachIndexed
 import kotlin.jvm.java
 import kotlin.text.isEmpty
@@ -75,7 +77,79 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
             }
         }
 
+        ReSendOtp.setOnClickListener {
+            lifecycleScope.launch {
+                var email = ""
+                val pref = getSharedPreferences("auth", MODE_PRIVATE)
+                email = pref.getString("email", "")!!
+                sendOTPEmail(email)
+            }
+        }
+
     }
+
+    suspend fun sendOTPEmail(email: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val gson = Gson()
+                val client = OkHttpClient()
+                val url = "http://10.0.2.2:8080/api/auth/forgot-password"
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val forgotPasswordRequest = ForgotPasswordRequest(email)
+
+                val jsonString = gson.toJson(forgotPasswordRequest)
+                val requestBody = jsonString.toRequestBody(mediaType)
+
+                val request = Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .header("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val repdpondyBody = response.body?.string()
+
+                val data = gson.fromJson(
+                    repdpondyBody, ForgotPasswordRespond::class.java
+                )
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@ForgotPasswordOTPVerificationActivity,
+                            data.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.d("ForgotPasswordActivity", "Response body: $data")
+                        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+                        prefs.edit { putString("email", email) }
+
+                        Log.d("emailForgotPassword", email.toString().trim())
+                        val intent = Intent(
+                            this@ForgotPasswordOTPVerificationActivity,
+                            ForgotPasswordOTPVerificationActivity::class.java
+                        )
+                        startActivity(intent);
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@ForgotPasswordOTPVerificationActivity,
+                            data.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.d("ForgotPasswordActivity", "Response body: $data")
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ForgotPasswordOTPVerificationActivity,
+                    e.message.toString(),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
 
     suspend fun verifyOtp() {
         withContext(Dispatchers.IO) {

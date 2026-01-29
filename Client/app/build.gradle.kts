@@ -76,4 +76,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:5.0.5")
     implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
+//master key keep login session
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }

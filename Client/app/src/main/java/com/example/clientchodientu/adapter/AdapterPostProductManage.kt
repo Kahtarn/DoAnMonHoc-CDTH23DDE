@@ -14,11 +14,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 
-class AdapterPostProductManage(private var listSelling : List<Product>) : RecyclerView.Adapter<AdapterPostProductManage.SellingViewHolder> () {
+class AdapterPostProductManage(
+    private var listSelling: List<Product>,
+    private var isSold: Boolean
+) :
+    RecyclerView.Adapter<AdapterPostProductManage.SellingViewHolder>() {
     var onItemClick: ((Product) -> Unit)? = null
     var onEditClick: ((Product) -> Unit)? = null
     var onDeleteClick: ((Product) -> Unit)? = null
-    var onSellingClick:((Product)-> Unit)? = null
+    var onSellingClick: ((Product) -> Unit)? = null
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -32,6 +36,10 @@ class AdapterPostProductManage(private var listSelling : List<Product>) : Recycl
         holder: SellingViewHolder,
         position: Int
     ) {
+
+        if (isSold) {
+            holder.more.visibility = View.GONE
+        }
         val p = listSelling[position]
         holder.title.text = p.title
         val province = p.seller?.provinceName ?: "N/A"
@@ -64,14 +72,17 @@ class AdapterPostProductManage(private var listSelling : List<Product>) : Recycl
                         onEditClick?.invoke(p)
                         true
                     }
+
                     R.id.menu_delete -> {
                         onDeleteClick?.invoke(p)
                         true
                     }
-                    R.id.menu_sold ->{
+
+                    R.id.menu_sold -> {
                         onSellingClick?.invoke(p)
                         true
                     }
+
                     else -> false
                 }
             }
@@ -83,14 +94,14 @@ class AdapterPostProductManage(private var listSelling : List<Product>) : Recycl
         return listSelling.size
     }
 
-    class SellingViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView) {
-        val title : TextView = itemView.findViewById(R.id.tvTitle)
-        val price : TextView = itemView.findViewById(R.id.tvPrice)
-        val location : TextView = itemView.findViewById(R.id.tvLocation)
-        val sellerName : TextView = itemView.findViewById(R.id.tvSellerName)
-        val createAt : TextView = itemView.findViewById(R.id.tvCreateAt)
+    class SellingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val title: TextView = itemView.findViewById(R.id.tvTitle)
+        val price: TextView = itemView.findViewById(R.id.tvPrice)
+        val location: TextView = itemView.findViewById(R.id.tvLocation)
+        val sellerName: TextView = itemView.findViewById(R.id.tvSellerName)
+        val createAt: TextView = itemView.findViewById(R.id.tvCreateAt)
         val img: ImageView = itemView.findViewById(R.id.imgProduct)
-        val more : ImageButton = itemView.findViewById(R.id.btnMore)
+        val more: ImageButton = itemView.findViewById(R.id.btnMore)
     }
 
     private fun convertTimeAgo(timeString: String?): String {
@@ -126,7 +137,7 @@ class AdapterPostProductManage(private var listSelling : List<Product>) : Recycl
         }
     }
 
-    fun updateData(newList : List<Product>) {
+    fun updateData(newList: List<Product>) {
         this.listSelling = newList
         notifyDataSetChanged()
     }

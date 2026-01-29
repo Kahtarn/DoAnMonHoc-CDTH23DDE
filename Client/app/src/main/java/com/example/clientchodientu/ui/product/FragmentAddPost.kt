@@ -1,7 +1,11 @@
 package com.example.clientchodientu.ui.product
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -13,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,8 +25,10 @@ import com.example.clientchodientu.R
 import com.example.clientchodientu.adapters.SelectedImageAdapter
 import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.entity.Category
+import com.example.clientchodientu.ui.home.FragmentHome
 import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.untils.FileUtils
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +38,7 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 
-class CreatePostActivity : AppCompatActivity() {
+class FragmentAddPost : Fragment() {
     private val gson = Gson()
     private val urlCate = "http://10.0.2.2:8080/api/category/getCategories"
     private val urlPost = "http://10.0.2.2:8080/api/product/post"
@@ -44,18 +51,17 @@ class CreatePostActivity : AppCompatActivity() {
     private lateinit var btnPost: Button
     private lateinit var rvImages: RecyclerView
     private val categoryList = mutableListOf<Category>()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_create_post, container, false)
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.fragment_create_post)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
-        initViews()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initViews(view)
         setupRecyclerView()
         loadCategories()
         btnPost.setOnClickListener {
@@ -65,25 +71,28 @@ class CreatePostActivity : AppCompatActivity() {
         }
 
     }
-    private fun initViews() {
-        edtTitle = findViewById(R.id.edtTitle)
-        edtPrice = findViewById(R.id.edtPrice)
-        edtDescription = findViewById(R.id.edtDescription)
-        spnCategory = findViewById(R.id.spnCategory)
-        btnPost = findViewById(R.id.btnPost)
-        rvImages = findViewById(R.id.rvSelectedImages)
+
+    private fun initViews(view: View) {
+        edtTitle = view.findViewById(R.id.edtTitle)
+        edtPrice = view.findViewById(R.id.edtPrice)
+        edtDescription = view.findViewById(R.id.edtDescription)
+        spnCategory = view.findViewById(R.id.spnCategory)
+        btnPost = view.findViewById(R.id.btnPost)
+        rvImages = view.findViewById(R.id.rvSelectedImages)
     }
 
-    private val pickMultipleMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(6)) { uris ->
-        if (uris.isNotEmpty()) {
-            selectedUris.addAll(uris)
-            if (selectedUris.size > 6) {
-                while (selectedUris.size > 6) selectedUris.removeAt(selectedUris.size - 1)
-                Toast.makeText(this, "Tối đa 6 ảnh thôi nhé", Toast.LENGTH_SHORT).show()
+    private val pickMultipleMedia =
+        registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(6)) { uris ->
+            if (uris.isNotEmpty()) {
+                selectedUris.addAll(uris)
+                if (selectedUris.size > 6) {
+                    while (selectedUris.size > 6) selectedUris.removeAt(selectedUris.size - 1)
+                    Toast.makeText(requireContext(), "Tối đa 6 ảnh thôi nhé", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                imageAdapter.setData(selectedUris)
             }
-            imageAdapter.setData(selectedUris)
         }
-    }
 
     private fun setupRecyclerView() {
         imageAdapter = SelectedImageAdapter(
@@ -95,7 +104,8 @@ class CreatePostActivity : AppCompatActivity() {
                 imageAdapter.setData(selectedUris)
             }
         )
-        rvImages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvImages.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvImages.adapter = imageAdapter
     }
 
@@ -105,7 +115,7 @@ class CreatePostActivity : AppCompatActivity() {
                 try {
                     val request = Request.Builder().url(urlCate).build()
                     val response =
-                        ApiClient.getClient(this@CreatePostActivity).newCall(request).execute()
+                        ApiClient.getClient(requireContext()).newCall(request).execute()
                     val responseBody = response.body?.string()
 
                     if (response.isSuccessful && responseBody != null) {
@@ -118,14 +128,15 @@ class CreatePostActivity : AppCompatActivity() {
             }
             if (categories != null) {
                 val adapter = ArrayAdapter(
-                    this@CreatePostActivity,
+                    requireContext(),
                     android.R.layout.simple_spinner_item,
                     categories
                 )
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spnCategory.adapter = adapter
             } else {
-                Toast.makeText(this@CreatePostActivity, "Không thể tải danh mục", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Không thể tải danh mục", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -135,19 +146,21 @@ class CreatePostActivity : AppCompatActivity() {
         val price = edtPrice.text.toString()
 
         if (title.isEmpty() || price.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập tiêu đề và giá", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Vui lòng nhập tiêu đề và giá", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
         if (selectedUris.isEmpty()) {
-            Toast.makeText(this, "Hãy chọn ít nhất 1 cái ảnh bìa", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Hãy chọn ít nhất 1 cái ảnh bìa", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
         val selectedCategory = spnCategory.selectedItem as? Category
 
         if (selectedCategory == null) {
-            Toast.makeText(this, "Vui lòng chọn danh mục", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Vui lòng chọn danh mục", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -162,7 +175,7 @@ class CreatePostActivity : AppCompatActivity() {
                 builder.addFormDataPart("categoryId", categoryId)
 
                 selectedUris.forEachIndexed { index, uri ->
-                    val file = FileUtils.getFileFromUri(this@CreatePostActivity, uri)
+                    val file = FileUtils.getFileFromUri(requireContext(), uri)
                     file?.let {
                         val requestBody = it.asRequestBody("image/jpeg".toMediaType())
 
@@ -177,19 +190,30 @@ class CreatePostActivity : AppCompatActivity() {
                     .build()
 
                 // 3. Thực thi gọi API
-                val response = ApiClient.getClient(this@CreatePostActivity).newCall(request).execute()
+                val response = ApiClient.getClient(requireContext()).newCall(request).execute()
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
-                        Toast.makeText(this@CreatePostActivity, "Đăng tin thành công!", Toast.LENGTH_SHORT).show()
-                        finish()
+                        Toast.makeText(requireContext(), "Đăng tin thành công!", Toast.LENGTH_SHORT)
+                            .show()
+                        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
+
+                        bottomNav.selectedItemId = R.id.nav_home
                     } else {
-                        Toast.makeText(this@CreatePostActivity, "Lỗi: ${response.code}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Lỗi: ${response.code}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@CreatePostActivity, "Lỗi hệ thống: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Lỗi hệ thống: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

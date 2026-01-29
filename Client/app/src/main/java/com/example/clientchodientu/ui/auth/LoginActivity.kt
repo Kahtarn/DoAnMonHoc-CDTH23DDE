@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.clientchodientu.MainActivity
 import com.example.clientchodientu.R
 import com.example.clientchodientu.dto.auth.login.LoginRequest
 import com.example.clientchodientu.dto.auth.login.LoginResponse
@@ -127,7 +128,7 @@ class LoginActivity : AppCompatActivity() {
                             Log.d("token", data.data.accessToken)
 //                            Toast.makeText(this@LoginActivity, data.message, Toast.LENGTH_SHORT)
 //                                .show()
-                            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
                             intent.flags =
                                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)

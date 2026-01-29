@@ -5,13 +5,15 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageButton
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.clientchodientu.R
@@ -29,10 +31,9 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import com.example.clientchodientu.dto.user.ResponseProfile
 
-class ProfileUser : AppCompatActivity() {
+class FragmentProfileUser : Fragment() {
     private lateinit var tvActivityEditProfileUser: TextView
     private lateinit var tvActivityLogout: TextView
-    private lateinit var btnBack: AppCompatImageButton
     private lateinit var tvActivityChangePassword: TextView
     private lateinit var imgProfile: ImageView
 
@@ -55,26 +56,26 @@ class ProfileUser : AppCompatActivity() {
         }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
-        setContentView(R.layout.fragment_profile_user)
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.ProfileUser)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
-        init()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_profile_user,container,false)
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init(view)
         setUpEvent()
     }
 
-    private fun init() {
-        tvActivityEditProfileUser = findViewById(R.id.tvActivityEditProfile)
-        tvActivityChangePassword = findViewById(R.id.tvActivityChangePassword)
-        tvActivityLogout = findViewById(R.id.tvActivityLogout)
-        btnChangeAvatar = findViewById(R.id.btnChangeAvatar)
-        imgProfile = findViewById(R.id.imgProfile)
-        tvFullNameProfile = findViewById(R.id.tvUsername)
+    private fun init(view:View) {
+        tvActivityEditProfileUser =view.findViewById(R.id.tvActivityEditProfile)
+        tvActivityChangePassword = view.findViewById(R.id.tvActivityChangePassword)
+        tvActivityLogout = view.findViewById(R.id.tvActivityLogout)
+        btnChangeAvatar = view.findViewById(R.id.btnChangeAvatar)
+        imgProfile = view.findViewById(R.id.imgProfile)
+        tvFullNameProfile = view.findViewById(R.id.tvUsername)
         lifecycleScope.launch {
             getInfoUser()
         }
@@ -83,18 +84,15 @@ class ProfileUser : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun setUpEvent() {
         tvActivityEditProfileUser.setOnClickListener {
-            startActivity(Intent(this, EditProfileUser::class.java))
+            startActivity(Intent(requireContext(), EditProfileUser::class.java))
         }
         tvActivityChangePassword.setOnClickListener {
-            startActivity(Intent(this, ChangePassword::class.java))
+            startActivity(Intent(requireContext(), ChangePassword::class.java))
         }
         tvActivityLogout.setOnClickListener {
-            TokenManager.logout(this)
+            TokenManager.logout(requireContext())
         }
 
-        btnBack.setOnClickListener {
-            finish()
-        }
 
         btnChangeAvatar.setOnClickListener {
             pickImageLauncher.launch("image/*")
@@ -104,7 +102,7 @@ class ProfileUser : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun uploadAvatarToServer(uri: Uri) {
         // 1. Chuyển URI thành File thật (Dùng hàm getFileFromUri tôi đã đưa lúc trước)
-        val file = getFileFromUri(this, uri) ?: return
+        val file = getFileFromUri(requireContext(), uri) ?: return
 
         // 2. Tạo RequestBody từ file
         val fileRequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
@@ -121,13 +119,13 @@ class ProfileUser : AppCompatActivity() {
                     .url("http://10.0.2.2:8080/api/user/update-avatar")
                     .post(requestBody)
                     .build()
-                val response = ApiClient.getClient(this@ProfileUser).newCall(request).execute()
+                val response = ApiClient.getClient(requireContext()).newCall(request).execute()
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         val updatedUser = response.body?.string()
                         Toast.makeText(
-                            this@ProfileUser,
+                            requireContext(),
                             "Cập nhật ảnh thành công!",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -153,7 +151,7 @@ class ProfileUser : AppCompatActivity() {
                 .url(urlProfile)
                 .addHeader("Authorization", "Bearer ${TokenManager.getToken()}")
                 .build()
-            val response = ApiClient.getClient(this@ProfileUser).newCall(request).execute()
+            val response = ApiClient.getClient(requireContext()).newCall(request).execute()
             if (response.isSuccessful) {
                 val responseBody = response.body?.string()
                 val gson = Gson()
@@ -172,7 +170,7 @@ class ProfileUser : AppCompatActivity() {
                 }
                 withContext(Dispatchers.Main) {
                     tvFullNameProfile.setText(data.fullName)
-                    Glide.with(this@ProfileUser)
+                    Glide.with(requireContext())
                         .load(imgUrl)
                         .placeholder(R.drawable.ic_user_placeholder)
                         .error(R.drawable.ic_user_placeholder)

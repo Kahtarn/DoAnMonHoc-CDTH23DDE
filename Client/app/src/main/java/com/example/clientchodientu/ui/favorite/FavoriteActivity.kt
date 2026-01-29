@@ -49,7 +49,7 @@ class FavoriteActivity : AppCompatActivity() {
 
 
     private var currentProductId: Int = -1
-    private var BASE_URL: String = "http://10.0.2.2:8080/api/product"
+    private var BASE_URL: String = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

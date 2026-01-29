@@ -103,7 +103,7 @@ class EditProfileUser : AppCompatActivity() {
             val jsonString = gson.toJson(putData)
             val mediaType = "application/json; charset=utf-8".toMediaType()
             val body = jsonString.toRequestBody(mediaType)
-            val editUrl="http://10.0.2.2:8080/api/user/edit-profile"
+            val editUrl="https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/edit-profile"
             val request= Request.Builder()
                 .url(editUrl)
                 .put(body)
@@ -122,7 +122,7 @@ class EditProfileUser : AppCompatActivity() {
     }
     suspend fun getInfoUser(){
         withContext(Dispatchers.IO){
-            val urlProfile="http://10.0.2.2:8080/api/user/my-profile"
+            val urlProfile="https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/my-profile"
             val request = Request.
             Builder()
                 .get()

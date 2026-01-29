@@ -39,8 +39,8 @@ class FragmentPostManager : Fragment() {
     private lateinit var sold: TextView
     private lateinit var token: String
 
-    private val sellingUrl = "http://10.0.2.2:8080/api/product/my-selling"
-    private val soldUrl = "http://10.0.2.2:8080/api/product/my-sold"
+    private val sellingUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/my-selling"
+    private val soldUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/my-sold"
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -167,7 +167,7 @@ class FragmentPostManager : Fragment() {
     private suspend fun markasSold(productId: Int) {
         withContext(Dispatchers.IO) {
             try {
-                val url = "http://10.0.2.2:8080/api/product/$productId/mark-as-sold"
+                val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/$productId/mark-as-sold"
                 val body = okhttp3.RequestBody.create(null, "")
                 val request = Request.Builder()
                     .url(url)
@@ -239,7 +239,7 @@ class FragmentPostManager : Fragment() {
     private suspend fun deleteProductApi(productId: Int) {
         withContext(Dispatchers.IO) {
             try {
-                val deleteUrl = "http://10.0.2.2:8080/api/product/delete/$productId"
+                val deleteUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/delete/$productId"
 
                 val request = Request.Builder()
                     .url(deleteUrl)

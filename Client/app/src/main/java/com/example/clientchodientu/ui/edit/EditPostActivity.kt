@@ -38,7 +38,7 @@ class EditPostActivity : AppCompatActivity() {
     private val gson = Gson()
     private var productId: Int = -1
     private var intentCategoryId: Int = -1
-    private val BASE_URL = "http://10.0.2.2:8080/api"
+    private val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

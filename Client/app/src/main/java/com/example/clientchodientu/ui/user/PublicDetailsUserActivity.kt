@@ -97,7 +97,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         sellerId = intent.getIntExtra("sellerId", -1)
     }
     private fun resolveUrl(path: String?): String {
-        val baseUrl = "http://10.0.2.2:8080"
+        val baseUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
         if (path.isNullOrBlank() || path == "null") return ""
         val cleanPath = if (path.startsWith("/")) path else "/$path"
         return if (path.startsWith("http")) path else baseUrl + cleanPath
@@ -141,7 +141,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
     suspend fun loadDetailsUser() {
         withContext(Dispatchers.IO) {
             try {
-                val url = "http://10.0.2.2:8080/api/user/details-user/${sellerId}"
+                val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/details-user/${sellerId}"
                 val request = Request.Builder().url(url).build()
                 val response = ApiClient.getClient(this@PublicDetailsUserActivity).newCall(request).execute()
                 val responseBodyString = response.body?.string()
@@ -177,7 +177,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         withContext(Dispatchers.IO) {
             try {
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/product/public/selling/$sellerId")
+                    .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/public/selling/$sellerId")
                     .build()
 
                 val response = ApiClient
@@ -226,7 +226,7 @@ class PublicDetailsUserActivity : AppCompatActivity() {
         withContext(Dispatchers.IO) {
             try {
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/product/public/sold/$sellerId")
+                    .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/public/sold/$sellerId")
                     .build()
                 val response = ApiClient
                     .getClient(this@PublicDetailsUserActivity)

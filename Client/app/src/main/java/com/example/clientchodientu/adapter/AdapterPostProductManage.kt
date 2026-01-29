@@ -51,7 +51,7 @@ class AdapterPostProductManage(
         holder.sellerName.text = p.seller?.fullName ?: "Người bán ẩn danh"
         holder.createAt.text = convertTimeAgo(p.createAt)
 
-        val BASE_URL = "http://10.0.2.2:8080"
+        val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
         val thumbnailUrl = BASE_URL + p.thumbnailUrl
 
         Glide.with(holder.itemView.context)

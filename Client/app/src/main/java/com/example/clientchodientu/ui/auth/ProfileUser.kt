@@ -118,7 +118,7 @@ class ProfileUser : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/user/update-avatar")
+                    .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/update-avatar")
                     .post(requestBody)
                     .build()
                 val response = ApiClient.getClient(this@ProfileUser).newCall(request).execute()
@@ -147,7 +147,7 @@ class ProfileUser : AppCompatActivity() {
 
     suspend fun getInfoUser() {
         withContext(Dispatchers.IO) {
-            val urlProfile = "http://10.0.2.2:8080/api/user/my-profile"
+            val urlProfile = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/my-profile"
             val request = Request.Builder()
                 .get()
                 .url(urlProfile)
@@ -159,7 +159,7 @@ class ProfileUser : AppCompatActivity() {
                 val gson = Gson()
                 val responseProfile = gson.fromJson(responseBody, ResponseProfile::class.java)
                 val data = responseProfile.data
-                val BASE_URL = "http://10.0.2.2:8080"
+                val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
                 val path = data.avatarUrl
                 val imgUrl = if (path!= null && path.startsWith("http"))
                     path

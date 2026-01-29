@@ -76,7 +76,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_chat_detail)
-        sendMessageUrl = "http://10.0.2.2:8080/api/chat/send-private"
+        sendMessageUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/chat/send-private"
 
         TokenManager.init(this)
 
@@ -353,7 +353,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
                         .toRequestBody("application/json".toMediaType())
 
                     val request = Request.Builder()
-                        .url("http://10.0.2.2:8080/api/chat/revoke-message")
+                        .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/chat/revoke-message")
                         .post(requestBody)
                         .build()
 

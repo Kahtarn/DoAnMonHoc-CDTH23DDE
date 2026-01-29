@@ -210,7 +210,7 @@ class RegisterActivity : AppCompatActivity() {
         startCountDown(btnSendOtp)
         withContext(Dispatchers.IO) {
             try {
-                val url = "http://10.0.2.2:8080/api/auth/send-otp"
+                val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/send-otp"
 
                 val gson = Gson()
                 val otpRequest = OtpRequest(email)
@@ -303,7 +303,7 @@ class RegisterActivity : AppCompatActivity() {
                     jsonString.toRequestBody("application/json".toMediaType())
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/auth/register")
+                    .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/register")
                     .post(requestBody)
                     .build()
 

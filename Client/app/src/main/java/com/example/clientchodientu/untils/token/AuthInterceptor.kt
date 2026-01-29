@@ -18,6 +18,7 @@ class AuthInterceptor : Interceptor {
         // Dán token vào Header
         val newRequest = originalRequest.newBuilder()
             .header("Authorization", "Bearer $accessToken")
+            .header("ngrok-skip-browser-warning", "true")
             .build()
 
         return chain.proceed(newRequest)

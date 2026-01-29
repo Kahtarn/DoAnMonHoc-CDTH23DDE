@@ -53,7 +53,7 @@ import java.util.*
 
 class ProductDetailActivity : AppCompatActivity() {
 
-    private val BASE_URL = "http://10.0.2.2:8080"
+    private val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
     private lateinit var tvTitle: TextView
     private lateinit var tvPrice: TextView
     private lateinit var tvAddress: TextView

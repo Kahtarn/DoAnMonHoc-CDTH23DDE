@@ -61,7 +61,7 @@ object TokenManager {
 
     fun updateFCMToken(context: Context, token: String) {
         val client = OkHttpClient()
-        val url = "http://10.0.2.2:8080/api/chat/set-fcm-token"
+        val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/chat/set-fcm-token"
 
         // Tạo JSON chuẩn
         val jsonObject = JSONObject()
@@ -69,7 +69,7 @@ object TokenManager {
 
         val requestBody = jsonObject.toString().toRequestBody("application/json".toMediaType())
         val request = Request.Builder().url(url).post(requestBody).build()
-
+        android.util.Log.d("AUTH_DEBUG", "Token lay tu Prefs: ${TokenManager.getToken()}")
         // Chạy bất đồng bộ để không treo UI
         ApiClient.getClient(context).newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -89,7 +89,7 @@ object TokenManager {
 
     suspend fun getUserId(context: Context): Int {
         return withContext(Dispatchers.IO) { // Chạy trên luồng phụ
-            val url = "http://10.0.2.2:8080/api/chat/get-user-id"
+            val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/chat/get-user-id"
             val request = Request.Builder().url(url).get().build()
 
             try {

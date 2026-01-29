@@ -117,7 +117,7 @@ class FragmentProfileUser : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/api/user/update-avatar")
+                    .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/update-avatar")
                     .post(requestBody)
                     .build()
                 val response = ApiClient.getClient(requireContext()).newCall(request).execute()
@@ -146,7 +146,7 @@ class FragmentProfileUser : Fragment() {
 
     suspend fun getInfoUser() {
         withContext(Dispatchers.IO) {
-            val urlProfile = "http://10.0.2.2:8080/api/user/my-profile"
+            val urlProfile = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/user/my-profile"
             val request = Request.Builder()
                 .get()
                 .url(urlProfile)
@@ -158,7 +158,7 @@ class FragmentProfileUser : Fragment() {
                 val gson = Gson()
                 val responseProfile = gson.fromJson(responseBody, ResponseProfile::class.java)
                 val data = responseProfile.data
-                val BASE_URL = "http://10.0.2.2:8080"
+                val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
                 val path = data.avatarUrl
                 val imgUrl = if (path!= null && path.startsWith("http"))
                     path

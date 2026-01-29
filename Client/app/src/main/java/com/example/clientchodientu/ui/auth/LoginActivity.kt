@@ -38,9 +38,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
     private lateinit var btnRegister: Button
     private var client = OkHttpClient()
-    private val urlLogin = "http://10.0.2.2:8080/api/auth/login"
+    private val urlLogin = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/login"
 
-    private val urlSetFCMToken = "http://10.0.2.2:8080/api/chat/set-fcm-token"
+    private val urlSetFCMToken = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/chat/set-fcm-token"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

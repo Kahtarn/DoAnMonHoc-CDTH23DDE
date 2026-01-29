@@ -40,8 +40,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 
 class FragmentAddPost : Fragment() {
     private val gson = Gson()
-    private val urlCate = "http://10.0.2.2:8080/api/category/getCategories"
-    private val urlPost = "http://10.0.2.2:8080/api/product/post"
+    private val urlCate = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/category/getCategories"
+    private val urlPost = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/product/post"
     private lateinit var imageAdapter: SelectedImageAdapter
     private val selectedUris = mutableListOf<Uri>()
     private lateinit var edtTitle: EditText

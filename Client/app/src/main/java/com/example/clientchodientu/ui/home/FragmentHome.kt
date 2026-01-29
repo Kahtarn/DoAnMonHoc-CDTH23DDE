@@ -2,6 +2,7 @@ package com.example.clientchodientu.ui.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,10 +37,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
 
 class FragmentHome : Fragment(){
-    private val baseUrl = "http://10.0.2.2:8080/api"
+    private val baseUrl = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api"
     private val urlProductAll = "$baseUrl/product/getAll"
     private val urlCategory = "$baseUrl/category/getCategories"
     private fun getFilterUrl(id: Int) = "$baseUrl/product/getByCategory?categoryId=$id"
@@ -87,6 +90,8 @@ class FragmentHome : Fragment(){
             val intent = Intent(requireContext(), FavoriteActivity::class.java)
             startActivity(intent)
         }
+
+        Log.d("TOKEN_HOME", token)
 
     }
 

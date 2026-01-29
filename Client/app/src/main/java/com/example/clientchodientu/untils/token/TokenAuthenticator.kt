@@ -64,7 +64,7 @@ class TokenAuthenticator(private val context: Context) : Authenticator {
         val body = json.toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
-            .url("http://10.0.2.2:8080/api/auth/refresh-token") // Đảm bảo API này đúng
+            .url("https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/refresh-token") // Đảm bảo API này đúng
             .post(body)
             .build()
 

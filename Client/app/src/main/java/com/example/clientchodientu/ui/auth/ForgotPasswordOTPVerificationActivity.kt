@@ -40,7 +40,7 @@ import kotlin.toString
 
 class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
     private var client = OkHttpClient()
-    private var urlBase = "http://10.0.2.2:8080/api/auth/";
+    private var urlBase = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/";
     private var gson = Gson()
     private lateinit var otp1: EditText
     private lateinit var otp2: EditText
@@ -93,7 +93,7 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
             try {
                 val gson = Gson()
                 val client = OkHttpClient()
-                val url = "http://10.0.2.2:8080/api/auth/forgot-password"
+                val url = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/forgot-password"
                 val mediaType = "application/json; charset=utf-8".toMediaType()
                 val forgotPasswordRequest = ForgotPasswordRequest(email)
 

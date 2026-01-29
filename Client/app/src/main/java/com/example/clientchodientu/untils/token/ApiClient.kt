@@ -8,6 +8,12 @@ object ApiClient {
     private var client: OkHttpClient? = null
 
     fun getClient(context: Context): OkHttpClient {
+
+        try {
+            TokenManager.init(context)
+        } catch (e: Exception) {
+            // Đã init rồi thì bỏ qua
+        }
         if (client == null) {
             client = OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor()) // Tự động gắn Token

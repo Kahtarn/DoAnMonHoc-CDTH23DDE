@@ -38,7 +38,7 @@ class AdapterPostOfUser(private var list: List<Product>) :
         holder.tvPrice.text = "${product.price} đ"
         holder.tvCreateAt.text = convertTimeAgo(product.createAt)
 
-        val BASE_URL = "http://10.0.2.2:8080"
+        val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
         val thumbnailUrl = BASE_URL + (product.thumbnailUrl ?: "")
 
         Glide.with(holder.itemView.context)

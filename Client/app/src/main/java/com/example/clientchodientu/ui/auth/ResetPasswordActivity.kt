@@ -31,7 +31,7 @@ class ResetPasswordActivity : AppCompatActivity() {
     private lateinit var btnResetPassword: Button
     private var client = OkHttpClient()
     private var gson = Gson()
-    private var urlBase = "http://10.0.2.2:8080/api/auth/reset-password";
+    private var urlBase = "https://uncondensable-diplopic-gibson.ngrok-free.dev/api/auth/reset-password";
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

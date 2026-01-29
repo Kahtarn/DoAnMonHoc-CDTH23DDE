@@ -35,7 +35,7 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
         holder.tvSellerName.text = product.seller?.fullName ?: "Người bán ẩn danh"
         holder.tvCreateAt.text = convertTimeAgo(product.createAt)
 
-        val BASE_URL = "http://10.0.2.2:8080"
+        val BASE_URL = "https://uncondensable-diplopic-gibson.ngrok-free.dev"
         val thumbnailUrl = BASE_URL + product.thumbnailUrl
 
         Glide.with(holder.itemView.context)

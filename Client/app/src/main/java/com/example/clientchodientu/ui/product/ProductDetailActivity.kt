@@ -347,36 +347,52 @@ class ProductDetailActivity : AppCompatActivity() {
     private fun convertTimeAgo(timeString: String?): String {
         if (timeString.isNullOrBlank()) return "Không rõ thời gian"
 
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
+        // Thử parse với nhiều định dạng để tránh lỗi
+        val patterns = arrayOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss"
+        )
+
+        var past: Date? = null
+
+        for (pattern in patterns) {
+            try {
+                val format = SimpleDateFormat(pattern, Locale.getDefault())
+                // Nếu chuỗi có chữ Z, ta ép nó hiểu là UTC. Nếu không, để mặc định Local.
+                if (timeString.endsWith("Z")) {
+                    format.timeZone = TimeZone.getTimeZone("UTC")
+                } else {
+                    format.timeZone = TimeZone.getDefault()
+                }
+                past = format.parse(timeString)
+                if (past != null) break
+            } catch (e: Exception) { continue }
         }
 
-        try {
-            val past = format.parse(timeString) ?: return "Định dạng sai"
-            val now = Date()
+        if (past == null) return "Lỗi định dạng"
 
-            // Sử dụng giá trị tuyệt đối Math.abs để tránh số âm khi máy chậm hơn server
-            val diffMillis = now.time - past.time
-            val absDiff = Math.abs(diffMillis)
+        val now = Date()
+        val diffMillis = now.time - past.time
 
-            // Nếu lệch dưới 1 phút (bất kể âm hay dương) thì coi là vừa xong
-            if (absDiff < 60000) return "Vừa xong"
+        // LOG DEBUG: Boss mở Logcat xem 2 con số này có khớp nhau không
+        Log.d("TIME_CHECK", "Giờ máy: ${now.time} | Giờ Server: ${past.time} | Lệch: ${diffMillis/1000} giây")
 
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(absDiff)
-            val hours = TimeUnit.MILLISECONDS.toHours(absDiff)
-            val days = TimeUnit.MILLISECONDS.toDays(absDiff)
+        // Nếu lệch quá lớn (ví dụ lệch 7 tiếng = 25.200.000 ms)
+        // thì khả năng cao vẫn sai múi giờ, ta dùng Math.abs để chữa cháy
+        val absDiff = Math.abs(diffMillis)
 
-            // Log để debug: Bạn sẽ thấy sự chênh lệch khủng khiếp nếu giờ máy bị sai
-            Log.d("TIME_DEBUG", "Diff: $diffMillis | Now: ${now.time} | Past: ${past.time}")
+        if (absDiff < 60000) return "Vừa xong"
 
-            return when {
-                minutes < 60 -> "$minutes phút trước"
-                hours < 24 -> "$hours giờ trước"
-                days < 7 -> "$days ngày trước"
-                else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
-            }
-        } catch (e: Exception) {
-            return "Lỗi thời gian"
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(absDiff)
+        val hours = TimeUnit.MILLISECONDS.toHours(absDiff)
+        val days = TimeUnit.MILLISECONDS.toDays(absDiff)
+
+        return when {
+            minutes < 60 -> "$minutes phút trước"
+            hours < 24 -> "$hours giờ trước"
+            days < 7 -> "$days ngày trước"
+            else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
         }
     }
     private fun showToast(msg: String) {

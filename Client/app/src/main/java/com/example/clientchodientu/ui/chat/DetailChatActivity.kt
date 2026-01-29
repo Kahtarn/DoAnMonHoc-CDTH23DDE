@@ -115,7 +115,7 @@ class DetailChatActivity : AppCompatActivity(), OnMessageLongClickListener {
             Log.d("FCM main", "Token FCM hiện tại: $token")
             TokenManager.updateFCMToken(this, token)
 
-            copyToClipboard(this, token)
+
         }
 
         // Sự kiện nút Gửi Tin Nhắn Chat

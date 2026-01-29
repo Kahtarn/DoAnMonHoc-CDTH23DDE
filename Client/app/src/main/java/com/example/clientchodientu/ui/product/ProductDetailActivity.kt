@@ -50,6 +50,7 @@ import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class ProductDetailActivity : AppCompatActivity() {
 
@@ -344,26 +345,38 @@ class ProductDetailActivity : AppCompatActivity() {
         return price?.let { DecimalFormat("#,###").format(it) + " đ" } ?: "0 đ"
     }
     private fun convertTimeAgo(timeString: String?): String {
-        if (timeString.isNullOrEmpty()) return ""
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        format.timeZone = TimeZone.getTimeZone("UTC") // Server trả về giờ UTC
-        return try {
-            val past = format.parse(timeString) ?: return ""
+        if (timeString.isNullOrBlank()) return "Không rõ thời gian"
+
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+
+        try {
+            val past = format.parse(timeString) ?: return "Định dạng sai"
             val now = Date()
-            val diff = now.time - past.time
-            val minute = 60 * 1000L
-            val hour = 60 * minute
-            val day = 24 * hour
-            when {
-                diff < minute -> "Vừa xong"
-                diff < hour -> "${diff / minute} phút trước"
-                diff < day -> "${diff / hour} giờ trước"
-                diff < 7 * day -> "${diff / day} ngày trước"
+
+            // Sử dụng giá trị tuyệt đối Math.abs để tránh số âm khi máy chậm hơn server
+            val diffMillis = now.time - past.time
+            val absDiff = Math.abs(diffMillis)
+
+            // Nếu lệch dưới 1 phút (bất kể âm hay dương) thì coi là vừa xong
+            if (absDiff < 60000) return "Vừa xong"
+
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(absDiff)
+            val hours = TimeUnit.MILLISECONDS.toHours(absDiff)
+            val days = TimeUnit.MILLISECONDS.toDays(absDiff)
+
+            // Log để debug: Bạn sẽ thấy sự chênh lệch khủng khiếp nếu giờ máy bị sai
+            Log.d("TIME_DEBUG", "Diff: $diffMillis | Now: ${now.time} | Past: ${past.time}")
+
+            return when {
+                minutes < 60 -> "$minutes phút trước"
+                hours < 24 -> "$hours giờ trước"
+                days < 7 -> "$days ngày trước"
                 else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(past)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            return "Lỗi xử lý thời gian"
+            return "Lỗi thời gian"
         }
     }
     private fun showToast(msg: String) {

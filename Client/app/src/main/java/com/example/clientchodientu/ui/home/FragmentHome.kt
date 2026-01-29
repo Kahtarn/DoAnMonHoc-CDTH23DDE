@@ -197,6 +197,7 @@ class FragmentHome : Fragment(){
                         if (success) {
                             println(message)
                             setUpAdapterProduct(listProduct)
+
                         } else {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)

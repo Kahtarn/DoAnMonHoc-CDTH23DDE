@@ -180,6 +180,7 @@ class ProfileUser : AppCompatActivity() {
                     Glide.with(this@ProfileUser)
                         .load(imgUrl)
                         .placeholder(R.drawable.ic_user_placeholder)
+                        .error(R.drawable.ic_user_placeholder)
                         .centerCrop()
                         .into(imgProfile)
                 }

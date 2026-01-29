@@ -9,6 +9,7 @@ import android.util.Patterns
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -35,7 +36,7 @@ import kotlin.toString
 class ForgotPasswordActivity : AppCompatActivity() {
     private lateinit var edtemail: EditText
     private lateinit var btnSendOTP: Button
-
+    private lateinit var ivBackOTP : ImageView
     private var countDownTimer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +47,10 @@ class ForgotPasswordActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+        ivBackOTP = findViewById(R.id.ivBackOTPverification)
+        ivBackOTP.setOnClickListener {
+            finish()
         }
         btnSendOTP = findViewById<Button>(R.id.btnSendOTPForgotPassword)
         edtemail = findViewById<EditText>(R.id.edtEmailForgotPassword)

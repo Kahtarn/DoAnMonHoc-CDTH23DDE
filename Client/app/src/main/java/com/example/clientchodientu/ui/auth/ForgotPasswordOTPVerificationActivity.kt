@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -47,6 +48,7 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
     private lateinit var otp6: EditText
     private lateinit var btnVerify: Button
     private lateinit var ReSendOtp: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

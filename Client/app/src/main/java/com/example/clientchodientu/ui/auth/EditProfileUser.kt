@@ -82,6 +82,7 @@ class EditProfileUser : AppCompatActivity() {
                 lifecycleScope.launch {
                     editInfoUser()
                 }
+                finish()
             }
         }
     }

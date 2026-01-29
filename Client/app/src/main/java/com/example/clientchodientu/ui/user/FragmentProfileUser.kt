@@ -30,6 +30,7 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import com.example.clientchodientu.dto.user.ResponseProfile
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class FragmentProfileUser : Fragment() {
     private lateinit var tvActivityEditProfileUser: TextView
@@ -45,7 +46,6 @@ class FragmentProfileUser : Fragment() {
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                // Hiển thị ảnh vừa chọn lên ImageView
                 Glide.with(this)
                     .load(it)
                     .circleCrop()
@@ -90,7 +90,8 @@ class FragmentProfileUser : Fragment() {
             startActivity(Intent(requireContext(), ForgotPasswordActivity::class.java))
         }
         tvActivityLogout.setOnClickListener {
-            TokenManager.logout(requireContext())
+            showLogoutConfirmation()
+
         }
 
 
@@ -179,5 +180,18 @@ class FragmentProfileUser : Fragment() {
                 }
             }
         }
+    }
+    private fun showLogoutConfirmation() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setTitle("Xác nhận đăng xuất")
+        builder.setMessage("Bạn có chắc chắn muốn thoát khỏi tài khoản này không?")
+        builder.setPositiveButton("Đăng xuất") { dialog, _ ->
+            TokenManager.logout(requireContext())
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Hủy bỏ") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
     }
 }

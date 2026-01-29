@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -31,8 +32,7 @@ class EditPostActivity : AppCompatActivity() {
     private lateinit var spnCategory: Spinner
     private lateinit var edtPrice: EditText
     private lateinit var edtDescription: EditText
-
-    // Data
+    private lateinit var btnBack : ImageView
     private val gson = Gson()
     private var productId: Int = -1
     private var intentCategoryId: Int = -1
@@ -48,6 +48,7 @@ class EditPostActivity : AppCompatActivity() {
         loadCategories()
 
         findViewById<Button>(R.id.btnCancel).setOnClickListener { finish() }
+        btnBack.setOnClickListener {finish()}
         findViewById<Button>(R.id.btnUpdate).setOnClickListener { validateAndSave() }
     }
 
@@ -56,8 +57,7 @@ class EditPostActivity : AppCompatActivity() {
         edtPrice = findViewById(R.id.edtPrice)
         edtDescription = findViewById(R.id.edtDescription)
         spnCategory = findViewById(R.id.spnCategory)
-
-        // Setup Window Insets (padding cho tai thỏ/nốt ruồi)
+        btnBack = findViewById(R.id.ivBack)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

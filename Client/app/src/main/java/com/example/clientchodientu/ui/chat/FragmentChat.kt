@@ -1,14 +1,14 @@
 package com.example.clientchodientu.ui.chat
 
+import android.content.Context
 import com.example.clientchodientu.R
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageButton
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,25 +23,26 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 
-class ChatActivity : AppCompatActivity() {
+class FragmentChat : Fragment() {
     private lateinit var rvInbox: RecyclerView
     private lateinit var adapter: AdapterChat
     private val conversationList = mutableListOf<InboxRespond>()
     private lateinit var db: FirebaseFirestore
     private var myId: Int = 0
     private var firestoreListener: ListenerRegistration? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_chat)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        FirebaseApp.initializeApp(this)
-        TokenManager.init(this)
-        setupRecyclerView()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_chat,container,false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        FirebaseApp.initializeApp(requireContext())
+        TokenManager.init(requireContext())
+        setupRecyclerView(view)
         lifecycleScope.launch {
             val firebaseToken = TokenManager.getFirebaseToken() ?: ""
             val mAuth = FirebaseAuth.getInstance()
@@ -59,25 +60,21 @@ class ChatActivity : AppCompatActivity() {
                     }
                 }
         }
-        findViewById<AppCompatImageButton>(R.id.btnBackChat).setOnClickListener {
-            finish()
-        }
-
     }
 
-    private fun setupRecyclerView() {
-        rvInbox = findViewById(R.id.rvConversationList)
+    private fun setupRecyclerView(view:View) {
+        rvInbox = view.findViewById(R.id.rvConversationList)
         // Khởi tạo Adapter với list rỗng và sự kiện click
         adapter = AdapterChat(conversationList) { conversation ->
             // Khi click vào 1 người, chuyển sang màn hình chat chi tiết
-            val intent = Intent(this, DetailChatActivity::class.java)
+            val intent = Intent(requireContext(), DetailChatActivity::class.java)
             intent.putExtra("ROOM_NAME", conversation.roomName)
             intent.putExtra("MY_ID", myId)
             intent.putExtra("PARTNER_ID", conversation.partnerId)
             intent.putExtra("PARTNER_NAME", conversation.partnerName)
             startActivity(intent)
         }
-        rvInbox.layoutManager = LinearLayoutManager(this)
+        rvInbox.layoutManager = LinearLayoutManager(requireContext())
         rvInbox.adapter = adapter
     }
 
@@ -157,7 +154,7 @@ class ChatActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Lưu lại: Tôi đang ở phòng chat 123
-        val prefs = getSharedPreferences("AppStatus", MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences("AppStatus", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("IS_ON_CHAT", true).apply()
         Log.d("Activity", "In chat sreen")
     }
@@ -165,7 +162,7 @@ class ChatActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         // Xóa đi: Tôi không còn ở phòng chat nào cả
-        val prefs = getSharedPreferences("AppStatus", MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences("AppStatus", Context.MODE_PRIVATE)
         prefs.edit().remove("IS_ON_CHAT").apply()
         Log.d("Activity", "Outside chat screen")
     }

@@ -134,13 +134,6 @@
         android:elevation="10dp"
         android:visibility="gone"
         app:layout_anchor="@id/cardView"
-        app:layout_anchorGravity="bottom" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:menu="@menu/bottom_nav_item_menu" />
+        app:layout_anchorGravity="bottom"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

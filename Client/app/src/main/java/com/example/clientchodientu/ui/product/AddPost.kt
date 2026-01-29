@@ -8,22 +8,30 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.clientchodientu.R
+import com.example.clientchodientu.adapter.CategoryAdapterAutoCompleteTextView
+import com.example.clientchodientu.dto.product.CategoryResponse
 import com.example.clientchodientu.dto.product.PostResponse
 import com.example.clientchodientu.dto.product.PostResquest
 import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.untils.token.ApiClient
 import com.example.clientchodientu.untils.token.TokenManager
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
@@ -35,6 +43,8 @@ class AddPost : AppCompatActivity() {
     private var selectedCategoryId:Int=-1
     private lateinit var btnXN: Button
     private var selectedImageUris = mutableListOf<android.net.Uri>()
+
+    // Khai báo launcher để chọn tối đa 5 ảnh (bạn có thể thay đổi số lượng)
     private val pickMultipleImageLauncher = registerForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(5)
     ) { uris ->
@@ -117,7 +127,7 @@ class AddPost : AppCompatActivity() {
 
                 val response = ApiClient.getClient(this@AddPost).newCall(request).execute()
 
-                response.use { resp ->
+                response.use { resp -> // Sử dụng .use để tự động đóng response body
                     val responseBody = resp.body?.string()
 
                     if (resp.isSuccessful && responseBody != null) {
@@ -147,8 +157,42 @@ class AddPost : AppCompatActivity() {
     private suspend fun getCategory() {
         withContext(Dispatchers.IO) {
             try {
+                val client = OkHttpClient()
+                val gson = Gson()
                 val url = "http://10.0.2.2:8080/api/category/getCategories"
                 val request = Request.Builder().url(url).get().build()
+
+//                val response = ApiClient.getClient
+//                if (response.isSuccessful) {
+//                    val body = response.body?.string()
+//                    val responseCategory = gson.fromJson(body, CategoryResponse::class.java)
+//                    val data: List<Category> = responseCategory.data
+//                    Log.d("ItemCategory",data.toString())
+//
+//                    withContext(Dispatchers.Main) {
+//                        val adapter = CategoryAdapterAutoCompleteTextView(this@AddPost, data)
+//                        autoCompleteTextView.setAdapter(adapter)
+//
+//                        // THAY ĐỔI 1: Đặt threshold bằng 0 để nó cho phép hiện dropdown khi ô trống
+//                        autoCompleteTextView.threshold = 0
+//
+//                        // THAY ĐỔI 2: Dùng setOnTouchListener thay vì OnClickListener
+//                        // OnClickListener đôi khi không chạy ở lần chạm đầu tiên do vướng Focus
+//                        autoCompleteTextView.setOnTouchListener { v, event ->
+//                            if (event.action == android.view.MotionEvent.ACTION_UP) {
+//                                autoCompleteTextView.showDropDown()
+//                            }
+//                            false
+//                        }
+//
+//                        autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+//                            val selectedCategory = parent.getItemAtPosition(position) as Category
+//                            selectedCategoryId = selectedCategory.id
+//                            // THAY ĐỔI 3: filter = false để sau khi chọn, danh sách không bị ẩn đi
+//                            autoCompleteTextView.setText(selectedCategory.name, false)
+//                        }
+//                    }
+//                }
             } catch (e: Exception) {
                 Log.e("API_ERROR", "Lỗi: ${e.message}")
             }
@@ -159,16 +203,23 @@ class AddPost : AppCompatActivity() {
             try {
                 contentResolver.openInputStream(uri).use { inputStream ->
                     val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream) ?: return@mapNotNull null
+
+                    // Thu nhỏ kích thước để giảm dung lượng JSON
                     val maxSize = 1024
                     val ratio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
                     val width = if (ratio > 1) maxSize else (maxSize * ratio).toInt()
                     val height = if (ratio > 1) (maxSize / ratio).toInt() else maxSize
+
                     val scaledBitmap = android.graphics.Bitmap.createScaledBitmap(originalBitmap, width, height, true)
                     val byteArrayOutputStream = java.io.ByteArrayOutputStream()
                     scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+
                     val bytes = byteArrayOutputStream.toByteArray()
+
+                    // Giải phóng RAM ngay lập tức
                     originalBitmap.recycle()
                     scaledBitmap.recycle()
+
                     android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
                 }
             } catch (e: Exception) {

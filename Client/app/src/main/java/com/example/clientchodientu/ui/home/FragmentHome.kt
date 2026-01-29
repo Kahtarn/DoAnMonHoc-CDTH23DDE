@@ -2,13 +2,16 @@ package com.example.clientchodientu.ui.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,14 +23,12 @@ import com.example.clientchodientu.entity.Category
 import com.example.clientchodientu.entity.Product
 import com.example.clientchodientu.ui.auth.ProfileUser
 import com.example.clientchodientu.ui.favorite.FavoriteActivity
-import com.example.clientchodientu.ui.product.CreatePostActivity
 import com.example.clientchodientu.ui.product.ProductDetailActivity
 import com.example.clientchodientu.untils.token.TokenManager
 import kotlinx.coroutines.launch
 import kotlin.toString
-import com.example.clientchodientu.ui.user.PostManagerActivity
+//import com.example.clientchodientu.ui.user.PostManagerActivity
 import com.example.clientchodientu.untils.token.ApiClient
-import com.example.clientchodientu.ui.chat.ChatActivity
 import com.example.exampletemplate.AdapterCategory
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
@@ -37,7 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 
-class HomeActivity : AppCompatActivity() {
+class FragmentHome : Fragment(){
     private val baseUrl = "http://10.0.2.2:8080/api"
     private val urlProductAll = "$baseUrl/product/getAll"
     private val urlCategory = "$baseUrl/category/getCategories"
@@ -53,22 +54,27 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var token: String
     private fun getSearchUrl(query: String) = "$baseUrl/product/filter?name=$query"
     private var searchJob: Job? = null
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_home,container,false)
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_home)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        btnFavorite = findViewById(R.id.btnFavorite)
-        progressBar = findViewById(R.id.progressBar)
-        recyclerViewProduct = findViewById(R.id.rvProduct)
-        recyclerViewCategory = findViewById(R.id.rvCategory)
-        recyclerViewProduct.layoutManager = LinearLayoutManager(this)
+        btnFavorite = view.findViewById(R.id.btnFavorite)
+        progressBar = view.findViewById(R.id.progressBar)
+        recyclerViewProduct = view.findViewById(R.id.rvProduct)
+        recyclerViewCategory = view.findViewById(R.id.rvCategory)
+        recyclerViewProduct.layoutManager = LinearLayoutManager(requireContext())
         recyclerViewCategory.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        searchView = findViewById(R.id.searchView)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        searchView = view.findViewById(R.id.searchView)
 
-        TokenManager.init(this)
+        TokenManager.init(requireContext())
         token = TokenManager.getToken().toString()
 
         lifecycleScope.launch {
@@ -78,43 +84,8 @@ class HomeActivity : AppCompatActivity() {
         }
 
         btnFavorite.setOnClickListener {
-            val intent = Intent(this, FavoriteActivity::class.java)
+            val intent = Intent(requireContext(), FavoriteActivity::class.java)
             startActivity(intent)
-        }
-
-        bottomNav = findViewById(R.id.bottomNavigation)
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    lifecycleScope.launch {
-                        loadProduct(urlProductAll)
-                        recyclerViewProduct.smoothScrollToPosition(0)
-                    }
-                    true
-                }
-
-                R.id.nav_save -> {
-                    startActivity(Intent(this, PostManagerActivity::class.java))
-                    true
-                }
-
-                R.id.nav_add -> {
-                    startActivity(Intent(this, CreatePostActivity::class.java))
-                    true
-                }
-
-                R.id.nav_chat -> {
-                    startActivity(Intent(this, ChatActivity::class.java))
-                    true
-                }
-
-                R.id.nav_account -> {
-                    startActivity(Intent(this, ProfileUser::class.java))
-                    true
-                }
-
-                else -> false
-            }
         }
 
     }
@@ -163,7 +134,7 @@ class HomeActivity : AppCompatActivity() {
                     .Builder()
                     .url(urlCategory)
                     .build()
-                val response = ApiClient.getClient(this@HomeActivity).newCall(request).execute()
+                val response = ApiClient.getClient(requireContext()).newCall(request).execute()
                 val responseBody = response.body?.string()
 
                 withContext(Dispatchers.Main) {
@@ -178,7 +149,7 @@ class HomeActivity : AppCompatActivity() {
                             progressBar.visibility = View.GONE
                             setUpAdapterCategories(listCategory)
                         } else {
-                            Toast.makeText(this@HomeActivity, message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -193,7 +164,7 @@ class HomeActivity : AppCompatActivity() {
         recyclerViewProduct.adapter = adapter
 
         adapter.onItemClick = { productId ->
-            val intent = Intent(this@HomeActivity, ProductDetailActivity::class.java)
+            val intent = Intent(requireContext(), ProductDetailActivity::class.java)
             intent.putExtra("PRODUCT_ID", productId)
             startActivity(intent)
         }
@@ -207,7 +178,7 @@ class HomeActivity : AppCompatActivity() {
                     .Builder()
                     .url(url)
                     .build()
-                val response = ApiClient.getClient(this@HomeActivity).newCall(request).execute()
+                val response = ApiClient.getClient(requireContext()).newCall(request).execute()
                 val responseBody = response.body?.string()
 
 
@@ -223,7 +194,7 @@ class HomeActivity : AppCompatActivity() {
                             setUpAdapterProduct(listProduct)
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@HomeActivity, message, Toast.LENGTH_SHORT)
+                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
                                     .show()
                             }
                         }

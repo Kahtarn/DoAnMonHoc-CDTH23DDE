@@ -12,5 +12,5 @@ data class User(
     val provinceName: String,
     val wardName: String,
     val createAt: String,
-    val avatarUrl: String
+    val avatarUrl: String?
 )

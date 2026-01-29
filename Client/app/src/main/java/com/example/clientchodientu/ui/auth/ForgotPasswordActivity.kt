@@ -47,8 +47,8 @@ class ForgotPasswordActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        btnSendOTP = findViewById<Button>(R.id.btnSendOTPForgotPassword)
-        edtemail = findViewById<EditText>(R.id.edtEmailForgotPassword)
+        btnSendOTP = findViewById(R.id.btnSendOTPForgotPassword)
+        edtemail = findViewById(R.id.edtEmailForgotPassword)
         btnSendOTP.setOnClickListener {
             val email = edtemail.text.toString().trim()
             if (email.isEmpty()) {
@@ -56,7 +56,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 focusEditText(edtemail)
                 return@setOnClickListener
             } else {
-                //dung dinh dang email
                 if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     startCountDown(btnSendOTP)
                     lifecycleScope.launch {
@@ -69,16 +68,13 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
-
 
     fun focusEditText(editText: EditText) {
         editText.requestFocus()
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
-
     suspend fun sendOTPEmail(email: String) {
         withContext(Dispatchers.IO) {
             try {

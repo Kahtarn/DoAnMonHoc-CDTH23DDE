@@ -64,8 +64,8 @@ class ForgotPasswordOTPVerificationActivity : AppCompatActivity() {
         otp5 = findViewById(R.id.edtOtp5)
         otp6 = findViewById(R.id.edtOtp6)
         setupOtpInputs(otp1, otp2, otp3, otp4, otp5, otp6)
-        btnVerify = findViewById<Button>(R.id.btnVerify)
-        ReSendOtp = findViewById<TextView>(R.id.tvReSendOtp)
+        btnVerify = findViewById(R.id.btnVerify)
+        ReSendOtp = findViewById(R.id.tvReSendOtp)
 
         btnVerify.setOnClickListener {
             lifecycleScope.launch {

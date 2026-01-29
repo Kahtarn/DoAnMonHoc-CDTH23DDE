@@ -51,7 +51,6 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var edtPhone: EditText
     private lateinit var btnSendOtp: Button
     private lateinit var btnRegister: Button
-
     private lateinit var radioGroupGender: RadioGroup
     private var selectedGender: Boolean = true
     private lateinit var sTinh: Spinner
@@ -59,7 +58,6 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var edtOtpCode: EditText
     private var selectedProvinceCode: Int = 0
     private var selectedWardCode: Int = 0
-
     private var countDownTimer: CountDownTimer? = null
     private val client = OkHttpClient()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,19 +69,18 @@ class RegisterActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        sTinh = findViewById<Spinner>(R.id.sTinh)
-        sHuyen = findViewById<Spinner>(R.id.sHuyen)
-        edtUsername = findViewById<EditText>(R.id.edtUsername)
-        edtEmail = findViewById<EditText>(R.id.edtEmail)
-        edtPassword = findViewById<EditText>(R.id.edtPassword)
-        edtFullName = findViewById<EditText>(R.id.edtFullname)
-        edtPhone = findViewById<EditText>(R.id.edtPhone)
-        edtOtpCode = findViewById<EditText>(R.id.edtOtp)
-        radioGroupGender = findViewById(R.id.radioGroupGender)
-        btnRegister = findViewById<Button>(R.id.btnRegister)
-        btnSendOtp = findViewById<Button>(R.id.btnSendOTPRegister)
 
-        //mac dinh la Nam
+        sTinh = findViewById(R.id.sTinh)
+        sHuyen = findViewById(R.id.sHuyen)
+        edtUsername = findViewById(R.id.edtUsername)
+        edtEmail = findViewById(R.id.edtEmail)
+        edtPassword = findViewById(R.id.edtPassword)
+        edtFullName = findViewById(R.id.edtFullname)
+        edtPhone = findViewById(R.id.edtPhone)
+        edtOtpCode = findViewById(R.id.edtOtp)
+        radioGroupGender = findViewById(R.id.radioGroupGender)
+        btnRegister = findViewById(R.id.btnRegister)
+        btnSendOtp = findViewById(R.id.btnSendOTPRegister)
         radioGroupGender.check(R.id.rbtnNam)
         radioGroupGender.setOnCheckedChangeListener { group, checkedId ->
             when (checkedId) {
@@ -92,14 +89,12 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
 
-
         lifecycleScope.launch {
             loadProviceData()
         }
+
         btnSendOtp.setOnClickListener {
             edtEmail.clearFocus()
-
-            // Hide keyboard
             val imm = getSystemService(INPUT_METHOD_SERVICE)
                     as InputMethodManager
             imm.hideSoftInputFromWindow(window.decorView.windowToken, 0)
@@ -135,6 +130,12 @@ class RegisterActivity : AppCompatActivity() {
             val wardName = sHuyen.selectedItem.toString()
             val otpCode = edtOtpCode.text.toString().trim()
 
+            if (!isPasswordValid(password)) {
+                focusEditText(edtPassword)
+                edtPassword.error = "Mật khẩu cần ít nhất 8 ký tự, 1 chữ hoa, 1 chữ số và KHÔNG có khoảng trắng!"
+                return@setOnClickListener
+            }
+
             if (userName.isEmpty()) {
                 focusEditText(edtUsername)
                 edtUsername.error = "Vui lòng nhập tên đăng nhập"
@@ -160,9 +161,9 @@ class RegisterActivity : AppCompatActivity() {
                 edtPhone.error = "Vui lòng nhập số điện thoại"
                 return@setOnClickListener
             }
-            if (phone.length !== 10) {
+            if (phone.length < 10 || phone.length > 15) {
                 focusEditText(edtPhone)
-                edtPhone.error = "Số điện thoại phải có 10 chữ số"
+                edtPhone.error = "Số điện thoại phải có 10 chữ số và dưới 15 chữ số"
                 return@setOnClickListener
             }
             if (email.isEmpty()) {
@@ -192,6 +193,11 @@ class RegisterActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    fun isPasswordValid(password: String): Boolean {
+        val passwordPattern = "^(?=.*[0-9])(?=.*[A-Z])(?=\\S+$).{8,}$"
+        return password.matches(passwordPattern.toRegex())
     }
 
     fun focusEditText(editText: EditText) {

@@ -84,7 +84,7 @@ class AdapterProduct(private var ListProduct: List<Product>) : RecyclerView.Adap
             return "Lỗi thời gian"
         }
     }
-    inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+     class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tvTitle)
         val img: ImageView = itemView.findViewById(R.id.imgProduct)
         val price: TextView = itemView.findViewById(R.id.tvPrice)
